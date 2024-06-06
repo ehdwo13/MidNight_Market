@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" >
+<th:block th:replace="~{header :: header}"></th:block>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+
+
+        .login-box{
+            margin: 0 auto;
+            width: 420px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /*border: 1px solid black;*/
+
+        }
+        .input-box{
+            margin: 10px auto;
+            width: 90%;
+            height: 90px;
+            /*border: 1px solid black;*/
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .box-size{
+            width: 300px;
+            height: 35px;
+            outline: none;
+        }
+        .other-info-box{
+            width: 75%;
+            height: 50px;
+            /*border: 1px solid black;*/
+            font-size: 11px;
+            color: black;
+        }
+        .other-info-box a{
+            color: black;
+        }
+        .form-box{
+            background-color: orangered;
+            color: white;
+            border: none;
+        }
+        .social-icon{
+            width: 75%;
+            height: 100px;
+            /*border: 1px solid black;*/
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+        }
+        .social-icon div{
+            /*border : 1px solid black;*/
+            width: 50px;
+            height: 50px;
+            border-radius: 50px;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        .login-select-box{
+            margin: 0 auto;
+            width: 200px;
+            height: 40px;
+            /*border: 1px solid black;*/
+            display: flex;
+            justify-content: center;
+            align-items: end;
+        }
+        .select-box{
+            width: 100px;
+            height: 40px;
+            background-color: white;
+            border: none;
+            outline: none;
+            border-bottom: 1px solid lightgrey;
+            cursor: pointer;
+        }
+        .select-box:hover{
+            filter: brightness(90%);
+        }
+
+    </style>
+
+</head>
+<body>
+                <form id="select-change" action="/login/form" method="post">
+                    <h1 style="margin: 30px auto; font-size: 30px; font-weight: 700; text-align: center">로그인</h1>
+
+                    <div class="login-select-box">
+                        <button type="button" class="select-box" id="customer">고객</button>
+                        <button type="button" class="select-box" id="seller">판매자</button>
+                    </div>
+
+
+                    <div class="login-box">
+                        <div class="input-box">
+
+                            <input type="text" class="box-size" name="id" placeholder="아이디">
+                            <input type="password" class="box-size" name="pw" placeholder="비밀번호">
+                        </div>
+                        <div class="other-info-box">
+                            <label>
+                                <input type="checkbox">
+                                <span style="margin-right: 15px;">아이디저장</span>
+                            </label>
+                            <a href="/customer/findId" id="cusOnly1"><span>아이디 찾기 |</span></a>
+                            <a href="/customer/changePw" id="cusOnly2"><span>비밀번호 재설정 |</span></a>
+                            <a href="/customer/insert" id="cusOnly3"><span>회원가입</span></a>
+                        </div>
+                        <button type="submit" class="box-size form-box">로그인</button>
+                        <div class="social-icon">
+                            <a href="/oauth2/authorization/google"><div style="background-image: url(/dist/image/social-image/google.png);"></div></a>
+                            <a href="/oauth2/authorization/kakao"><div style="background-image: url(/dist/image/social-image/kakao.png);"></div></a>
+                            <a href="/oauth2/authorization/naver"><div style="background-image: url(/dist/image/social-image/naver.png);"></div></a>
+                        </div>
+                    </div>
+                </form>
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const select_btn = document.querySelectorAll('.select-box');
+
+                        // 첫 번째 버튼이 있는 경우 클릭하고 스타일 적용
+                        if(select_btn.length > 0){
+                            select_btn[0].click();
+                            select_btn[0].style.color = 'black';
+                            select_btn[0].style.borderBottom = '2px solid black';
+                            select_btn[0].style.fontWeight = '700';
+                        }
+
+                        document.addEventListener('click', (e) => {
+                            const clicked_btn = e.target.closest('.select-box');
+
+                            if(clicked_btn) {
+                                // 모든 select-box 버튼의 스타일 초기화
+                                select_btn.forEach(btn => {
+                                    btn.style.color = 'black';
+                                    btn.style.borderBottom = '1px solid lightgray';
+                                    btn.style.fontWeight = 'normal';
+                                });
+
+                                // 클릭된 버튼에 스타일 적용
+                                clicked_btn.style.color = 'black';
+                                clicked_btn.style.borderBottom = '2px solid black';
+                                clicked_btn.style.fontWeight = '700';
+                            }
+
+                            // 고객일 경우
+                            if(e.target.id == 'customer'){
+                                console.log('고객일 경우');
+                                let form = document.getElementById('select-change');
+                                form.action = "/customer/form";
+                                console.log(form);
+                                document.querySelector('.social-icon').style.display = '';
+                                document.getElementById('cusOnly1').style.display = '';
+                                document.getElementById('cusOnly2').style.display = '';
+                                document.getElementById('cusOnly3').innerText = '회원가입';
+                            }
+
+                            // 판매자일 경우
+                            if(e.target.id == 'seller'){
+                                console.log('판매자일 경우');
+                                let form = document.getElementById('select-change');
+                                form.action = "/판매자의 로그인으로 이동할 주소 넣으면 됍니다.";
+                                console.log(form);
+                                document.querySelector('.social-icon').style.display = 'none';
+                                document.getElementById('cusOnly1').style.display = 'none';
+                                document.getElementById('cusOnly2').style.display = 'none';
+                                document.getElementById('cusOnly3').innerText = '관리자에게 문의해주세요. ';
+                            }
+                        });
+                    });
+
+  </script>
+
+</body>
+<th:block th:replace="~{footer :: footer}"></th:block>
+</html>

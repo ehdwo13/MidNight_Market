@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{header :: header}"></th:block>
+
+
+<style>
+  .container{
+    border: 1px solid black;
+    margin: auto;
+    width: 500px;
+    height: 700px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+  }
+</style>
+
+
+  <form href="/product/register" method="post" enctype="multipart/form-data">
+<div class="container">
+
+  <h1>상품등록 페이지</h1>
+
+  <div>
+    <!-- 로그인하면 로그인에 user명 붙여주면 될듯 -->
+    판매자명 : <input type="text" value="dbscksdnd" name="sellerId"  readonly>
+
+  </div>
+  <div>
+    상품명 : <input type="text" name="name">
+  </div>
+
+  <div style="display: flex">
+    상품 카테고리 :
+    <select class="form-select" aria-label="Default select example" id="categorySelect" onchange="updateCategoryOptions()">
+      <option selected>---------</option>
+
+      <th:block th:each="productCategory:${productDTO.pcList}" >
+        <option th:value="${productCategory.id}">[[${productCategory.name}]]</option>
+      </th:block>
+
+    </select>
+    세부 카테고리 :
+    <select class="form-select" aria-label="Default select example" id="categoryDetailSelect" name="productCategoryDetailId">
+      <option selected>---------</option>
+    </select>
+  </div>
+
+  <div>
+    상품 대표 이미지 (1개) : <input type="file" name="file">
+  </div>
+
+  <div>
+    상품 설명 : <input type="text" name="description">
+  </div>
+
+  <div>
+    상품개수 : <input type="number" name="totalQty">
+    <!-- 품절일 경우 알림기능 추가, 상품 수정페이지에 상품 개수 추가 설정 -->
+  </div>
+
+  <div>
+    상품 가격 : <input type="number" name="price">
+  </div>
+
+
+  <div>
+    (상품이미지 표시 순서를 위해 이미지 마지막에 순서를 붙여주세요. => 1부터 시작 ex)image1.jpg, image2.jpg)
+    <div>
+
+    </div>
+    상품정보이미지(여러개) : <input type="file" name="files" multiple="multiple">
+  </div>
+
+  <button type="submit">상품등록</button>
+
+</div>
+  </form>
+
+<!--
+메인이미지 안넣을 경우 버튼 비활성화
+상세이미지 뒤에 번호가 없거나 겹칠경우 버튼 비활성화
+판매자 아이디를 이메일로 변경
+
+-->
+
+
+<script th:inline="javascript">
+  const productDTO = [[${productDTO}]];
+</script>
+
+<script th:src="@{/js/productRegister.js}"></script>
+
+<th:block th:replace="~{footer :: footer}"></th:block>

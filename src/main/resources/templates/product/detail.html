@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>상품 상세</title>
+    <link rel="stylesheet" th:href="@{/dist/css/productDetail.css}">
+</head>
+<th:block th:replace="~{header :: header}"></th:block>
+
+<body>
+
+<div class="product-container">
+
+    <div class="first-content">
+        <div class="main-image-box"><img th:src="${productDTO.productVO.mainImage}" style="width: 100%; height: 100%">
+        </div>
+
+        <div class="right-content-box">
+
+            <div class="product-description">
+
+                <div class="product-description-box">
+                    <p>카테고리 > [[${productDTO.pcVO.name}]] > [[${productDTO.pcdVO.name}]] </p>
+                </div>
+
+                <div class="product-description-box">
+                    <p>[[${productDTO.productVO.name}]]</p>
+                </div>
+
+                <div class="product-description-box">
+                    <p>[[${productDTO.productVO.price}]]원</p>
+                </div>
+
+                <div class="product-description-box">
+                    <p>별점 : ⭐⭐⭐⭐⭐ (+카운트)</p>
+                </div>
+
+                <div class="product-description-box">
+                    <p>판매자</p>
+                </div>
+
+                <div class="product-description-box">
+                    <p>3,000원(40,000원 이상 무료)</p>
+                </div>
+            </div>
+
+            <div class="pick-content">
+                <div class="pick-box">
+                    <div class="product-count-box">
+                        <p>상품수량</p>
+                        <div id="count-box">
+                            <button class="count-button" id="-" disabled>-</button>
+                            <span class="count-quantity" id="productQty">1</span>
+                            <button class="count-button" id="+">+</button>
+                        </div>
+                        <p id="max-quantity-notice" style="color: red;"></p>
+                        <div class="total-sum">
+                            <span style="font-size: 27px; margin: 0 50px 0 100px">합계</span>
+                            <span class="product-price-text" id="productPrice"
+                                  th:text="${#numbers.formatDecimal(productDTO.productVO.price, 0, 'COMMA', -1, 'POINT')} + ' 원'"></span>
+                        </div>
+                    </div>
+
+                    <div class="buy-or-pick-box">
+                        <button class="like-button" id="slangBtn" th:attr="data-type=${productDTO.slangVO == null ? 'post' : 'delete'}"}>
+                            <th:block th:if="${productDTO.slangVO == null}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="gray"
+                                 class="bi bi-suit-heart" viewBox="0 0 16 16">
+                                <path d="m8 6.236-.894-1.789c-.222-.443-.607-1.08-1.152-1.595C5.418 2.345 4.776 2 4 2 2.324 2 1 3.326 1 4.92c0 1.211.554 2.066 1.868 3.37.337.334.721.695 1.146 1.093C5.122 10.423 6.5 11.717 8 13.447c1.5-1.73 2.878-3.024 3.986-4.064.425-.398.81-.76 1.146-1.093C14.446 6.986 15 6.131 15 4.92 15 3.326 13.676 2 12 2c-.777 0-1.418.345-1.954.852-.545.515-.93 1.152-1.152 1.595zm.392 8.292a.513.513 0 0 1-.784 0c-1.601-1.902-3.05-3.262-4.243-4.381C1.3 8.208 0 6.989 0 4.92 0 2.755 1.79 1 4 1c1.6 0 2.719 1.05 3.404 2.008.26.365.458.716.596.992a7.6 7.6 0 0 1 .596-.992C9.281 2.049 10.4 1 12 1c2.21 0 4 1.755 4 3.92 0 2.069-1.3 3.288-3.365 5.227-1.193 1.12-2.642 2.48-4.243 4.38z"/>
+                            </svg>
+                            </th:block>
+                            <th:block th:if="${productDTO.slangVO != null}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="rgba(255, 0, 0, 0.685)"
+                                     class="bi bi-heart-fill" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/>
+                                </svg>
+                            </th:block>
+                        </button>
+                        <button class="buy-or-pick-select" style="background-color: blueviolet;" id="basketButton">
+                            장바구니
+                        </button>
+                        <button class="buy-or-pick-select" id="orderButton"
+                                style="background-color: rgba(255, 69, 0, 0.81);">상품주문
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <form action="/payment/orders" id="orderMoveForm" method="post">
+        <input type="hidden" name="merchantUid" id="merchantUid">
+    </form>
+
+
+    <div class="second-content">
+        <div class="detailMenuBar">
+            <ul>
+                <li><a href="">상품상세정보</a></li>
+                <li><a href="">상품후기</a></li>
+                <li><a href="">문의</a></li>
+                <li><a href="">배송/교환/반품안내</a></li>
+            </ul>
+        </div>
+
+        <div class="detailMenu">
+            <th:block th:each="i:${productDTO.imageList}">
+                <img th:src="${i.detailImage}">
+            </th:block>
+            <p>상품후기</p>
+            <div class="review">
+                <p>포토리뷰</p>
+                <button type="button" class="imgDetailBtn" onclick="openWindow()">더보기 ></button>
+            </div>
+
+            <div class="detailReviewBox">
+                <div class="reviewList">
+                    <p class="after">추천순</p>
+                    <p>최신순</p>
+                </div>
+
+                <div class="reviewImg">
+                    <a href=""><img src="/dist/image/product_thumbnail/고구마.jpg" alt=""></a>
+                    <a href=""><img src="/dist/image/product_thumbnail/고구마.jpg" alt=""></a>
+                    <a href=""><img src="/dist/image/product_thumbnail/고구마.jpg" alt=""></a>
+                    <a href=""><img src="/dist/image/product_thumbnail/고구마.jpg" alt=""></a>
+                    <a href=""><img src="/dist/image/product_thumbnail/고구마.jpg" alt=""></a>
+                    <a href=""><img src="/dist/image/product_thumbnail/고구마.jpg" alt=""></a>
+                </div>
+
+                <div class="review">
+                    <div>
+                        <p>등급 작성자</p>
+                    </div>
+                    <p>별점</p>
+                    <p>상품명</p>
+                    <p class="reviewContent">리뷰내용</p>
+                    <div class="reviewImgDatail">
+                        <img src="/dist/image/product_thumbnail/고구마.jpg" alt="">
+                        <img src="/dist/image/product_thumbnail/고구마.jpg" alt="">
+                    </div>
+                    <p>날짜<button type="button">도움돼요<img src="/dist/icon/hand-thumbs-up-fill.svg"></button></p>
+                </div>
+
+            </div>
+
+            <p>상품문의</p>
+            <p>배송안내</p>
+            <p>교환/반품 안내</p>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script th:inline="javascript">
+    const productDTO = [[${productDTO}]];
+    const customerId = [[${session.id}]];
+    const productId = [[${productId}]];
+    console.log(productDTO);
+    console.log(customerId);
+    console.log(productId);
+</script>
+<script th:src="@{/js/productDetail.js}"></script>
+</body>
+
+<!--<th:block th:replace="~{footer :: footer}"></th:block>-->

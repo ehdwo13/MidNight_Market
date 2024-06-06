@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" xmlns="http://www.w3.org/1999/html">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <title>loginSelect</title>
+    <style>
+        .join{
+            width: 100%;
+            height: 500px;
+/*            background-color: beige;*/
+            padding-bottom: 20px;
+        }
+        .join>.join1 {
+            width: 40%;
+            height: 500px;
+            /* background-color: beige; */
+            float: left;
+            position: relative;
+            border-right: 1px solid lightgray;
+        <!--            margin-top: 30px;-->
+            margin-bottom: 30px;
+        }
+
+        .join>.join2 {
+            width: 60%;
+            height: 500px;
+            /* background-color:blanchedalmond; */
+            float: right;
+            position: relative;
+        }
+
+        .join>.join1>.join3 {
+            position: absolute;
+            top: 50%;
+            left: 40%;
+            transform: translate(-50%, -50%);
+        }
+
+        .join>.join1>.join3>.text1 {
+            font-size: 23px;
+            font-weight: bold;
+            line-height: 40px;
+            letter-spacing: -3px;
+        }
+
+        .text2 {
+            font-size: 35px;
+            font-weight: 900;
+        }
+
+        .box1 {
+            width: 310px;
+            height: 100px;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            background-image: linear-gradient(to left,
+            rgba(128, 0, 128, 0.717), rgba(255, 0, 0, 0.589));
+            position: absolute;
+            top: 38%;
+            left: 50%;
+            margin-top: 30px;
+            margin-bottom: 30px;
+            padding-left: 20px;
+            padding-top: 20px;
+            transform: translate(-50%, -50%);
+            color: white;
+            border: none;
+        }
+
+        .box2 {
+            width: 310px;
+            height: 100px;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            background-color: rgba(211, 211, 211, 0.308);
+            position: absolute;
+            top: 62%;
+            left: 50%;
+            margin-top: 30px;
+            margin-bottom: 30px;
+            padding-left: 20px;
+            padding-top: 20px;
+            transform: translate(-50%, -50%);
+            color: black;
+            border: none;
+        }
+        .box1:hover{
+            filter: brightness(85%);
+        }
+        .box2:hover{
+            filter: brightness(85%);
+        }
+
+        .text3 {
+            display: block;
+            margin-top: 10px;
+        }
+
+        .text4 {
+            font-weight: 900;
+        }
+        .custom-modal .modal-content{
+            width: 40% !important;
+            margin: 190px auto !important;
+        }
+
+        .modal-title{
+            font-size: 30px;
+            font-weight: 700;
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%);
+        }
+        #registerDescription{
+            margin: 30px 0 20px;
+            width: 100%;
+            height: 50px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 22px;
+            color: rgba(0, 0, 0, 0.53);
+            border-bottom: 1px solid lightgrey;
+        }
+        .register-type{
+            margin: 0 auto;
+            width: 55%;
+            height: 350px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .select-box{
+            width: 100%;
+            height: 50px;
+            margin: 10px 0;
+            /*border: 1px solid black;*/
+            text-align: center;
+            line-height: 50px;
+            position: relative;
+        }
+        .select-box:hover {
+            filter: brightness(85%);
+        }
+        .social-text{
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .social-image{
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 30px;
+        }
+        .text-with-lines {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            height: 25px;
+            margin: 10px 0;
+            text-align: center;
+            line-height: 50px;
+            font-size: 17px;
+            font-weight: bold;
+            color: rgba(128, 128, 128, 0.63);
+
+        }
+        .text-with-lines::before,
+        .text-with-lines::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(128, 128, 128, 0.63);
+            margin: 0 10px;
+
+        }
+
+    </style>
+</head>
+
+<th:block th:replace="~{header :: header}"></th:block>
+
+<body>
+
+<div class="join">
+    <div class="join1">
+        <div class="join3">
+            <span class="text1">믿고 사는 즐거움</span><br>
+            <span class="text2">이젠마켓</span>
+            <span class="text1">에 오신것을 <br> 환영합니다</span>
+        </div>
+    </div>
+
+    <div class="join2">
+            <button type="button" class="box1" data-bs-toggle="modal" data-bs-target="#myModal" id="customerRegister">
+                    <span class="person">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
+                             class="bi bi-person" viewBox="0 0 16 16">
+                            <path
+                                    d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
+                        </svg>
+                    </span>
+                <span class="text4">개인회원</span>
+                <span class="text3">본인인증 또는 SNS인증 후 가입</span>
+            </button>
+
+            <button type="button" class="box2" id="sellerRegister">
+                    <span class="person">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
+                             class="bi bi-person" viewBox="0 0 16 16">
+                            <path
+                                    d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
+                        </svg>
+                    </span>
+                <span class="text4">사업자 회원</span>
+                <span class="text3">사업자번호 인증 후 가입</span>
+            </button>
+
+    </div>
+</div>
+
+<!-- Modal Line -->
+<div class="modal" id="myModal" tabindex="-1">
+    <div class="modal-dialog custom-modal" style="max-width: none">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">회원가입하기</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="registerDescription"><p>소셜 로그인 및 이메일로 가입할 수 있어요!</p></div>
+                <div class="register-type">
+                    <a href="/oauth2/authorization/google" class="select-box" style="background-color: rgba(211,211,211,0.36)"> <img src="/dist/image/social-image/google.png" class="social-image"><span class="social-text">Google로 시작하기</span></a>
+                    <a href="/oauth2/authorization/naver" class="select-box" style="background-color: #03c75a; color: white">  <img src="/dist/image/social-image/naver.png" class="social-image"><span class="social-text">네이버로 시작하기</span></a>
+                    <a href="/oauth2/authorization/kakao" class="select-box" style="background-color: #F7E600; color: #3A1D1D">  <img src="/dist/image/social-image/kakao.png" class="social-image"><span class="social-text">카카오로 시작하기</span></a>
+                    <div class="text-with-lines"><span class="social-text"></span>또는</div>
+                    <a href="/customer/insert" class="select-box" style="background-color: gray; color: white"><span class="social-text">ID/PW 회원가입<span></a>
+                </div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+<th:block th:replace="~{footer :: footer}"></th:block>
+
+<script>
+    document.getElementById('sellerRegister').addEventListener('click',()=>{
+        window.location.href = '/seller/register';
+    })
+</script>
+
+</html>

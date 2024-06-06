@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+
+<th:block th:fragment="footer">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+        <!-- 구글 폰트 -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Jua&family=Nanum+Gothic+Coding&family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
+        <title>footer</title>
+
+        <link rel="stylesheet" th:href="@{/dist/css/bootstrap.min.css}">
+        <script th:src="@{/dist/js/bootstrap.bundle.min.js}"></script>
+        <link rel="stylesheet" th:href="@{/dist/css/footer.css}">
+        <link rel="stylesheet" th:href="@{/dist/css/reset.css}">
+
+    </head>
+    <body>
+    <footer class="footer" >
+        <div class="inner">
+            <div class="footerBt">
+                <div>
+                    <div class="icon">
+                    <ul>
+                        <li class="youtube">
+                            <a href="http://youtube.com" target='_blank'>
+                                <img th:src="@{@{/dist/icon/icon-youtube-on.png}}">
+                            </a>
+                        </li>
+                        <li class="instagram">
+                            <a href="http://instagram.com" target='_blank'>
+                                <img th:src="@{@{/dist/icon/icon-instagram-on.png}}">
+                            </a>
+                        </li>
+                        <li class="facebook">
+                            <a href="https://facebook.com" target='_blank'>
+                                <img th:src="@{@{/dist/icon/icon-facebook-on.png}}">
+                            </a>
+                        </li>
+                        <li class="blog">
+                            <a href="https://section.blog.naver.com" target='_blank'>
+                                <img th:src="@{@{/dist/icon/icon-blog-on.png}}">
+                            </a>
+                        </li>
+                    </ul>
+                    </div>
+                    <div class="t">
+                        <span class="service">고객 센터</span><br>
+                        <span class="">월~토 오전 9시 - 오후 6시</span><br>
+                        <span class="service">
+                            <span class="phone">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-telephone-fill" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877z"/>
+                              </svg>
+                            </span>1577 - 1234</span>
+                    </div>
+                    <!-- 아이콘 아래 hr 태그가 제거됨 -->
+                    <div class="t2">
+                        <span><a href="">회사소개</a></span>
+                        <span><a href="">개인정보처리방침</a></span>
+                        <span><a href="">이용약관</a></span>
+                        <span><a href="">고객센터</a></span>
+                    </div>
+                    <hr>
+                    <div class="t3">
+                        <span class="service2">(주)미드나잇마켓</span><br>
+                        <span>대표자 : 김미드</span><br>
+                        <span>사업자등록번호 : 123-45-67890</span><br>
+                        <span>통신판매업신고번호 : 제2024-서울강남-12345호</span><br>
+                        <span>주소 : 서울특별시 강남구 용인시 마켓동 123 5층</span><br>
+                        <span>개인정보보호책임자 : 박나잇</span><br>
+                        <span>팩스 : 02-123-4567</span>
+                    </div>
+                    <div class="t4">COPYRIGHT ⓒ ezen Corp. ALL RIGHTS RESERVED.</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    </body>
+</th:block>
+</html>

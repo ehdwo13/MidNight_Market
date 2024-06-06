@@ -1,0 +1,53 @@
+<th:block th:replace="~{header :: header}"></th:block>
+<head>
+    <meta charset="UTF-8">
+    <title>아이디 찾기</title>
+    <style>
+        .ft{
+            font-size: 50px;
+        }
+        section{
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <section>
+        <p class="ft">아이디 찾기</p>
+        <label for="nickName"></label>닉네임
+        <input type="text" name="nickName" id="nickName"><br>
+        <button type="button" id="findId">확인</button>
+        <div id="resultDiv" style="display: none">
+
+        </div>
+    </section>
+</body>
+<script>
+    document.getElementById('findId').addEventListener('click', ()=>{
+        let nickName = document.getElementById('nickName').value;
+        let resultDiv = document.getElementById('resultDiv');
+        resultDiv.style.display = "";
+        resultDiv.innerText = "";
+        findId(nickName).then(result =>{
+            if(!result){
+                resultDiv.innerText = "아이디 정보가 없습니다. "
+            }else{
+                resultDiv.innerText = "찾으시는 아이디는 "+result+"입니다.";
+            }
+        })
+    })
+    async function findId(nickName) {
+        try {
+            const url = '/customer/findId/'+nickName;
+            const config = {
+                method: 'GET'
+            };
+            const resp = await fetch(url, config);
+            const result = await resp.text();
+            return result;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+</script>
+<th:block th:replace="~{footer :: footer}"></th:block>

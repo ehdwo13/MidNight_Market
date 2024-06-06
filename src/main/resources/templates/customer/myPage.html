@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{header :: header}"></th:block>
+<link rel="stylesheet" th:href="@{/dist/css/myPage.css}">
+<head>
+
+    <title>myPage</title>
+
+    <style>
+        body {
+  width: 100%;
+  height: auto;
+  min-width: 1200px;
+  background-color: rgba(255, 166, 0, 0.034);
+}
+
+.mypage0 {
+  /*padding: 2% 7%;*/
+    width: 940px;
+    margin: 100px auto;
+    height: 800px;
+    min-width: 1200px;
+    background-color: rgba(255, 166, 0, 0.034);
+}
+
+.mypage1 {
+  width: 30%;
+  height: auto;
+  background-color: white;
+  float: left;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.mypage1-1 {
+  display: flex;
+}
+
+.circle1 {
+  width: 50px;
+  height: 50px;
+  border: 1px solid rgb(148, 146, 150);
+  border-radius: 100%;
+  text-align: center;
+  margin-right: 20px;
+}
+
+.circle1_text {
+  line-height: 50px;
+  font-size: 13px;
+}
+
+.mypage2 {
+  width: 60%;
+  height: auto;
+  /* background-color: aqua; */
+  float: right;
+  padding: 20px;
+}
+
+.mypage_text1 {
+  line-height: 50px;
+  font-size: 20px;
+  font-weight: 550;
+}
+
+.mypage3 {
+  width: 100%;
+  height: 100px;
+  /* background-color: aqua; */
+  margin-top: 20px;
+  border: 1px solid lightgray;
+  border-radius: 10px;
+  display: flex;
+}
+
+.mypage_box1 {
+  width: calc(100% / 2);
+  /* background-color: aqua; */
+}
+
+.hr1 {
+  border: 1px solid rgba(211, 211, 211, 0.495);
+}
+
+.mypage_box2 {
+  width: calc(100% / 2);
+  /* background-color: yellow; */
+}
+
+.mypage_box3 {
+  margin-left: 30px;
+  margin-top: 20px;
+  line-height: 30px;
+}
+
+.mypage_box4 {
+  margin-left: 30px;
+  line-height: 30px;
+}
+
+.mypage_text5 {
+  font-size: 20px;
+  font-weight: 550;
+}
+
+.mypage_text3 {
+  color: gray;
+}
+
+.mypage_box5 {
+  width: 100%;
+  height: auto;
+  /* background-color: aqua; */
+  margin-top: 30px;
+}
+
+.mypage_box5-1 {
+  line-height: 30px;
+  margin-bottom: 30px;
+}
+
+.mypage_text7 {
+  color: gray;
+  font-size: 15px;
+  font-weight: 550;
+}
+
+.mypage_text8 {
+  font-size: 18px;
+  color: black;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.mypage2_text1 {
+  font-size: 20px;
+  font-weight: 550;
+}
+
+.mypage2_text2 {
+  font-size: 13px;
+  color: gray;
+}
+
+.mypage2_text3 {
+  float: right;
+  color: black;
+}
+
+.hr2 {
+  border: 1px solid black;
+}
+
+/* input 초기화 */
+input[type="checkbox"] {
+  display: none;
+}
+
+/* (체크박스, 텍스트) 정렬 맞추기 */
+.checkbox_label {
+  display: flex;
+  align-items: center;
+}
+
+/* 체크박스 디자인 */
+.checkbox_icon::before {
+  content: "";
+  display: block;
+  margin-right: 5px;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+  border: 1px solid #9da3a5;
+  box-sizing: border-box;
+  position: relative;
+  cursor: pointer;
+}
+
+/* checked */
+.checkbox_label input:checked + .checkbox_icon::before {
+  /*   transition: all 0.15s ease; */
+  background: url(https://intranet.adef.co.kr/asset/images/ic_check.png) orange
+    no-repeat center;
+  border: none;
+}
+
+.mypage2_box2 {
+  margin: 30px 0 20px 10px;
+  display: flex;
+}
+
+li {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.mypage2_text4 {
+  margin: 0 20px;
+  padding: 5px;
+  font-size: 12px;
+  border: 1px solid lightgray;
+  background-color: rgba(211, 211, 211, 0.247);
+  border-radius: 15%;
+}
+
+.mypage_text9 {
+  color: orange;
+  font-weight: 550;
+}
+
+.mypage2_box2-1 {
+  width: 100%;
+  display: flex;
+}
+
+.mypage2_box2-3 {
+  width: 30%;
+  height: 50px;
+  border: 1px solid black;
+  /* float: left; */
+}
+
+.mypage2_box2-4 {
+  width: 30%;
+  height: 50px;
+  border: 1px solid black;
+  /* float: right; */
+}
+    </style>
+
+</head>
+
+<body>
+<div class="mypage0">
+    <div id="mypage1" class="mypage1">
+        <div class="mypage1-1">
+            <div class="circle1">
+                <span class="circle1_text">등급</span>
+            </div>
+            <span class="mypage_text1">[[${session.name}]]님</span>
+        </div>
+        <div class="mypage3">
+            <div class="mypage_box1">
+                <div class="mypage_box3">
+                    <span class="mypage_text3">적립금</span>
+                </div>
+                <div class="mypage_box4">
+                    <span class="mypage_text5">0</span>
+                    <span class="mypage_text6">원</span>
+                </div>
+            </div>
+            <hr class="hr1">
+            <div class="mypage_box2">
+                <div class="mypage_box3">
+                    <span class="mypage_text3">이젠 캐시</span>
+                </div>
+                <div class="mypage_box4">
+                    <span class="mypage_text5">0</span>
+                    <span class="mypage_text6">원</span>
+                </div>
+            </div>
+        </div>
+        <div class="mypage_box5">
+
+            <div class="mypage_box5-1">
+                <div class="mypage_text7">
+                    자주 찾는 메뉴
+                </div>
+                <div class="mypage_text8" id="1">주문 내역</div>
+                <div class="mypage_text8" id="2">쿠폰</div>
+                <div class="mypage_text8" id="3">찜한 상품</div>
+                <div class="mypage_text8" id="4">자주 구매</div>
+            </div>
+
+            <hr class="hr1">
+
+            <div class="mypage_box5-1">
+                <div class="mypage_text7">
+                    쇼핑
+                </div>
+                <div class="mypage_text8" id="5">상품 후기</div>
+                <div class="mypage_text8" id="6">상품 문의</div>
+            </div>
+
+            <hr class="hr1">
+
+            <div class="mypage_box5-1">
+                <div class="mypage_text7">
+                    내 정보 관리
+                </div>
+                <div class="mypage_text8" id="7">배송지 관리</div>
+                <div class="mypage_text8" id="8">개인 정보 수정</div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="mypage2">
+        <div id="d1">
+            <div class="mypage2_box1">
+                <span class="mypage2_text1">주문 내역</span>
+                <span class="mypage2_text2">최대 지난 3년간의 주문내역까지 확인할 수 있어요.</span>
+            </div>
+            <hr class="hr2">
+            <div class="mypage2_box2">
+                <ul>
+                    <li>
+                        <div class="mypage2_box2-1">
+                            <span class="mypage2_text5">주문 내역이 없습니다.</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="d2" style="display: none;">
+            <div class="mypage2_box1">
+                <span class="mypage2_text1">쿠폰</span>
+                <a href=""><span class="mypage2_text3">+ 쿠폰 등록</span></a>
+            </div>
+            <hr class="hr2">
+            <div class="mypage2_box2">
+                <ul>
+                    <li>
+                        <div class="mypage2_box2-1">
+                            <span class="mypage2_text5">쿠폰 내역이 존재하지 않습니다.</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="d3" style="display: none;">
+            <div class="mypage2_box1">
+                <span class="mypage2_text1">찜한 상품</span>
+                <span class="mypage2_text2">찜한 상품은 최대 200개까지 저장됩니다.</span>
+            </div>
+            <hr class="hr2">
+            <div class="mypage2_box2" id="slangPage">
+                <ul>
+                    <li>
+                        <div class="mypage2_box2-1">
+                            <span class="mypage2_text5">찜한 상품이 없습니다.</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="d4" style="display: none;">
+            <div class="mypage2_box1">
+                <span class="mypage2_text1">자주 구매한 상품</span>
+            </div>
+            <hr class="hr2">
+            <div class="mypage2_box2">
+                <ul>
+                    <li>
+                        <div class="mypage2_box2-1">
+                            <span class="mypage2_text5">구매한 상품이 없습니다.</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="d5" style="display: none;">
+            <div class="mypage2_box1">
+                <span class="mypage2_text1">상품 후기</span>
+            </div>
+            <hr class="hr2">
+            <div class="mypage2_box2">
+                <ul>
+                    <li>
+                        <div class="mypage2_box2-1">
+                            <span class="mypage2_text5">작성한 후기가 없습니다.</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="d6" style="display: none;">
+            <div class="mypage2_box1">
+                <span class="mypage2_text1">상품 문의</span>
+            </div>
+            <hr class="hr2">
+            <div class="mypage2_box2">
+                <ul>
+                    <li>
+                        <div class="mypage2_box2-1">
+                            <span class="mypage2_text5">작성한 문의가 없습니다.</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="d7" style="display: none;">
+            <div class="mypage2_box1">
+                <span class="mypage2_text1">배송지 관리</span>
+                <span class="mypage2_text2">배송지에 따라 상품 정보 및 배송 유형이 달라질 수 있습니다.</span>
+                <a href=""><span class="mypage2_text3">+ 배송지 추가</span></a>
+            </div>
+            <hr class="hr2">
+            <div class="mypage2_box2">
+                <ul>
+                    <li>
+                        <a href="">
+                            <label class="checkbox_label">
+                                <input type="checkbox">
+                                <span class="checkbox_icon"></span>
+                            </label>
+                        </a>
+                        <div class="mypage2_box2-1">
+                            <span class="mypage2_text4">기본 배송지</span>
+                            <span class="mypage2_text5">인천 남동구 남동대로 123번길 123동 123호</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="d8" style="display: none;">
+            <div class="mypage2_box1">
+                <span class="mypage2_text1">개인정보 수정</span>
+                <span class="mypage2_text2">회원님의 정보를 안전하게 보호하기 위해 비밀번호를 다시 한번 확인해주세요.</span>
+            </div>
+            <hr class="hr2">
+            <div class="mypage2_box2">
+                <form action="">
+                    <span>아이디</span><input type="text" name="" id="">
+                    <span>비밀번호</span><input type="password">
+                    <button type="submit">확인</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:inline="javascript">
+    const customerId = [[${session.id}]];
+</script>
+<script th:src="@{/js/myPage.js}"></script>
+<script>
+    document.getElementById('mypage1').addEventListener('click', (e) => {
+
+        console.log(typeof(e.target.id));
+        const target = Number(e.target.id)
+        if(target >= 1 && target <= 8){
+            console.log(typeof(target));
+            document.getElementById("d1").style.display = 'none';
+            document.getElementById("d2").style.display = 'none';
+            document.getElementById("d3").style.display = 'none';
+            document.getElementById("d4").style.display = 'none';
+            document.getElementById("d5").style.display = 'none';
+            document.getElementById("d6").style.display = 'none';
+            document.getElementById("d7").style.display = 'none';
+            document.getElementById("d8").style.display = 'none';
+            document.getElementById('d' + e.target.id).style.display = '';
+
+
+        }
+    })
+</script>
+
+<th:block th:replace="~{footer :: footer}"></th:block>
+</body>
+

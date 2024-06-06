@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>desk</title>
+    <link rel="stylesheet" href="/dist/css/helpDesk.css">
+</head>
+<th:block th:replace="~{header :: header}"></th:block>
+<body>
+
+<!--con1-->
+
+<div class="con con1">
+    <p> 고객 센터 </p>
+</div>
+
+<!--con2-->
+<div class="con con2">
+
+    <div class="qTopText">
+        <p>자주 찾는 질문 TOP10</p>
+    </div>
+
+    <div class="qnaTop"></div>
+
+</div>
+<!-- 모달창 코드 -->
+<div class="modal" id="topModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered top-custom-modal" style="max-width: none">
+        <div class="modal-content top-content">
+            <div class="modal-header">
+                <h5 class="modal-title top-title" style="font-size: 20px; font-weight: 700">Modal title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body top-body">
+                <p id="mText">외않되.</p>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!--con3-->
+<div class="con con3">
+    <ul class="tap_list">
+        <li class="tap_btn" id="customer">회원</li>
+        <li class="tap_btn" id="pay">주문/결제</li>
+        <li class="tap_btn" id="delivery">배송</li>
+        <li class="tap_btn" id="payback">취소/환불</li>
+        <li class="tap_btn" id="returnExchange">반품/교환</li>
+    </ul>
+    
+    <div id="accordion-list">
+    </div>
+
+</div>
+
+<script th:src="@{/js/helpDesk.js}"></script>
+</body>
+
+
+
+<th:block th:replace="~{footer :: footer}"></th:block>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{header :: header}"></th:block>
+<title>판매자 회원가입</title>
+<style>
+    .container1{
+        border: 1px solid black;
+        margin: auto;
+        width: 940px;
+        height: 700px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+    }
+</style>
+
+<form action="/seller/register" method="post">
+    <div class="container1">
+        <h1>판매자 회원가입</h1>
+            <label>
+                아이디 : <input type="text" id="idF"> @
+                <input type="text" id="idB">
+                <select name="emailDomain" id="emailDomain" onchange="changeVal()">
+                    <option name="emailDomain" value="">직접입력</option>
+                    <option name="emailDomain" value="gmail.com">gmail.com</option>
+                    <option name="emailDomain" value="naver.com">naver.com</option>
+                    <option name="emailDomain" value="kakao.com">kakao.com</option>
+                    <option name="emailDomain" value="daum.net">daum.net</option>
+                    <option name="emailDomain" value="hanmail.net">hanmail.net</option>
+                    <option name="emailDomain" value="hotmail.com">hotmail.com</option>
+
+                </select>
+                <input type="hidden" name="id" id="id">
+                <button type="button" id="idCheck">중복확인</button>
+            </label>
+            <label>
+                비밀번호 : <input type="password" name="pw" id="pw">
+                <span id="validText"></span>
+            </label>
+            <label>
+                비밀번호확인 : <input type="password" name="pwC" id="pwC">
+                <span id="checkPw"></span>
+            </label>
+            <label>
+                쇼핑몰 이름 : <input type="text" name="shopName" id="shopName">
+                <button type="button" id="shopNameCheck">중복확인</button>
+            </label>
+            <label>
+                연락처 : <input type="tel" id="tel" name="tel" pattern="[0-9]{3}[0-9]{4}[0-9]{4}" required placeholder="-은 제외하고 입력"/>
+            </label>
+        <button type="submit" id="check">회원가입</button>
+    </div>
+</form>
+<script>
+    function changeVal(){
+        let result ={};
+        const emailDomain = document.getElementById('emailDomain');
+        result.emailDomain = emailDomain.options[emailDomain.selectedIndex].value;
+        if(result.emailDomain === "직접입력"){
+            document.getElementById('idB').value = "";
+        }
+        document.getElementById('idB').value = result.emailDomain;
+    }
+
+    document.getElementById('idCheck').addEventListener('click',()=>{
+        let id = document.getElementById('idF').value+"@"+document.getElementById('idB').value;
+        checkId(id).then(result =>{
+            if(result === "1"){
+                alert("사용가능한 아이디입니다. ");
+                document.getElementById('id').value = id;
+            }else{
+                alert("중복아이디 입니다. 다시 입력해주세요. ")
+                document.getElementById('id').value = '';
+            }
+        })
+    })
+    async function checkId(id){
+        try {
+            const url = '/seller/checkId/'+id;
+            const config = {
+                method: 'GET'
+            };
+            const resp = await fetch(url, config);
+            const result = await resp.text();
+            return result;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    document.getElementById('shopNameCheck').addEventListener('click',()=>{
+        let shopName = document.getElementById('shopName').value;
+        shopNameCheck(shopName).then(result =>{
+            if(result === "1"){
+                alert("사용가능한 쇼핑몰 이름입니다. ")
+            }else{
+                alert("이미 사용중인 쇼핑몰 이름입니다. 다시 입력해주세요. ")
+                document.getElementById('shopName').value = '';
+            }
+        })
+    })
+    async function shopNameCheck(shopName){
+        try {
+            const url = '/seller/checkShopName/'+shopName;
+            const config = {
+                method: 'GET'
+            };
+            const resp = await fetch(url, config);
+            const result = await resp.text();
+            return result;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    document.getElementById('pw').addEventListener("change", ()=> {
+        let pw = document.getElementById('pw').value;
+        if(!validPW(pw)){
+            document.getElementById('validText').style.display = '';
+            document.getElementById('validText').style.color ="red";
+            document.getElementById('validText').innerText = " 비밀번호는 8글자 이상, 영문, 숫자, 특수문자를 포함해야 합니다. "
+        }else{
+            document.getElementById('validText').style.display = 'none';
+        }
+    })
+    document.getElementById('pwC').addEventListener("change", ()=>{
+        let pwC = document.getElementById('pwC').value;
+        let pw = document.getElementById('pw').value;
+        if(pwC !== pw){
+            document.getElementById('checkPw').style.display = '';
+            document.getElementById('checkPw').style.color ="red";
+            document.getElementById('checkPw').innerText = "입력하신 패스워드가 동일하지 않습니다. "
+        }else{
+            document.getElementById('checkPw').style.display = 'none';
+        }
+    })
+    function validPW (pw) {
+        return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/.test(pw);
+    }
+</script>
+
+<th:block th:replace="~{footer :: footer}"></th:block>

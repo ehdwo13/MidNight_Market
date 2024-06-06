@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>modify</title>
+</head>
+<th:block th:replace="~{header :: header}"></th:block>
+<body>
+    <h1>1:1 문의</h1>
+    <form th:action="@{/help/modify}" method="post">
+        <input type="hidden" name="hno" th:value="${hvo.hno}">
+        <div class="my-3">
+            <label for="created">작성일 : </label>
+            <input type="text" class="form-control" id="created" th:value="${hvo.regAt}" readonly>
+        </div>
+        <div class="my-3">
+            <label for="mod">수정일 : </label>
+            <input type="text" class="form-control" id="mod" th:value="${hvo.modAt}" readonly>
+        </div>
+        <div class="mb-3">
+            <label for="title">제목 : </label>
+            <input type="text" class="form-control" id="title" name="title" th:value="${hvo.title}">
+        </div>
+        <div class="mb-3">
+            <label for="id">작성자 : </label>
+            <input type="text" class="form-control" id="id" name="id" th:value="${hvo.id}" readonly>
+        </div>
+        <div class="mb-3">
+            <label for="content">내용 : </label>
+            <textarea name="content" id="content" cols="50" rows="5" class="form-control">[[${hvo.content}]]</textarea>
+        </div>
+        <div class="input-group mb-3">
+            <label for="secret"></label>
+            <input type="checkbox" id="secret" onclick="checkSecret()">비밀글 설정
+            <input type="hidden" name="secret" id="secretHidden" value="N">
+        </div>
+<!--        <div class="input-group mb-3" id="passwordInput" style="display: none;">-->
+<!--            비밀번호 : <input type="password" name="password">-->
+<!--        </div>-->
+        <button type="submit" id="modBtn" class="btn btn-outline-warning">수정</button>
+        <a th:href="@{/help/list}"><button type="button" id="listBtn" class="btn btn-outline-primary">목록</button></a>
+    </form>
+    <script th:src="@{/js/helpModify.js}"></script>
+</body>
+<th:block th:replace="~{footer :: footer}"></th:block>

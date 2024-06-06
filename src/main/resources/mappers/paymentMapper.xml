@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.www.repository.PaymentMapper">
+
+    <insert id="register">
+        INSERT INTO payment (merchant_uid, customer_id, pay_description, original_price, pay_price)
+        VALUES
+        (#{merchantUid}, #{customerId}, #{payDescription}, #{originalPrice}, #{payPrice})
+    </insert>
+
+    <select id="getMyPaymentProduct" resultType="com.project.www.domain.PaymentDTO">
+        SELECT * FROM payment
+        WHERE
+        merchant_uid = #{merchantUid}
+    </select>
+
+    <update id="paySuccessUpdate">
+        UPDATE payment
+        SET
+        status = 'success',
+        pay_method = #{payMethod},
+        pay_date = now()
+        WHERE
+        merchant_uid = #{merchantUid}
+    </update>
+
+</mapper>

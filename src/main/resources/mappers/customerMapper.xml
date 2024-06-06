@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.www.repository.CustomerMapper">
+    <insert id="insert">
+        insert into customer(id, pw, nick_name, provider, provider_id)
+        values(#{id}, #{pw}, #{nickName}, #{provider}, #{providerId})
+    </insert>
+    <select id="checkEmail" resultType="int">
+        select count(id) from customer where id = #{id}
+    </select>
+    <select id="checkNickName" resultType="int">
+        select count(nick_name) from customer where nick_name = #{nick_name}
+    </select>
+    <select id="findNickName" resultType="String">
+        select id from customer where nick_name = #{nick_name}
+    </select>
+    <select id="findId" resultType="int">
+        select count(id) from customer where id = #{id}
+    </select>
+    <update id="updateDefaultPw">
+        update customer set pw = #{pw} where id = #{id}
+    </update>
+    <update id="updatePw">
+        update customer set pw = #{pw} where id = #{id}
+    </update>
+    <select id="findByUserName" resultType="com.project.www.domain.CustomerVO">
+        SELECT * FROM customer where provider_id = #{providerId}
+    </select>
+</mapper>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" xmlns="http://www.w3.org/1999/html">
+<th:block th:fragment="header">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" th:href="@{/dist/css/bootstrap.min.css}">
+        <script th:src="@{/dist/js/bootstrap.bundle.min.js}"></script>
+        <link rel="stylesheet" th:href="@{/dist/css/header.css}">
+        <link rel="stylesheet" th:href="@{/dist/css/reset.css}">
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    </head>
+    <body>
+    <header class="header">
+        <form action="" class="menuForm">
+            <div class="inner top">
+                <div class="top_part">
+                    <div class="logo_part">
+                        <a href="/">
+                            <img th:src="@{/dist/icon/logo_watermark.png}" alt="" style="width: 160px" height="90px">
+                        </a>
+                    </div>
+                    <div class="search_part">
+                        <input type="text" class="search_bar" id="autoComplete" placeholder="찾고 싶은 상품을 검색해보세요!"
+                               onfocus="this.placeholder=''" onblur='this.placeholder="찾고 싶은 상품을 검색해보세요!"'>
+                        <button type="submit"><img th:src="@{/dist/icon/search.gif}"></button>
+                    </div>
+                    <div class="inner loginBox">
+                        <th:block sec:authorize="isAnonymous()">
+                            <a href="/customer/registerSelect" id="joinBtn">회원가입</a>
+                            <a href="/login/form" class="login">로그인</a>
+                        </th:block>
+                        <th:block sec:authorize="isAuthenticated()">
+                            <p th:if="${session.id}" style="display: none" id="idValue">[[${id}]]</p>
+                            <a th:if="${session.name}" th:href="@{/customer/myPage}">
+                                [[${session.name}]] 님
+                            </a>
+                            <a href="/logout" id="logoutBtn" class="logout" >로그아웃</a>
+                            <th:block th:if="${pwReset == 1}">
+                                <p style="display:none;" id="isReset"></p>
+                            </th:block>
+                        </th:block>
+                    </div>
+                </div>
+
+                <div class="etc-part">
+                    <a href="#" id="bellBtn">
+                        <img th:src="@{/dist/icon/bell.png}">
+                    </a>
+                    <a href="#" id="cartBtn">
+                        <img th:src="@{/dist/icon/cart.png}">
+                    </a>
+                    <a href="#" id="heartBtn">
+                        <img th:src="@{/dist/icon/heart.png}">
+                    </a>
+                </div>
+            </div>
+
+            <div class="inner menu">
+                <nav class="navbar" style="padding: 0">
+                    <ul class="menu_part">
+                        <li>
+                            <a href="#" class="bar">카테고리</a>
+                            <ul class="submenu">
+                                <li>
+                                    <a href="#">채소</a>
+                                    <ul class="subsubmenu">
+                                        <li><a href="#">고구마·감자·당근</a></li>
+                                        <li><a href="#">양파·대파·마늘·배추</a></li>
+                                        <li><a href="#">쌈채소·나물</a></li>
+                                        <li><a href="#">콩나물·버섯</a></li>
+                                        <li><a href="#">브로콜리·양상추</a></li>
+                                        <li><a href="#">오이·호박·고추</a></li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a href="#">과일/견과/쌀</a>
+                                    <ul class="subsubmenu">
+                                        <li><a href="#">국산과일</a></li>
+                                        <li><a href="#">수입과일</a></li>
+                                        <li><a href="#">냉동·건과일</a></li>
+                                        <li><a href="#">견과류</a></li>
+                                        <li><a href="#">쌀·잡곡</a></li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a href="#">수산/해산/건어물</a>
+                                    <ul class="subsubmenu">
+                                        <li><a href="#">생선류</a></li>
+                                        <li><a href="#">오징어·낙지·문어</a></li>
+                                        <li><a href="#">새우·게</a></li>
+                                        <li><a href="#">해산물·전복·조개류</a></li>
+                                        <li><a href="#">멸치·황태</a></li>
+                                        <li><a href="#">어포·쥐포</a></li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a href="#">정육/가공육/계란</a>
+                                    <ul class="subsubmenu">
+                                        <li><a href="#">계란·가공란</a></li>
+                                        <li><a href="#">닭·오리고기</a></li>
+                                        <li><a href="#">돼지고기</a></li>
+                                        <li><a href="#">소고기</a></li>
+                                        <li><a href="#">양념육·가공육</a></li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a href="#">과자/빙과/베이커리</a>
+                                    <ul class="subsubmenu">
+                                        <li><a href="#">과자·간식</a></li>
+                                        <li><a href="#">초콜릿·젤리·캔디·껌</a></li>
+                                        <li><a href="#">빙과·아이스크림</a></li>
+                                        <li><a href="#">베이커리</a></li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a href="#">생수/음료</a>
+                                    <ul class="subsubmenu">
+                                        <li><a href="#">생수·탄산수</a></li>
+                                        <li><a href="#">탄산음료</a></li>
+                                        <li><a href="#">과일·야채음료</a></li>
+                                        <li><a href="#">스포츠·건강음료</a></li>
+                                        <li><a href="#">전통·차·기타음료</a></li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a href="#">우유/유제품</a>
+                                    <ul class="subsubmenu">
+                                        <li><a href="#">우유·두유</a></li>
+                                        <li><a href="#">요거트·요구르트</a></li>
+                                        <li><a href="#">연유·생크림·버터</a></li>
+                                        <li><a href="#">가공치즈</a></li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a href="#">면/양념/통조림</a>
+                                    <ul class="subsubmenu">
+                                        <li><a href="#">라면</a></li>
+                                        <li><a href="#">파스타면·생면</a></li>
+                                        <li><a href="#">밀가루·가루·믹스</a></li>
+                                        <li><a href="#">죽·스프·카레</a></li>
+                                        <li><a href="#">양념·액젓·장류</a></li>
+                                        <li><a href="#">햄·통조림·병조림</a></li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a href="#">밀키트/간편식</a>
+                                    <ul class="subsubmenu">
+                                        <li><a href="#">밀키트</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#" class="bar">세일</a>
+                        </li>
+                        <li>
+                            <a href="#" class="bar">베스트</a>
+                        </li>
+                        <li>
+                            <a href="#" class="bar">신상품</a>
+                        </li>
+                        <li>
+                            <a href="/help/desk" id="helpBtn" class="bar">고객센터</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </form>
+    </header>
+    </body>
+    <script>
+        if(document.getElementById("isReset")!= null){
+            const width = 600;
+            const height = 600;
+
+            // 화면의 크기를 가져옴
+            const screenWidth = window.screen.width;
+            const screenHeight = window.screen.height;
+
+            // 팝업 창의 위치를 계산
+            const left = (screenWidth / 2) - (width / 2);
+            const top = (screenHeight / 2) - (height / 2);
+            alert("비밀번호가 초기화되었습니다. 다시 설정해주세요. ")
+            openPop = window.open('/login/reset', '비밀번호변경', `width=${width},height=${height},scrollbars=yes,left=${left},top=${top}`);
+
+            let id = document.getElementById('idValue').innerText;
+            openPop.onload = function (){
+                openPop.document.getElementById('id').value = id;
+            }
+            const popupInterval = setInterval(function() {
+                if (openPop.closed) {
+                    clearInterval(popupInterval);
+                    logout().then(result=>{
+                        console.log(result);
+                        location.reload();
+                    })
+                }
+            }, 500);
+        }
+        async function logout() {
+            try {
+                const url = '/logout';
+                const config = {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                };
+                const response = await fetch(url, config);
+
+                if (response.ok) {
+                    window.location.href = '/login'; // 로그인 페이지로 리디렉션
+                } else {
+                    console.error('로그아웃 실패:', response.statusText);
+                }
+            } catch (error) {
+                console.error('로그아웃 중 오류 발생:', error);
+            }
+        }
+
+    </script>
+    <script>
+        $('#autoComplete').autocomplete({
+            source : function(request, response) { //source: 입력시 보일 목록
+                $.ajax({
+                    url : "/ajax/autocomplete.do"
+                    , type : "POST"
+                    , dataType: "JSON"
+                    , data : {value: request.term}	// 검색 키워드
+                    , success : function(data){ 	// 성공
+                        response(
+                            $.map(data.resultList, function(item) {
+                                return {
+                                    label : item.name    	// 목록에 표시되는 값
+                                    , value : item.name		// 선택 시 input창에 표시되는 값
+                                };
+                            })
+                        );    //response
+                    }
+                    ,error : function(){ //실패
+                        alert("오류가 발생했습니다.");
+                    }
+                });
+            }
+            ,focus : function(event, ui) { // 방향키로 자동완성단어 선택 가능하게 만들어줌
+                return false;
+            }
+            ,minLength: 1// 최소 글자수
+            ,autoFocus : true // true == 첫 번째 항목에 자동으로 초점이 맞춰짐
+            ,delay: 100	//autocomplete 딜레이 시간(ms)
+            ,select : function(evt, ui) {
+                // 아이템 선택시 실행 ui.item 이 선택된 항목을 나타내는 객체, lavel/value/idx를 가짐
+                console.log(ui.item.label);
+            }
+        });
+    </script>
+</th:block>
+</html>

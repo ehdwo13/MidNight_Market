@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:replace="~{layout :: setFragment(~{this::content})}">
+    <th:block th:fragment="content">
+        <th:block th:with="nvo=${nvo.nvo}">
+            <div class="container-sm">
+
+
+            </div>
+        </th:block>
+    </th:block>
+</th:block>

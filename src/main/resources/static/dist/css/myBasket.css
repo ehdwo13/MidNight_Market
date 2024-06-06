@@ -1,0 +1,216 @@
+body {
+    width: 100%;
+}
+
+.basket1 {
+    /* background-color: aqua; */
+    height: 800px;
+    padding: 10px 80px;
+}
+
+.basket2 {
+    text-align: center;
+    margin: 50px;
+}
+
+.title1 {
+    font-size: 30px;
+    font-weight: 550;
+}
+
+.basket3 {
+    /* background-color: pink; */
+    width: 70%;
+    height: 500px;
+    float: left;
+    border: 1px solid black;
+}
+
+a {
+    color: black;
+}
+
+.text1 {
+    /* margin-left: 10px;
+    margin-right: 10px; */
+}
+
+.text2 {
+    margin-left: 20px;
+}
+
+hr {
+    border: 1px solid black;
+}
+
+.basket4 {
+    background-color: rgba(211, 211, 211, 0.155);
+    width: 300px;
+    height: 350px;
+    float: right;
+    position: sticky;
+    top: 105px;
+    right: 70px;
+}
+
+.basket5 {
+    padding: 20px;
+    /* margin-bottom: 10px; */
+    border: 1px solid lightgray;
+    border-radius: 3px;
+}
+
+.text3,
+.text4,
+.text5,
+.text7 {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.text6,
+.text8 {
+    text-align: right;
+    margin-bottom: 20px;
+    font-size: 12px;
+}
+
+.text7 {
+    margin-top: 50px;
+}
+
+.basket6 {
+    float: right;
+    text-align: center;
+    width: 300px;
+    height: 70px;
+    background-color: orange;
+    line-height: 70px;
+    border-radius: 5px;
+}
+
+.basket7 {
+    background-color: white;
+    width: 300px;
+    height: 30px;
+}
+
+.text9 {
+    font-size: 20px;
+    font-weight: 550;
+}
+
+.accumulate {
+    background-color: orange;
+    border-radius: 10px;
+    padding: 3px;
+    margin-right: 5px;
+    color: white;
+}
+
+.basket8 {
+    /* background-color: aqua; */
+    padding-top: 90px;
+}
+
+.text10,
+.text11 {
+    font-size: 12px;
+    margin-bottom: 20px;
+}
+
+.basket9 {
+    /*background-color: yellow;*/
+    /* padding: 10px; */
+}
+
+.image1 {
+    width: 100px;
+    height: 100px;
+    /* background-color: aqua; */
+    border: 1px solid black;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+li {
+    display: flex;
+    align-items: center;
+    position: relative;
+    /* padding: 20px 0px; */
+}
+
+.name1 {
+    /* background-color: aliceblue; */
+    width: 400px;
+    height: 100px;
+    line-height: 100px;
+}
+
+.box1 {
+    /* background-color: pink; */
+    width: 100px;
+    height: 100px;
+    /* line-height: 100px; */
+    text-align: center;
+    display: flex;
+}
+
+.box2 {
+    width: 40px;
+    height: 100px;
+    /* background-color: yellow; */
+}
+
+.price {
+    /* background-color: aqua; */
+    width: 100px;
+    height: 100px;
+    line-height: 100px;
+    text-align: right;
+    margin-left: 20px;
+}
+
+/* input 초기화 */
+input[type="checkbox"] {
+    display: none;
+}
+
+/* (체크박스, 텍스트) 정렬 맞추기 */
+.checkbox_label {
+    display: flex;
+    align-items: center;
+}
+
+/* 체크박스 디자인 */
+.checkbox_icon::before {
+    content: "";
+    display: block;
+    margin-right: 5px;
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    background-color: transparent;
+    border: 1px solid #9da3a5;
+    box-sizing: border-box;
+    position: relative;
+    cursor: pointer;
+}
+
+/* checked */
+.checkbox_label input:checked + .checkbox_icon::before {
+    /*   transition: all 0.15s ease; */
+    background: url(https://intranet.adef.co.kr/asset/images/ic_check.png) #03c75a
+    no-repeat center;
+    border: none;
+}
+
+button{
+    border: 1px solid lightgray;
+    background-color: rgba(211, 211, 211, 0.174);
+    width: 30px;
+    height: 30px;
+    margin-top: 35px;
+    align-items: center;
+}

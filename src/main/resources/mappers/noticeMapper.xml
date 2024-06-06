@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.www.repository.NoticeMapper">
+<insert id="register">
+    insert into notice(title,content)
+    values (#{title}, #{content})
+</insert>
+
+    <select id="getList" resultType="com.project.www.domain.NoticeVO">
+        select * from notice
+    </select>
+</mapper>

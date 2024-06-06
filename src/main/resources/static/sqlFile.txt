@@ -1,0 +1,487 @@
+#수정완료
+CREATE TABLE customer (
+	id VARCHAR(150) NOT NULL,
+	pw VARCHAR(160),
+	nick_name VARCHAR(30) NOT NULL,
+	provider VARCHAR(256),
+	provider_id VARCHAR(256),
+	register_date DATETIME DEFAULT NOW(),
+	class VARCHAR(50) DEFAULT 'BRONZE',
+	address VARCHAR(400),
+	role VARCHAR(20) DEFAULT 'role_user',
+	PRIMARY KEY (id)
+);
+
+#수정완료
+CREATE TABLE seller (
+	id VARCHAR(150) NOT NULL,
+	pw VARCHAR(160) NOT NULL,
+	shop_name VARCHAR(40) NOT NULL,
+    tel VARCHAR(100) NOT NULL,
+    role VARCHAR(20) DEFAULT 'role_seller',
+	PRIMARY KEY (id)
+);
+
+#수정완료
+CREATE TABLE product (
+	id bigint NOT NULL AUTO_INCREMENT,
+	name VARCHAR(200) NOT NULL,
+	price bigint NOT NULL DEFAULT 0,
+	discount_rate int default 0,
+	discount_price bigint default 0,
+	product_category_detail_id bigint NOT NULL,
+	description text,
+	total_qty bigint,
+	total_sold_qty bigint default 0,
+	register_date DATETIME DEFAULT NOW(),
+	main_image VARCHAR(256),
+	thumb_image VARCHAR(256),
+	seller_id VARCHAR(50) NOT NULL,
+	is_del VARCHAR(5) DEFAULT "N",
+	PRIMARY KEY (id)
+);
+
+#수정완료
+CREATE TABLE orders (
+	merchant_uid VARCHAR(256) NOT NULL,
+	customer_id VARCHAR(150) NOT NULL,
+	product_id bigint NOT NULL,
+	qty bigint NOT NULL,
+	pay_price bigint NOT NULL,
+	orders_date DATETIME DEFAULT NOW(),
+	status VARCHAR(10) default 'stand_by'
+);
+
+#수정완료
+CREATE TABLE address (
+	address VARCHAR(400) NOT NULL,
+	customer_id VARCHAR(150)
+);
+
+#수정완료
+CREATE TABLE review (
+	id bigint NOT NULL AUTO_INCREMENT,
+	title VARCHAR(100) NOT NULL,
+	content VARCHAR(4000) NOT NULL,
+	star bigint NOT NULL,
+	register_date DATETIME DEFAULT NOW(),
+	rev_up_count bigint DEFAULT 0,
+	customer_id VARCHAR(150) NOT NULL,
+	product_id bigint NOT NULL,
+	PRIMARY KEY (id)
+);
+
+#리뷰이미지
+CREATE TABLE review_image(
+    review_id bigint NOT NULL,
+    review_image VARCHAR(256) NOT NULL
+);
+
+#리뷰좋아요
+CREATE TABLE review_like(
+    review_id bigint NOT NULL,
+    customer_id VARCHAR(150) NOT NULL
+);
+
+#수정완료
+CREATE TABLE member_coupon (
+	coupon_id bigint NOT NULL AUTO_INCREMENT,
+	issue_date DATETIME DEFAULT NOW(),
+	end_date DATETIME,
+	use_status BOOLEAN,
+	use_date DATETIME,
+	customer_id VARCHAR(150) NOT NULL,
+	PRIMARY KEY (coupon_id)
+);
+
+#수정완료
+CREATE TABLE coupon (
+	id bigint NOT NULL AUTO_INCREMENT,
+	name VARCHAR(100) NOT NULL,
+	discount_amount bigint,
+	discount_percentage bigint,
+	PRIMARY KEY (id)
+);
+
+#수정완료
+CREATE TABLE basket (
+	customer_id VARCHAR(150) NOT NULL,
+	qty bigint NOT NULL,
+	product_id bigint NOT NULL
+);
+
+#수정완료
+CREATE TABLE product_qna (
+	id bigint NOT NULL AUTO_INCREMENT,
+	title VARCHAR(100) NOT NULL,
+	content VARCHAR(256) NOT NULL,
+	register_date DATETIME DEFAULT NOW(),
+	qna_status BOOLEAN NOT NULL,
+	customer_id VARCHAR(150) NOT NULL,
+	PRIMARY KEY (id)
+);
+
+#수정완료
+CREATE TABLE product_qna_answer (
+	id bigint NOT NULL AUTO_INCREMENT,
+	shop_name VARCHAR(40) NOT NULL,
+	content VARCHAR(256) NOT NULL,
+	customer_id VARCHAR(150) NOT NULL,
+	answer_date DATETIME DEFAULT NOW(),
+	seller_id VARCHAR(50) NOT NULL,
+	qna_id bigint NOT NULL,
+	PRIMARY KEY (id)
+);
+
+#수정완료
+CREATE TABLE product_category_detail (
+	id bigint NOT NULL,
+	name VARCHAR(50) NOT NULL,
+	product_category_id	bigint	NOT NULL,
+	PRIMARY KEY (id)
+);
+
+#수정완료
+CREATE TABLE product_category (
+	id bigint NOT NULL,
+	name VARCHAR(50) NOT NULL,
+	PRIMARY KEY (id)
+);
+
+#수정완료
+CREATE TABLE payment (
+	merchant_uid VARCHAR(256) NOT NULL,
+	customer_id VARCHAR(150) NOT NULL,
+	pay_description VARCHAR(100),
+	pay_date DATETIME DEFAULT NOW(),
+	original_price bigint NOT NULL,
+	pay_price bigint NOT NULL,
+	pay_method VARCHAR(100),
+	address VARCHAR(400),
+	status VARCHAR(10) DEFAULT 'stand_by',
+	PRIMARY KEY (merchant_uid)
+);
+
+#수정완료
+CREATE TABLE notification (
+	notify_type VARCHAR(100) NOT NULL,
+	notify_content VARCHAR(200) NOT NULL,
+	notify_date DATETIME DEFAULT NOW(),
+	customer_id VARCHAR(150) NOT NULL
+);
+
+#수정완료
+CREATE TABLE customer_point (
+	id bigint NOT NULL AUTO_INCREMENT,
+	customer_id VARCHAR(150) NOT NULL,
+	save_date DATETIME DEFAULT NOW(),
+	use_date DATETIME,
+	point_type VARCHAR(30),
+	point_current bigint,
+	point_amount bigint,
+	PRIMARY KEY (id)
+);
+#수정완료
+CREATE TABLE notice (
+	id bigint NOT NULL AUTO_INCREMENT,
+	title VARCHAR(100) NOT NULL,
+	register_date DATETIME DEFAULT NOW(),
+	content text not null,
+	PRIMARY KEY (id)
+);
+
+#수정완료
+CREATE TABLE help(
+	hno bigint NOT NULL AUTO_INCREMENT,
+	id VARCHAR(100) NOT NULL,
+	title VARCHAR(100) NOT NULL,
+	content TEXT NOT NULL,
+	reply VARCHAR(10) default 'N',
+	reply_content VARCHAR(150),
+	secret VARCHAR(10),
+	customer_id VARCHAR(150),
+	reg_at DATETIME default now(),
+	mod_at datetime default now(),
+	PRIMARY KEY(hno));
+
+
+#수정완료
+CREATE TABLE product_detail_image (
+	detail_image VARCHAR(256) NOT NULL,
+	sequence int NOT NULL,
+	product_id bigint NOT NULL
+);
+
+#찜하기 추가
+CREATE TABLE slang (
+    customer_id VARCHAR(30) NOT NULL,
+    product_id bigint NOT NULL,
+    register_date DATETIME DEFAULT NOW()
+);
+
+
+ALTER TABLE product_category_detail ADD CONSTRAINT FK_product_category_TO_product_category_detail_1 FOREIGN KEY (
+	product_category_id
+)
+REFERENCES product_category (
+	id
+);
+
+ALTER TABLE product ADD CONSTRAINT FK_product_category_detail_TO_product_1 FOREIGN KEY (
+	product_category_detail_id
+)
+REFERENCES product_category_detail (
+	id
+);
+
+ALTER TABLE product ADD CONSTRAINT FK_seller_TO_product_1 FOREIGN KEY (
+	seller_id
+)
+REFERENCES seller (
+	id
+);
+
+
+ALTER TABLE orders ADD CONSTRAINT FK_product_TO_orders_1 FOREIGN KEY (
+	product_id
+)
+REFERENCES product (
+	id
+);
+
+ALTER TABLE orders ADD CONSTRAINT FK_customer_TO_orders_1 FOREIGN KEY (
+	customer_id
+)
+REFERENCES customer (
+	id
+);
+
+ALTER TABLE orders ADD CONSTRAINT FK_payment_TO_orders_1 FOREIGN KEY (
+	merchant_uid
+)
+REFERENCES payment (
+	merchant_uid
+);
+
+ALTER TABLE review ADD CONSTRAINT FK_customer_TO_review_1 FOREIGN KEY (
+	customer_id
+)
+REFERENCES customer (
+	id
+);
+
+ALTER TABLE member_coupon ADD CONSTRAINT FK_customer_TO_member_coupon_1 FOREIGN KEY (
+	customer_id
+)
+REFERENCES customer (
+	id
+);
+
+ALTER TABLE basket ADD CONSTRAINT FK_customer_TO_basket_1 FOREIGN KEY (
+	customer_id
+)
+REFERENCES customer (
+	id
+);
+
+ALTER TABLE basket ADD CONSTRAINT FK_product_TO_basket_1 FOREIGN KEY (
+	product_id
+)
+REFERENCES product (
+	id
+);
+
+ALTER TABLE product_qna ADD CONSTRAINT FK_customer_TO_product_qna_1 FOREIGN KEY (
+	customer_id
+)
+REFERENCES customer (
+	id
+);
+
+ALTER TABLE product_qna_answer ADD CONSTRAINT FK_seller_TO_product_qna_answer_1 FOREIGN KEY (
+	seller_id
+)
+REFERENCES seller (
+	id
+);
+
+ALTER TABLE product_qna_answer ADD CONSTRAINT FK_product_qna_TO_product_qna_answer_1 FOREIGN KEY (
+	qna_id
+)
+REFERENCES product_qna (
+	id
+);
+
+
+ALTER TABLE payment ADD CONSTRAINT FK_customer_TO_payment_1 FOREIGN KEY (
+	customer_id
+)
+REFERENCES customer (
+	id
+);
+
+
+
+ALTER TABLE notification ADD CONSTRAINT FK_customer_TO_notification_1 FOREIGN KEY (
+	customer_id
+)
+REFERENCES customer (
+	id
+);
+
+ALTER TABLE customer_point ADD CONSTRAINT FK_customer_TO_customer_point_1 FOREIGN KEY (
+	customer_id
+)
+REFERENCES customer (
+	id
+);
+
+
+ALTER TABLE help ADD CONSTRAINT FK_customer_TO_help_1 FOREIGN KEY (
+	customer_id
+)
+REFERENCES customer (
+	id
+);
+
+
+ALTER TABLE product_detail_image ADD CONSTRAINT FK_product_TO_product_detail_image_1 FOREIGN KEY (
+	product_id
+)
+REFERENCES product (
+	id
+);
+
+ALTER TABLE address ADD CONSTRAINT FK_customer_TO_address_1 FOREIGN KEY (
+	customer_id
+)
+REFERENCES customer (
+	id
+);
+
+#상품 <-> 상품리뷰
+ALTER TABLE review ADD CONSTRAINT FK_product_TO_review_1 FOREIGN KEY (
+	product_id
+)
+REFERENCES product (
+	id
+);
+
+#상품이미지 연결
+ALTER TABLE review_image ADD CONSTRAINT FK_review_TO_review_image_1 FOREIGN KEY (
+	review_id
+)
+REFERENCES review (
+	id
+);
+
+#상품 좋아요 연결
+ALTER TABLE review_like ADD CONSTRAINT FK_review_TO_review_like_1 FOREIGN KEY (
+	review_id
+)
+REFERENCES review (
+	id
+);
+
+ALTER TABLE review_like ADD CONSTRAINT FK_customer_TO_review_like_1 FOREIGN KEY (
+	customer_id
+)
+REFERENCES customer (
+	id
+);
+
+
+#찜하기 연결
+ALTER TABLE slang ADD CONSTRAINT FK_customer_TO_slang_1 FOREIGN KEY (
+	customer_id
+)
+REFERENCES customer (
+	id
+);
+
+ALTER TABLE slang ADD CONSTRAINT FK_product_TO_slang_1 FOREIGN KEY (
+	product_id
+)
+REFERENCES product (
+	id
+);
+
+
+-- 카테고리
+INSERT INTO PRODUCT_CATEGORY VALUES (1, "채소");
+INSERT INTO PRODUCT_CATEGORY VALUES (2, "과일/견과/쌀");
+INSERT INTO PRODUCT_CATEGORY VALUES (3, "수산/해산/건어물");
+INSERT INTO PRODUCT_CATEGORY VALUES (4, "정육/가공육/계란");
+INSERT INTO PRODUCT_CATEGORY VALUES (5, "과자/빙과/베이커리");
+INSERT INTO PRODUCT_CATEGORY VALUES (6, "생수/음료");
+INSERT INTO PRODUCT_CATEGORY VALUES (7, "우유/유제품");
+INSERT INTO PRODUCT_CATEGORY VALUES (8, "면/양념/통조림");
+INSERT INTO PRODUCT_CATEGORY VALUES (9, "밀키트/간편식");
+
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (1, "고구마/감자/당근", 1);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (2, "양파/대파/마늘/배추", 1);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (3, "쌈채소/나물", 1);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (4, "콩나물/버섯", 1);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (5, "브로콜리/양상추", 1);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (6, "오이/호박/고추", 1);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (7, "국산과일", 2);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (8, "수입과일", 2);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (9, "냉동/건과일", 2);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (10, "견과류", 2);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (11, "쌀/잡곡", 2);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (12, "생선류", 3);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (13, "오징어/낙지/문어", 3);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (14, "새우/게", 3);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (15, "해산물/전복/조개류", 3);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (16, "멸치/황태", 3);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (17, "어포/쥐포", 3);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (18, "계란/가공란", 4);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (19, "닭/오리고기", 4);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (20, "돼지고기", 4);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (21, "소고기", 4);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (22, "양념육/가공육", 4);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (23, "과자/간식", 5);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (24, "초콜릿/젤리/캔디/껌", 5);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (25, "빙과/아이스크림", 5);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (26, "베이커리", 5);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (27, "생수/탄산수", 6);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (28, "탄산음료", 6);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (29, "과일/야채음료", 6);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (30, "스포츠/건강음료", 6);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (31, "전통/차/기타음료", 6);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (32, "우유/두유" , 7);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (33, "요거트/요구르트" , 7);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (34, "연유/생크림/버터" , 7);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (35, "가공치즈" , 7);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (36, "라면", 8);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (37, "파스타면/생면", 8);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (38, "밀가루/가루/믹스", 8);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (39, "죽/스프/카레", 8);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (40, "양념/액젓/장류", 8);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (41, "햄/통조림/병조림", 8);
+INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (42, "밀키트", 9);
+
+
+INSERT INTO customer(id, pw, nick_name, role)
+VALUES ('admin', 'admin', 'admin', 'role_admin');
+
+#TEST DATA
+INSERT INTO customer(id,pw,nick_name)
+VALUES ('oco0217@gmail.com', 'cksdnd12', '고객');
+
+INSERT INTO seller(id,pw,shop_name,tel)
+VALUES ('dbscksdnd','cksdnd12','이젠마켓','010-6374-6951');
+
+INSERT INTO product(name, price, product_category_detail_id, description, total_qty, total_sold_qty, main_image, thumb_image, seller_id)
+VALUES('길고 긴 바나나', 150, 15, '너무맛잇어서 문제', 7, 0,
+'/upload/2024\\06\\03/3a514557-d3e8-4f03-b0bb-7ec45c360032_바나나메인.jpg',
+'/upload/2024\\06\\03/3a514557-d3e8-4f03-b0bb-7ec45c360032_th_바나나메인.jpg',
+'dbscksdnd'),
+('토마토', 250, 2, '엄청맛잇음', 24, 0,
+'/upload/2024\\06\\03/f25071f1-957b-4751-afd9-0398837be89c_토마토메인.jpg',
+'/upload/2024\\06\\03/f25071f1-957b-4751-afd9-0398837be89c_th_토마토메인.jpg',
+'dbscksdnd'),
+('사과', 750, 8, '엄청맛잇음', 12, 0,
+'/upload/2024\\06\\03/795f4f2f-f273-4c9d-9c86-f61c9e733cc3_사과메인.jpeg',
+'/upload/2024\\06\\03/795f4f2f-f273-4c9d-9c86-f61c9e733cc3_th_사과메인.jpeg',
+'dbscksdnd');

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.www.repository.HelpMapper">
+
+    <select id="getList" resultType="com.project.www.domain.HelpVO">
+        SELECT * from help
+        order by hno desc
+        limit #{pageStart}, #{pageSize}
+    </select>
+
+    <insert id="insert">
+        INSERT into help(id,title,content,secret)
+        values(#{id},#{title},#{content},#{secret})
+    </insert>
+
+    <select id="getDetail" resultType="com.project.www.domain.HelpVO">
+        SELECT * from help
+        where hno = #{hno}
+    </select>
+
+    <update id="modify">
+        UPDATE help
+        set
+        title=#{title}, content=#{content}, mod_at = now()
+        where hno = #{hno}
+    </update>
+
+    <delete id="delete">
+        DELETE from help
+        where hno = #{hno}
+    </delete>
+
+    <update id="replyUpdate">
+        UPDATE help
+        set
+        reply = 'Y'
+        where hno = #{hno}
+    </update>
+
+    <update id="replyRegister">
+        UPDATE help
+        set
+        reply_content = #{replyContent}
+        where hno = #{hno}
+    </update>
+
+    <select id="getTotal" resultType="int">
+        SELECT count(hno) from help
+    </select>
+
+</mapper>

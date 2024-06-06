@@ -1,0 +1,213 @@
+@font-face {
+    font-family: 'NanumSquareB';
+    src: url(../font/nanum-square/NanumSquareB.ttf);
+}
+@font-face {
+    font-family: 'NanumSquareEB';
+    src: url(../font/nanum-square/NanumSquareEB.ttf);
+}
+a span {
+    color : black;
+}
+.sectionBox {
+    margin: 0 auto;
+    width: 100%;
+    height: 360px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.sectionBox > .slide {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.sectionBox > .slide > .slideImgInner {
+    display: flex;
+    transition: transform 0.5s ease;
+}
+
+.animated {
+    transition: transform 0.5s ease;
+}
+
+.sectionBox > .slide > .slideImgInner > .slideImg {
+    width: 100%;
+    height: 360px;
+}
+
+.sectionBox > .slide > .slideImgInner > .slideImg > img {
+    width: 100%;
+    height: 100%;
+}
+
+.slideImg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+.slideImg.active {
+    opacity: 1;
+}
+
+.sectionBox > .sectionSlideBtn > button {
+    border: 0;
+    outline: 0;
+    background-color: transparent;
+}
+
+.sectionBox > .sectionSlideBtn > .leftBtn {
+    position: absolute;
+    top: 46%;
+    left: 70px;
+    transform: translateY(-50%);
+    filter: opacity(0.2) drop-shadow(0 0 0 #ffffff);
+}
+
+.sectionBox > .sectionSlideBtn > .leftBtn > img {
+    width: 55px;
+    height: 55px;
+}
+
+.sectionBox > .sectionSlideBtn > .rightBtn {
+    position: absolute;
+    top: 48%;
+    right: 70px;
+    transform: translateY(-50%);
+    filter: opacity(0.2) drop-shadow(0 0 0 #ffffff);
+}
+
+.sectionBox > .sectionSlideBtn > .rightBtn > img {
+    width: 55px;
+    height: 55px;
+}
+
+.sectionBox > .sectionSlideBtn > a > img {
+    width: 30px;
+    height: 30px;
+}
+
+.slideImgInner {
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.5s ease;
+}
+.animated {
+    transition: transform 0.5s ease;
+}
+
+.mainBox {
+    width:940px;
+    margin: 30px 0 0 0;
+    padding: 0;
+}
+
+@keyframes blink {
+    50% {opacity: 0;}
+}
+
+.mainBox > .mainComment {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0 10px 0;
+    font-size: 30px;
+    font-weight: bold;
+    font-family: 'Giants-I';
+    animation: blink 3s linear infinite;
+}
+.mainBox > .mainComment:first-child {
+    margin-top: 100px;
+}
+.mainBox > div {
+    display: block;
+    text-align: left;
+}
+.mainBox > div > p:first-child {
+    color: #ED234B;
+    font-family: 'NanumSquareEB';
+    margin: 10px 3px;
+}
+.mainBox > div > p:last-child {
+    font-size: 22px;
+    font-family: 'NanumSquareEB';
+    margin: 10px 0 20px 0;
+}
+.mainBox > ul {
+    padding: 0;
+    margin: 0;
+    width: 940px;
+    height: 370px;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    /*border: 4px solid lightgray;*/
+}
+.mainBox > ul > li {
+    width: 220px;
+    height: 350px;
+    /*border: 1px solid violet;*/
+}
+
+.mainBox > ul > li > a > div {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+}
+.mainBox > ul > li > a > div > button {
+    border: none;
+    width: 180px;
+    height: 30px;
+    font-weight: bold;
+}
+.mainBox > ul > li > a > div > span {
+    font-size: 15px;
+    text-align: center;
+    font-family: 'NanumSquareEB';
+}
+.mainBox > ul > li > a > div:last-child {
+    display: flex;
+    justify-content: left;
+    margin: 10px 0 30px 10px;
+}
+.mainBox > ul > li > a > div:last-child > span {
+    font-size: x-small;
+    font-family: 'NanumSquareB';
+}
+
+.mainBox > ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.mainBox > ul > li {
+    display: inline-block;
+    margin: 10px;
+    overflow: hidden;
+}
+
+.mainBox > ul > li > a {
+    display: block;
+    width: 220px;
+    height: 250px;
+    position: relative;
+}
+
+.mainBox > ul > li > a > img {
+    width: 100%;
+    height: 100%;
+    transition: transform 0.5s, filter 0.5s;
+    transform: scale(1.0);
+}
+
+.mainBox > ul > li > a > img:hover {
+    transform: scale(1.05);
+    filter: brightness(1.05);
+}

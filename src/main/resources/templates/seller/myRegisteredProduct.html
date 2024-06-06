@@ -1,0 +1,111 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{header :: header}"></th:block>
+
+<style>
+    .container{
+        border: 1px solid black;
+        margin: auto;
+        width: 100%;
+        height: 700px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+    }
+
+    .invenList{
+        border: 1px solid black;
+        width: 100%;
+        display: flex;
+    }
+
+    .invenList:hover{
+        background-color: skyblue;
+    }
+
+    .invenInfo{
+        border: 1px solid black;
+        width: 25%;
+        height: 200px;
+        text-align: center;
+        line-height: 200px;
+    }
+</style>
+
+<div class="container">
+    <h1>내가 등록한 상품 리스트</h1>
+    <h3>[[${list[0].sellerId}]]님께서 등록한 상품들</h3>
+
+    <th:block th:each="li:${list}">
+        <ul class="invenList">
+            <li class="invenInfo"> <img th:src="${li.mainImage}" alt="사진등록" style="width: 100%" height="100%"> </li>
+            <li class="invenInfo">상품명 : [[${li.name}]] </li>
+            <li class="invenInfo">잔여개수 : <span class="productQty">[[${li.totalQty}]]</span> 개</li>
+            <li class="invenInfo"> 가격 : [[${li.price}]]원 </li>
+            <li><input type="number" class="qty"> <button type="button" th:attr="data-id=${li.id}" class="updateQty">수량 변경</button></li>
+            <a th:href="@{/product/detail(id=${li.id})}" class="invenInfo">
+                <li>페이지 이동하기</li>
+            </a>
+        </ul>
+    </th:block>
+
+</div>
+
+
+<script>
+
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('updateQty')) {
+            // 버튼의 부모 요소(li)에서 .qty 클래스를 가진 input 요소 찾기
+            const productId = e.target.dataset.id;
+            const qtyInput = e.target.closest('li').querySelector('.qty').value;
+            console.log('ID:', productId);
+            console.log('수량:', qtyInput);
+
+            if(qtyInput.length == 0 || qtyInput.val == ''){
+                alert('변경하실 상품의 수량을 입력해주세요.');
+                return;
+            }
+
+            const sendData = {
+                id : productId,
+                totalQty : qtyInput
+            }
+
+            sendUpdateQtyToSeller(sendData).then(result=>{
+                if(result == 'true'){
+                    alert('수량변경에 성공하였습니다.');
+                    e.target.closest('ul').querySelector('.productQty').innerText = qtyInput;
+                    e.target.closest('li').querySelector('.qty').value = '';
+
+                }
+            })
+
+        }
+    });
+
+
+        async function sendUpdateQtyToSeller(sendData){
+
+            try {
+                const url = '/seller/productQtyUpdate';
+                const config = {
+                    method : 'put',
+                    headers : {
+                        'content-type' : 'application/json; charset = utf-8'
+                    },
+                    body : JSON.stringify(sendData)
+                }
+
+                const resp = await  fetch(url,config);
+                const result = await resp.text();
+                return result;
+
+            }catch(error){
+                console.log(error);
+            }
+
+        }
+
+</script>
+
+<th:block th:replace="~{footer :: footer}"></th:block>

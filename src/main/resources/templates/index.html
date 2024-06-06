@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>index</title>
+    <link rel="stylesheet" th:href="@{/dist/css/reset.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/main.css}">
+    <script th:src="@{/dist/js/bootstrap.bundle.min.js}"></script>
+</head>
+<th:block th:replace="~{header :: header}"></th:block>
+
+<body>
+
+<section>
+    <!--광고배너(자동슬라이드&버튼)-->
+    <div class="inner sectionBox">
+        <div class="slide">
+            <div class="slideImgInner">
+                <div class="slideImg">
+                    <img th:src="@{/dist/image/banner_ad/banner_ad1.jpg}">
+                </div>
+                <div class="slideImg">
+                    <img th:src="@{/dist/image/banner_ad/banner_ad2.jpg}">
+                </div>
+                <div class="slideImg">
+                    <img th:src="@{/dist/image/banner_ad/banner_ad3.jpg}">
+                </div>
+                <div class="slideImg">
+                    <img th:src="@{/dist/image/banner_ad/banner_ad4.jpg}">
+                </div>
+                <div class="slideImg">
+                    <img th:src="@{/dist/image/banner_ad/banner_ad5.png}">
+                </div>
+                <div class="slideImg">
+                    <img th:src="@{/dist/image/banner_ad/banner_ad6.jpg}">
+                </div>
+            </div>
+        </div>
+        <div class="sectionSlideBtn">
+            <button class="leftBtn"><img th:src="@{/dist/icon/chevron_left.png}"></button>
+            <button class="rightBtn"><img th:src="@{/dist/icon/chevron_right.png}"></button>
+        </div>
+    </div>
+</section>
+
+<main>
+    <!-- 세일 상품 -->
+    <div class="inner mainBox">
+        <div class="mainComment">금주의 다양한 신상품!</div>
+        <div>
+            <p>NEW</p>
+            <p>신상품</p>
+        </div>
+        <ul>
+            <th:block th:each="newProductList:${newProductList}">
+            <li><a th:href="@{/product/detail(id = ${newProductList.id})}">
+                <img th:src="${newProductList.mainImage}">
+                <div class="product">
+                    <span>[[${newProductList.name}]]</span>
+                </div>
+                <div class="product">
+                    <span th:text="${#numbers.formatDecimal(newProductList.price, 0, 'COMMA', -1, 'POINT')} + ' 원'"></span>
+                </div>
+                <div class="product">
+                    <span><img th:src="@{/dist/icon/review.png}" style="width: 15px" height="15px">리뷰수</span>
+                </div>
+                </a>
+            </li>
+            </th:block>
+        </ul>
+    </div>
+
+    <!-- 베스트 상품 -->
+    <div class="inner mainBox">
+        <div class="mainComment">가장 많이 팔린 상품!</div>
+        <div>
+            <p>BEST</p>
+            <p>베스트 상품</p>
+        </div>
+        <ul>
+            <th:block th:each="heavySoldList:${heavySoldList}">
+            <li><a th:href="@{/product/detail(id = ${heavySoldList.id})}">
+                <img th:src="${heavySoldList.mainImage}">
+                <div class="product">
+                    <span>[[${heavySoldList.name}]]</span>
+                </div>
+                <div class="product">
+                    <span th:text="${#numbers.formatDecimal(heavySoldList.price, 0, 'COMMA', -1, 'POINT')} + ' 원'"></span>
+                </div>
+                <div class="product">
+                    <span><img th:src="@{/dist/icon/review.png}" style="width: 15px" height="15px">리뷰수</span>
+                </div>
+            </a>
+            </li>
+            </th:block>
+
+        </ul>
+    </div>
+
+    <!-- 신상품 -->
+    <div class="inner mainBox">
+        <div class="mainComment">놓치면 후회할 가격!</div>
+        <div>
+            <p>SALE</p>
+            <p>세일 상품</p>
+        </div>
+        <ul>
+            <th:block th:each="discountProductList:${discountProductList}">
+                <!-- 변수 선언 -->
+            <li><a th:href="@{/product/detail(id = ${discountProductList.id})}">
+                <img th:src="${discountProductList.mainImage}">
+                <div class="product">
+                    <span>[[${discountProductList.name}]]</span>
+                </div>
+                <div class="product">
+                    <span th:text="${#numbers.formatDecimal(discountProductList.price, 0, 'COMMA', -1, 'POINT')} + ' 원'" style="text-decoration: line-through; color: red;"></span>
+                    <span style="margin:0 10px;">([[${discountProductList.discountRate}]]%)-></span>
+                    <span th:text="${#numbers.formatDecimal(discountProductList.discountPrice, 0, 'COMMA', -1, 'POINT')} + ' 원'"></span>
+                </div>
+                <div class="product">
+                    <span><img th:src="@{/dist/icon/review.png}" style="width: 15px" height="15px">리뷰수</span>
+                </div>
+            </a>
+            </li>
+            </th:block>
+        </ul>
+    </div>
+</main>
+<script th:src="@{/js/main.js}"></script>
+</body>
+<th:block th:replace="~{footer :: footer}"></th:block>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:replace="~{header :: header}"></th:block>
+
+<head>
+    <title>mySlang</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+        .slang-container {
+            max-width: 940px;
+            margin: 100px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden; /* 셀렉트 박스를 감싸는 컨테이너를 overflow: hidden으로 설정 */
+        }
+
+
+        .product {
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0;
+            margin: 30px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .product img {
+            width: 100px;
+            height: 120px;
+            margin-right: 20px;
+        }
+        .product-info {
+            width: 300px;
+            height: 120px;
+            border: 1px solid black;
+        }
+        .product:hover {
+            background-color: #f9f9f9;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 8px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        /* 주문하기 버튼 스타일 */
+        .order-button {
+            background-color: orange;
+            border: none;
+            color: white;
+            padding: 12px 60px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        /* 셀렉트 박스 스타일 */
+        .sort-select-box{
+            width: 850px;
+            height: 50px;
+            margin: 10px auto;
+            display: flex;
+            /*border: 1px solid black;*/
+            justify-content: end;
+        }
+        .sort-select {
+            margin-top: 10px;
+            float: right;
+        }
+        /* 삭제하기 버튼 스타일 */
+        .delete-button {
+            border: none;
+            padding: 12px 60px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="slang-container">
+    <h1> (여기서 고객세션에서 받아와 닉네임넣고)님께서 찜한 상품</h1>
+
+    <div class="sort-select-box">
+    <select class="sort-select" onchange="sortProducts(this.value)">
+        <option value="recent">최근 등록</option>
+        <option value="price">가격 순</option>
+        <option value="discount">할인 순</option>
+    </select>
+    </div>
+
+    <div id="productList"></div>
+</div>
+
+<div id="myModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modalProductName"></h2>
+        <img src="" id="modalProductImage" alt="Product Image" style="max-width: 100%;">
+        <p id="modalProductPrice"></p>
+    </div>
+</div>
+
+<script th:inline="javascript">const customerId = [[${session.id}]]; //프린시팔로 고객 아이디 받아와서 넣으면 됌;</script>
+
+<script>
+    //가정: 사용자가 찜한 상품 목록
+    let userFavorites = [
+        {
+            id: 1,
+            name: "상품 1",
+            image: "https://via.placeholder.com/200",
+            price: "10000원",
+            date: "2024-06-01",
+            discount: 0.1 // 할인율 (10% 할인)
+        },
+        {
+            id: 2,
+            name: "상품 2",
+            image: "https://via.placeholder.com/200",
+            price: "20000원",
+            date: "2024-06-02",
+            discount: 0.2 // 할인율 (20% 할인)
+        },
+        {
+            id: 3,
+            name: "상품 3",
+            image: "https://via.placeholder.com/200",
+            price: "30000원",
+            date: "2024-06-03",
+            discount: 0 // 할인 없음
+        }
+    ];
+
+    const productList = document.getElementById('productList');
+    const modal = document.getElementById("myModal");
+    const modalContent = document.querySelector(".modal-content");
+    const modalProductName = document.getElementById("modalProductName");
+    const modalProductImage = document.getElementById("modalProductImage");
+    const modalProductPrice = document.getElementById("modalProductPrice");
+
+
+    async function getMySlangProductListFromServer(customerId){
+
+        try{
+            const response = await fetch('/product/getMySlangProduct/'+customerId);
+            const result = await response.json();
+            return result;
+        }catch (e) {
+            console.log(e);
+        }
+    }
+
+    function spreadMySlangProductList(customerId){
+        getMySlangProductListFromServer(customerId).then(result=>{
+            console.log(result);
+            let div = document.getElementById('productList');
+            div.innerHTML = '';
+            let str ='';
+            if(result.length > 0){
+
+                result.forEach(productVO =>{
+
+                    str += `<div class="product">`;
+                    str += `<img src=${productVO.mainImage} alt="ㅇㅇ" style="border-radius: 5px">`;
+                    str += `<div class="product-info" id="myModal">`;
+                    str += `<h3 style="font-weight: 600; margin-bottom: 10px">${productVO.name}</h3>`;
+                    //할인을 안할경우
+                    if(productVO.discountRate === 0){
+                    str += `잘되는지 확인`;
+                    str += `<span>${productVO.price}</span>`;
+                    //할인을 할 경우
+                    }else{
+                        str += `<span style="color: orangered; font-weight: 600; margin-right: 7px">${productVO.discountRate}%</span>`;
+                        str += `<span>${productVO.discountPrice}</span>`;
+                    }
+                    str += `</div>`;
+                    str += `<button class="delete-button" onclick="deleteProduct(${productVO.id})">삭제하기</button>`;
+                    str += `<button class="order-button" onclick="orderProduct(${productVO.id})">주문하기</button>`;
+                    str += `</div>`;
+                });
+                    div.innerHTML += str;
+            }
+
+        })
+    }
+
+
+    // 찜한 상품 목록을 화면에 표시
+    function displayProducts(products) {
+        productList.innerHTML = '';
+        products.forEach(product => {
+            const productItem = document.createElement('div');
+            productItem.classList.add('product');
+            productItem.innerHTML = `
+                <img src="${product.image}" alt="${product.name}">
+                <div class="product-info">
+                    <h3>${product.name}</h3>
+                    <p>${product.price}</p>
+                </div>
+                <button class="order-button" onclick="orderProduct(${product.id})">주문하기</button>
+                <button class="delete-button" onclick="deleteProduct(${product.id})">삭제하기</button>
+            `;
+            productItem.addEventListener('click', () => {
+                showModal(product);
+            });
+            productList.appendChild(productItem);
+        });
+    }
+    // 상품 정렬 함수
+    function sortProducts(option) {
+        let sortedProducts = [...userFavorites];
+        if (option === "recent") {
+            sortedProducts.sort((a, b) => new Date(b.date) - new Date(a.date)); // 최근 등록 순으로 정렬
+        } else if (option === "price") {
+            sortedProducts.sort((a, b) => parseInt(a.price) - parseInt(b.price)); // 가격 순으로 정렬
+        } else if (option === "discount") {
+            sortedProducts.sort((a, b) => b.discount - a.discount); // 할인 순으로 정렬
+        }
+        displayProducts(sortedProducts);
+    }
+
+    // 모달을 열고 선택한 상품 정보 표시
+    function showModal(product) {
+        modal.style.display = "block";
+        modalProductName.textContent = product.name;
+        modalProductImage.src = product.image;
+        modalProductPrice.textContent = product.price;
+    }
+
+    // 모달 닫기 함수
+    function closeModal() {
+        modal.style.display = "none";
+    }
+
+    // 삭제하기 버튼을 눌렀을 때 상품 삭제
+    function deleteProduct(productId) {
+        sendSlangUpdateServer(productId).then(result=>{
+            if(result === 'delete_success'){
+                spreadMySlangProductList(customerId);
+            }
+        })
+    }
+
+    //찜하기 정보 요청
+    async function sendSlangUpdateServer(productId) {
+        try {
+            const response = await fetch('/product/slang/' + customerId + '/' + productId, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json' // 요청 헤더 설정
+                },
+            });
+            const result = await response.text();
+            return result;
+        } catch (error) {
+            console.error('Error fetching product detail:', error);
+        }
+    }
+
+    // 모달 닫기 버튼 클릭 이벤트
+    const closeBtn = document.querySelector(".close");
+    closeBtn.onclick = closeModal;
+
+    // 모달 외부 클릭 시 닫기
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    };
+
+    // 상품 주문 함수
+    function orderProduct(productId) {
+        console.log(productId);
+        window.location.href = '/product/detail?id='+productId;
+    }
+
+    // 초기 상품 목록 표시
+    displayProducts(userFavorites);
+</script>
+<script th:inline="javascript" th:if="customerId != null">
+    spreadMySlangProductList(customerId);
+</script>
+</body>
+<th:block th:replace="~{footer :: footer}"></th:block>

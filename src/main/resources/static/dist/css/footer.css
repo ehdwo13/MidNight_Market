@@ -1,0 +1,150 @@
+@font-face {
+  font-family: 'NanumSquareB';
+  src: url(../font/nanum-square/NanumSquareB.ttf);
+}
+@font-face {
+  font-family: 'NanumSquareEB';
+  src: url(../font/nanum-square/NanumSquareEB.ttf);
+}
+@font-face {
+  font-family: 'NanumSquareRoundB';
+  src: url(../font/nanum-square-round/NanumSquareRoundB.ttf);
+}
+@font-face {
+  font-family: 'NanumSquareRoundEB';
+  src: url(../font/nanum-square-round/NanumSquareRoundEB.ttf);
+}
+@font-face {
+  font-family: 'NanumSquareRoundL';
+  src: url(../font/nanum-square-round/NanumSquareRoundL.ttf);
+}
+
+footer {
+  margin-top: 50px;
+  border-top: 1px solid lightgray;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+footer > .inner {
+  width: 100%;
+  max-width: 1000px;
+  height: 320px;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+footer > .inner > .footerBt > div > .icon > ul {
+  width: 1000px;
+  display: flex;
+  justify-content: center;
+  margin: 10px 0;
+  line-height: 30px;
+  text-align: center;
+  padding: 10px 0 10px 0;
+}
+
+footer > .inner > .footerBt > div > .icon > ul > li {
+  padding: 10px 20px;
+  position: relative;
+}
+
+footer > .inner > .footerBt {
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /*border-top: 1px solid lightgray;*/
+  width: 100%;
+}
+
+footer > .inner > .footerBt .t2{
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  margin-top: 30px;
+  text-align: center;
+  padding: 0;
+}
+
+footer > .inner > .footerBt .t3 {
+  padding-top: 10px;
+}
+
+footer > .inner > .footerBt .t {
+  margin: 15px 0;
+  line-height: 30px;
+  text-align: center;
+  padding: 15px 0;
+}
+
+footer > .inner > .footerBt .t3,
+footer > .inner > .footerBt .t4 {
+  margin: 10px 0;
+  line-height: 20px;
+  text-align: left;
+}
+
+footer > .inner > .footerBt .t > span,
+footer > .inner > .footerBt .t2 > span,
+footer > .inner > .footerBt .t3 > span {
+  padding: 10px 20px;
+  position: relative;
+}
+
+footer > .inner > .footerBt .t > span {
+  padding: 10px 20px;
+  position: relative;
+  font-family: NanumSquareRoundEB;
+  font-width: bold;
+}
+
+footer > .inner > .footerBt .t2 > span {
+  font-family: 'NanumSquareRoundL';
+  font-size: 14px;
+  padding: 10px 20px;
+  position: relative;
+}
+
+footer > .inner > .footerBt .t3 > span,
+footer > .inner > .footerBt .t4 > span {
+  padding: 10px 20px;
+  position: relative;
+  font-family: 'NanumSquareRoundL';
+}
+
+footer > .inner > .footerBt .t2 > span > a {
+  color: black;
+  font-width: bold;
+}
+
+.service {
+  font-size: 30px;
+  font-weight: bold;
+  line-height: 60px;
+}
+
+.service2 {
+  font-size: 50px;
+  font-weight: bold;
+  line-height: 20px;
+}
+
+footer > .inner > .footerBt .t3 > span:first-child{
+  font-size: medium;
+  line-height: 30px;
+}
+
+footer > .inner > .footerBt .t3 > span {
+  padding: 10px 20px;
+  font-size: small;
+}
+
+footer > .inner > .footerBt .t4 {
+  margin: 30px 10px;
+  padding-left: 10px;
+  font-size: xx-small;
+}
