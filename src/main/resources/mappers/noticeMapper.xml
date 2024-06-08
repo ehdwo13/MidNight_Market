@@ -11,4 +11,21 @@
     <select id="getList" resultType="com.project.www.domain.NoticeVO">
         select * from notice
     </select>
+
+    <select id="getDetail" resultType="com.project.www.domain.NoticeVO">
+        select * from notice
+        where
+        id = #{id}
+    </select>
+
+    <update id="modify">
+        update notice
+        set
+        title=#{title}, content=#{content}, register_date = now()
+        where id = #{id}
+    </update>
+
+    <delete id="remove">
+        delete from notice where id = #{id}
+    </delete>
 </mapper>

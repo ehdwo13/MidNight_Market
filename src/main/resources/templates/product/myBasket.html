@@ -75,7 +75,7 @@
 </form>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script th:inline="javascript">const customerId = [[${session.id}]] //프린시팔로 고객 아이디 받아와서 넣으면 됌;
+<script th:inline="javascript">const customerId = [[${session.id}]];
 console.log(customerId + '확인');</script>
 <script th:src="@{/js/myBasket.js}"></script>
 <script th:inline="javascript" th:if="customerId != null">

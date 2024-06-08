@@ -6,6 +6,7 @@ import com.project.www.domain.ProductVO;
 import com.project.www.domain.SlangVO;
 import com.project.www.handler.FileHandler;
 import com.project.www.service.ProductService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -64,10 +66,11 @@ public class ProductController {
 
     //상품 상세페이지
     @GetMapping("/detail")
-    public void detail(@RequestParam("id")long id, Model model){
+    public void detail(@RequestParam("id")long id, Model model, HttpSession httpSession){
 
         //프린시팔로 현재 사용중인 아이디 받아야 한다
-        String customerId = "oco0217@gmail.com";
+        String customerId = (String)httpSession.getAttribute("id");
+        log.info("프린시팔 아이디 확인>>>{}",customerId);
         
         log.info(">>>>Product Detail Id 확인>>>>{}",id);
         ProductDTO productDTO = psv.getDetail(customerId ,id);
@@ -116,7 +119,7 @@ public class ProductController {
     public void mySlang(){}
 
     @ResponseBody
-    @GetMapping("/getMySlangProduct/{customerId}")
+    @GetMapping("/getMySlangProductList/{customerId}")
     public List<ProductVO> getMySlangProduct(@PathVariable("customerId")String customerId){
         log.info(">>>>내가찜한품목 고객아이디 확인>>>{}",customerId);
         return psv.getMySlangProduct(customerId);

@@ -4,7 +4,7 @@ var slideImgInner = document.querySelector('.slideImgInner'),
     slideCount = slideImg.length,
     leftBtn = document.querySelector('.leftBtn'),
     rightBtn = document.querySelector('.rightBtn'),
-    autoSlideInterval = 2500, // 자동 슬라이드 간격 (2.5초)
+    autoSlideInterval = 3000, // 자동 슬라이드 간격 (3초)
     autoSlide;
 
 function showSlide(index) {

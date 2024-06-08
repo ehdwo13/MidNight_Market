@@ -50,4 +50,13 @@
         SELECT count(hno) from help
     </select>
 
+    <select id="getMyList"  resultType="com.project.www.domain.HelpVO">
+        select * from help
+        where id = #{name}
+    </select>
+
+    <select id="getMyTotal" resultType="int">
+        select count(hno) from help
+        where id = #{name}
+    </select>
 </mapper>

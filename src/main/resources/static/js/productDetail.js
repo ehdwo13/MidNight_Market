@@ -80,7 +80,7 @@ document.getElementById('basketButton').addEventListener('click', () => {
     }
 
     productData = {
-        customerId: 'oco0217@gmail.com', //고객이메일
+        customerId: customerId, //고객이메일
         productId: Number(`${productDTO.productVO.id}`), //상품고유번호
         qty: Number(document.getElementById('productQty').innerText), //주문할 수량
     };

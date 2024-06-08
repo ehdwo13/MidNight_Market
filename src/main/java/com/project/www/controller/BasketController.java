@@ -80,7 +80,7 @@ public class BasketController {
     public String update(@RequestBody BasketVO basketVO){
 
         int isOk = bsv.update(basketVO);
-        //log.info("업데이트할 바스켓 객체 확인 >> {} ",basketVO);
+        log.info("업데이트할 바스켓 객체 확인 >> {} ",basketVO);
 
         return isOk > 0 ? "success" : "fail";
     }

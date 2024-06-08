@@ -26,4 +26,18 @@
         merchant_uid = #{merchantUid}
     </update>
 
+    <select id="getMyPurchasedProductList" resultType="com.project.www.domain.OrdersVO">
+        SELECT * FROM orders
+        WHERE
+        customer_id = #{customerId}
+    </select>
+
+    <update id="isReviewCommentUpdate">
+        UPDATE orders
+        SET
+        is_review_comment = 1
+        WHERE
+        id = #{ordersId}
+    </update>
+
 </mapper>

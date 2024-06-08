@@ -219,8 +219,8 @@
                         str += `<span>${productVO.discountPrice}</span>`;
                     }
                     str += `</div>`;
-                    str += `<button class="delete-button" onclick="deleteProduct(${productVO.id})">삭제하기</button>`;
-                    str += `<button class="order-button" onclick="orderProduct(${productVO.id})">주문하기</button>`;
+                    str += `<button class="delete-button" onclick="deleteProduct(${productVO.id})">삭제</button>`;
+                    str += `<button class="order-button" onclick="orderProduct(${productVO.id})">주문</button>`;
                     str += `</div>`;
                 });
                     div.innerHTML += str;
@@ -237,8 +237,8 @@
             const productItem = document.createElement('div');
             productItem.classList.add('product');
             productItem.innerHTML = `
-                <img src="${product.image}" alt="${product.name}">
-                <div class="product-info">
+                 <img src="${product.image}" alt="${product.name}">
+                  <div class="product-info">
                     <h3>${product.name}</h3>
                     <p>${product.price}</p>
                 </div>

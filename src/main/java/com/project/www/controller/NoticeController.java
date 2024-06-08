@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import java.util.List;
 @Controller
 public class NoticeController {
     private final NoticeService nsv;
+    private int isOk;
 
     @GetMapping("/register")
     public void register(){};
@@ -35,7 +37,30 @@ public class NoticeController {
         m.addAttribute("list",list);
     }
 
-//    @GetMapping("/detail")
+    @GetMapping("/detail")
+    public void detail(Model m, @RequestParam("id") long id){
+        NoticeVO nvo = nsv.getDetail(id);
+        m.addAttribute("nvo", nvo);
+    }
 
+    @GetMapping("/modify")
+    public void modify(Model m, @RequestParam("id") long id){
+        NoticeVO nvo = nsv.getDetail(id);
+        m.addAttribute("nvo", nvo);
+    }
+
+    @PostMapping("/modify")
+    public String modify(NoticeVO nvo){
+        log.info("nvo{}",nvo);
+        isOk = nsv.modify(nvo);
+
+        return "redirect:/notice/detail?id="+nvo.getId();
+    }
+
+    @GetMapping("/remove")
+    public String remove(@RequestParam("id") long id) {
+        nsv.remove(id);
+        return "redirect:/notice/notice";
+    }
 
 }

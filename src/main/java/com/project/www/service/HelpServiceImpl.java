@@ -57,4 +57,14 @@ public class HelpServiceImpl implements HelpService {
         return helpMapper.getTotal(pgvo);
     }
 
+    @Override
+    public List<HelpVO> getMyList(String name) {
+        return helpMapper.getMyList(name);
+    }
+
+    @Override
+    public int getMyTotal(String name) {
+        return helpMapper.getMyTotal(name);
+    }
+
 }

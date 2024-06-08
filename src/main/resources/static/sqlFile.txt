@@ -17,7 +17,7 @@ CREATE TABLE seller (
 	id VARCHAR(150) NOT NULL,
 	pw VARCHAR(160) NOT NULL,
 	shop_name VARCHAR(40) NOT NULL,
-    tel VARCHAR(100) NOT NULL,
+    tel VARCHAR(100),
     role VARCHAR(20) DEFAULT 'role_seller',
 	PRIMARY KEY (id)
 );
@@ -43,13 +43,16 @@ CREATE TABLE product (
 
 #수정완료
 CREATE TABLE orders (
+    id bigint AUTO_INCREMENT,
 	merchant_uid VARCHAR(256) NOT NULL,
 	customer_id VARCHAR(150) NOT NULL,
 	product_id bigint NOT NULL,
 	qty bigint NOT NULL,
 	pay_price bigint NOT NULL,
 	orders_date DATETIME DEFAULT NOW(),
-	status VARCHAR(10) default 'stand_by'
+	status VARCHAR(10) default 'stand_by',
+	is_review_comment tinyint DEFAULT 0,
+	PRIMARY KEY(id)
 );
 
 #수정완료
@@ -61,20 +64,21 @@ CREATE TABLE address (
 #수정완료
 CREATE TABLE review (
 	id bigint NOT NULL AUTO_INCREMENT,
-	title VARCHAR(100) NOT NULL,
-	content VARCHAR(4000) NOT NULL,
+	content VARCHAR(200) NOT NULL,
 	star bigint NOT NULL,
 	register_date DATETIME DEFAULT NOW(),
 	rev_up_count bigint DEFAULT 0,
 	customer_id VARCHAR(150) NOT NULL,
 	product_id bigint NOT NULL,
+	orders_id bigint NOT NULL,
 	PRIMARY KEY (id)
 );
 
 #리뷰이미지
 CREATE TABLE review_image(
     review_id bigint NOT NULL,
-    review_image VARCHAR(256) NOT NULL
+    review_image VARCHAR(256) NOT NULL,
+    review_thumb_image VARCHAR(256) NOT NULL
 );
 
 #리뷰좋아요
@@ -198,7 +202,7 @@ CREATE TABLE help(
 	content TEXT NOT NULL,
 	reply VARCHAR(10) default 'N',
 	reply_content VARCHAR(150),
-	secret VARCHAR(10),
+	secret VARCHAR(10) default 'N',
 	customer_id VARCHAR(150),
 	reg_at DATETIME default now(),
 	mod_at datetime default now(),
@@ -462,8 +466,8 @@ INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (41, "햄/통조림/병조림", 8);
 INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (42, "밀키트", 9);
 
 
-INSERT INTO customer(id, pw, nick_name, role)
-VALUES ('admin', 'admin', 'admin', 'role_admin');
+INSERT INTO customer(id, pw, nick_name, provider, provider_id, role)
+VALUES ('admin', '$2a$10$bYu2jPdVKXbYf.x7/hpzEeft1gW8j9eguBjp4ICp5ij4.RUt4R1Oy', 'admin', 'form', 'admin', 'role_admin');
 
 #TEST DATA
 INSERT INTO customer(id,pw,nick_name)
@@ -472,16 +476,16 @@ VALUES ('oco0217@gmail.com', 'cksdnd12', '고객');
 INSERT INTO seller(id,pw,shop_name,tel)
 VALUES ('dbscksdnd','cksdnd12','이젠마켓','010-6374-6951');
 
-INSERT INTO product(name, price, product_category_detail_id, description, total_qty, total_sold_qty, main_image, thumb_image, seller_id)
-VALUES('길고 긴 바나나', 150, 15, '너무맛잇어서 문제', 7, 0,
+INSERT INTO product(name, price,discount_price, product_category_detail_id, description, total_qty, total_sold_qty, main_image, thumb_image, seller_id)
+VALUES('길고 긴 바나나', 150, 150, 15, '너무맛잇어서 문제', 7, 0,
 '/upload/2024\\06\\03/3a514557-d3e8-4f03-b0bb-7ec45c360032_바나나메인.jpg',
 '/upload/2024\\06\\03/3a514557-d3e8-4f03-b0bb-7ec45c360032_th_바나나메인.jpg',
 'dbscksdnd'),
-('토마토', 250, 2, '엄청맛잇음', 24, 0,
+('토마토', 250, 250, 2, '엄청맛잇음', 24, 0,
 '/upload/2024\\06\\03/f25071f1-957b-4751-afd9-0398837be89c_토마토메인.jpg',
 '/upload/2024\\06\\03/f25071f1-957b-4751-afd9-0398837be89c_th_토마토메인.jpg',
 'dbscksdnd'),
-('사과', 750, 8, '엄청맛잇음', 12, 0,
+('사과', 750, 750, 8, '엄청맛잇음', 12, 0,
 '/upload/2024\\06\\03/795f4f2f-f273-4c9d-9c86-f61c9e733cc3_사과메인.jpeg',
 '/upload/2024\\06\\03/795f4f2f-f273-4c9d-9c86-f61c9e733cc3_th_사과메인.jpeg',
 'dbscksdnd');

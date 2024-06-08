@@ -1,7 +1,7 @@
-
+const email = paymentDTO.customerId.replace(/\([^)]*\)/g, '');
+console.log(email);
 
 $(document).ready(function () {
-console.log('사전검증 함수');
     $.ajax({
         url: "/payment/prepare",
         method: "post",
@@ -16,17 +16,13 @@ console.log('사전검증 함수');
 document.getElementById('purchaseButton').addEventListener('click', (e)=> {
 
     e.preventDefault(); //이벤트 취소
-    console.log('결제 버튼 클릭');
 
     const data = {
-
      merchantUid : paymentDTO.merchantUid,
      amount : paymentDTO.payPrice,
      tel : '010-1234-5678',
      address : '경기도 인천시 제주도구'
     }
-
-    console.log(data);
 
     let IMP = window.IMP; // Iamport 객체 초기화
     IMP.init('imp53054186'); // 가맹점 식별코드
@@ -37,8 +33,8 @@ document.getElementById('purchaseButton').addEventListener('click', (e)=> {
         merchant_uid: paymentDTO.merchantUid,
         name: paymentDTO.payDescription,
         amount: paymentDTO.payPrice,
-        buyer_email: paymentDTO.customerId,
-        buyer_name: 'nick_name',
+        buyer_email: email,
+        buyer_name: nickName,
         buyer_tel: '010-1234-5678',
         buyer_addr: '인천시 제주도 광역시',
         buyer_postcode: '123-456'

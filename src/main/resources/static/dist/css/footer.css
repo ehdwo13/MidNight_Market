@@ -19,6 +19,11 @@
   src: url(../font/nanum-square-round/NanumSquareRoundL.ttf);
 }
 
+body {
+  min-width: 1280px;
+  min-height: 600px;
+}
+
 footer {
   margin-top: 50px;
   border-top: 1px solid lightgray;

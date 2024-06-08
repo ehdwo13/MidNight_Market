@@ -3,24 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <title>register</title>
+
+    <style>
+        body {
+    min-width: 1200px;
+}
+
+        .notice_register0 {
+    width: auto;
+    height: auto;
+    padding: 20px 50px;
+}
+
+.notice_register1 {
+    font-size: 25px;
+    font-weight: 550;
+    margin: 10px 0 50px 0px;
+}
+
+.notice_register2 {
+    margin-bottom: 30px;
+}
+
+.notice_register2_1 {
+    margin-right: 70px;
+    float: left;
+}
+
+.notice_register2_1_text {
+    line-height: 30px;
+    font-size: 20px;
+}
+
+.notice_register2_2 {
+
+}
+
+.notice_register2_1 {
+    font-size: 15px;
+}
+
+.notice_register2_title {
+    width: 80%;
+    height: 30px;
+    border-style: none;
+    background-color: rgba(255, 166, 0, 0.199);
+    border-radius: 10px;
+    font-size: 20px;
+}
+
+.notice_register2_title:focus {
+    outline: none;
+}
+
+.notice_register3 {
+    margin-bottom: 30px;
+}
+
+.notice_register3_1 {
+    margin-right: 70px;
+    float: left;
+}
+
+.notice_register3_1_text {
+    line-height: 30px;
+    font-size: 20px;
+}
+
+.notice_register2_content {
+    width: 80%;
+    height: 150px;
+    border-style: none;
+    background-color: rgba(255, 166, 0, 0.199);
+    border-radius: 10px;
+    font-size: 20px;
+}
+
+.notice_register2_content:focus {
+    outline: none;
+}
+
+.notice_register4 {
+    width: auto;
+    display: flex;
+}
+
+.notice_register4 {
+    margin-left: 80%;
+}
+
+.notice_register4_2 {
+    margin-left: 30px;
+}
+    </style>
 </head>
 
+<th:block th:replace="~{header :: header}"></th:block>
+
 <body>
-<div class="container-md">
-    <h1>notice Register Page</h1>
+<div class="notice_register0">
+    <div class="notice_register1">글쓰기</div>
     <form th:action="@{/notice/register}" method="post">
-        <div class="input-group mb-3">
-            <span class="input-group-text" id="t">제목</span>
-            <input type="text" class="form-control" name="title" aria-label="title" aria-describedby="basic-addon1">
+        <div class="notice_register2">
+            <div class="notice_register2_1">
+                <span class="notice_register2_1_text" id="t">제목</span>
+            </div>
+            <div class="notice_register2_2">
+                <input type="text" class="notice_register2_title" name="title" aria-label="title"
+                       aria-describedby="basic-addon1">
+            </div>
         </div>
-        <div class="input-group mb-3">
-            <span class="input-group-text" id="c">내용</span>
-            <textarea class="form-control" name="content" aria-label="With textarea"></textarea>
+        <div class="notice_register3">
+            <div class="notice_register3_1">
+                <span class="notice_register3_1_text" id="c">내용</span>
+            </div>
+            <div class="notice_register3_2">
+                <textarea class="notice_register2_content" name="content" aria-label="With textarea"></textarea>
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary" id="regBtn">등록</button>
-        <a th:href="@{/help/list}"><button type="button" class="btn btn-outline-primary">목록</button></a>
+        <div class="notice_register4">
+            <div class="notice_register4_1">
+                <button type="submit" class="notice_register4_1_button1" id="regBtn">등록</button>
+            </div>
+        </div>
     </form>
 </div>
 </body>
+
+<th:block th:replace="~{footer :: footer}"></th:block>
 
 </html>

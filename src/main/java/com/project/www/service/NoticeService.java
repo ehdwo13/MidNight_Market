@@ -8,4 +8,10 @@ public interface NoticeService {
     void register(NoticeVO nvo);
 
     List<NoticeVO> getList();
+
+    NoticeVO getDetail(long id);
+
+    void remove(long id);
+
+    int modify(NoticeVO nvo);
 }

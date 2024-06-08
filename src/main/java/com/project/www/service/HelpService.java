@@ -20,4 +20,8 @@ public interface HelpService {
     void replyRegister(HelpVO hvo);
 
     int getTotal(PagingVO pgvo);
+
+    List<HelpVO> getMyList(String name);
+
+    int getMyTotal(String name);
 }

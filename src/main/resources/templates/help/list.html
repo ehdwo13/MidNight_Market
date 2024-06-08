@@ -11,8 +11,9 @@
 </style>
 <body>
 <h1>1:1 문의</h1>
-<a href="/help/register"><button type="button" class="helpBtn">문의하기</button></a>
-<div class="input-group mb-3" style="width: 500px;">
+<button type="button" class="helpBtn" id="hb">문의하기</button>
+<!--<a href="/help/register"><button type="button" class="helpBtn" id="helpBtn" th:if="${session.name == null}" style="display: none">문의하기</button></a>-->
+<div class="input-group mb-3" style="width: 940px;">
     <table class="table table-striped">
         <thead>
         <tr>
@@ -26,9 +27,8 @@
         <tbody th:each="hvo:${list}">
         <tr>
             <td>[[${hvo.hno}]]</td>
-<!--            <td><a th:href="@{/help/detail(hno=${hvo.hno})}">[[${hvo.title}]]</a></td>-->
             <td>
-                <a th:href="@{/help/detail(hno=${hvo.hno})}">
+                <a href="#" id="idInfo" th:data-id="${hvo.id}" th:data-hno="${hvo.hno}">
                     <span th:text="${hvo.secret == 'Y' ? '비밀글입니다.' : hvo.title}"
                           th:classappend="${hvo.secret == 'Y' ? 'yes' : ''}" class="secret"></span>
                 </a>
@@ -36,13 +36,13 @@
             <td>[[${hvo.id}]]</td>
             <td>[[${hvo.regAt}]]</td>
             <td>
-                <span th:text="${hvo.reply == 'N' || hvo.reply == 'n' ? '답변대기' : '답변완료'}"></span>
+                <span th:text="${hvo.reply == 'N' ? '답변대기' : '답변완료'}"></span>
             </td>
         </tr>
 
         <tr th:if="${hvo.replyContent != null}">
             <td colspan="5" class="replyAdmin">
-                <a th:href="@{/help/replyAns(hno=${hvo.hno})}">┗ Re_관리자 답변입니다.</a>
+                <a href="#" class="adminReply" id="replyInfo" th:data-replyCheck="${hvo.reply}" th:data-secretCheck="${hvo.secret}" th:data-id="${hvo.id}" th:data-hno="${hvo.hno}">┗ 관리자 답변입니다.</a>
             </td>
         </tr>
         </tbody>
@@ -67,10 +67,16 @@
                     <span aria-hidden="true">≫</span>
                 </a>
             </li>
+            <a href="/help/myList"><button type="button" id="myHelpBtn" th:if="${session.name != null}">내 문의글</button></a>
         </ul>
     </nav>
 </div>
-</body>
 
+<script th:inline="javascript">
+    var sesId = [[${session.id}]];
+    var sesName = [[${session.name}]];
+    let role = [[${session.role}]];
+</script>
+<script th:src="@{/js/helpList.js}"></script>
+</body>
 <th:block th:replace="~{footer :: footer}"></th:block>
-</html>

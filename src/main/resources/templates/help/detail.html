@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>detail</title>
@@ -35,19 +35,22 @@
         <a th:href="@{/help/list}"><button type="button" id="listBtn" class="btn btn-outline-primary">목록</button></a>
     </form>
 
-    <h3>관리자 답변</h3>
+    <!--관리자 답변은 관리자만 달 수 있게-->
     <!--답변이 있는 경우-->
     <div th:if="${hvo.replyContent != null}">
+        <p>관리자 답변</p>
         <p>[[${hvo.replyContent}]]</p>
     </div>
     <!--답변이 없는 경우-->
-    <div th:if="${hvo.replyContent == null}">
+    <div th:if="${hvo.replyContent == null}" sec:authorize="hasAnyAuthority('role_admin')">
+        <p>관리자 답변</p>
         <form th:action="@{/help/reply}" method="post">
             <input type="hidden" name="hno" th:value="${hvo.hno}">
             <textarea name="replyContent" rows="5" cols="50"></textarea>
             <button type="submit" class="btn btn-outline-success">등록</button>
         </form>
     </div>
+
     <script th:src="@{/js/helpDetail.js}"></script>
 </body>
 <th:block th:replace="~{footer :: footer}"></th:block>

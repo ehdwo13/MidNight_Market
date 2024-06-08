@@ -22,4 +22,21 @@ public class NoticeServiceImpl implements NoticeService{
         List<NoticeVO> list = noticeMapper.getList();
         return list;
     }
+
+    @Override
+    public NoticeVO getDetail(long id) {
+        NoticeVO nvo =
+            noticeMapper.getDetail(id);
+        return nvo;
+    }
+
+    @Override
+    public void remove(long id) {
+        noticeMapper.remove(id);
+    }
+
+    @Override
+    public int modify(NoticeVO nvo) {
+        return noticeMapper.modify(nvo);
+    }
 }

@@ -35,6 +35,7 @@ public class IndexController {
             HttpSession ses = request.getSession();
             ses.setAttribute("name", principal.getNickName());
             ses.setAttribute("id", principal.getUsername());
+            ses.setAttribute("role", principal.getAuth());
             if(principal.getPassword() != null){
                 if(bCryptPasswordEncoder.matches("resetPw",principal.getPassword())){
                     model.addAttribute("pwReset", 1);
