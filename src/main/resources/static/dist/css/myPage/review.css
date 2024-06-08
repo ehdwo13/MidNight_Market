@@ -1,0 +1,98 @@
+.rating {
+    float: none;
+    width: 200px;
+    display: flex;
+    /*border: 1px solid black;*/
+    margin: 30px auto;
+}
+.rating__input {
+    display: none;
+}
+.rating__label {
+    width: 20px;
+    overflow: hidden;
+    cursor: pointer;
+}
+.rating__label .star-icon {
+    width: 20px;
+    height: 40px;
+    display: block;
+    position: relative;
+    left: 0;
+    background-image: url("https://velog.velcdn.com/images/jellykelly/post/9957327f-f358-4c25-9989-5bb3dd5755d6/image.svg");
+    background-repeat: no-repeat;
+    background-size: 40px;
+}
+.rating__label .star-icon.filled {
+    background-image: url(" https://velog.velcdn.com/images/jellykelly/post/10caf033-b0ef-4d58-804b-6e33395e4ea5/image.svg");
+    /*border: 1px solid red;*/
+}
+.rating__label--full .star-icon {
+    background-position: right;
+}
+.rating__label--half .star-icon {
+    background-position: left;
+}
+.rating.readonly .star-icon {
+    opacity: 0.7;
+    cursor: default;
+}
+
+
+.modal-product-info-box{
+    width: 60%;
+    height: 150px;
+    /*background-color: #0a58ca;*/
+    margin: 20px 0 15px 45px;
+    display: flex;
+    justify-content: start;
+}
+.modal-info:first-child{
+    width: 35%;
+    height: 100%;
+    margin-right: 12px;
+    /*border: 1px solid black;*/
+}
+.modal-info:last-child{
+    width: 50%;
+    height: 100%;
+    text-wrap: nowrap;
+    /*border: 1px solid black;*/
+}
+
+#photo-upload{
+    width: 100px;
+    height: 50px;
+    margin: 0 auto 20px;
+    text-align: center;
+    cursor: pointer;
+}
+#fileList{
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+}
+.footer-button-box{
+    width: 500px;
+    height: 50px;
+    /*border: 1px solid black;*/
+    display: flex;
+    justify-content: space-between;
+}
+.footer-button-box button{
+    width: 230px;
+    height: 50px;
+    background-color: white;
+}
+.footer-button-box button{
+    border: none;
+    border-radius: 5px;
+    color: #0d6efd;
+    font-size: 18px;
+    font-weight: 550;
+}
+.footer-button-box button:first-child{
+    border-right: 1px solid lightgray;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}

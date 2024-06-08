@@ -1,0 +1,80 @@
+#slangPage {
+    display: flex;
+    flex-direction: column;
+}
+
+.product-box {
+    /*border: 1px solid black;*/
+    width: 100%;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 40px;
+    border-bottom: 1px solid lightgray;
+    border-radius: 5px;
+}
+.product-box:hover{
+    background-color: rgba(0, 0, 0, 0.1);
+    transition: 0.7s;
+}
+
+.product-image-box {
+    width: 90px;
+    height:110px;
+    margin-right: 15px;
+    /*border: 3px solid rebeccapurple;*/
+}
+
+.description-box {
+    /*border: 1px solid black;*/
+    width: 500px;
+    height: 110px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.product-info {
+    /*border: 1px solid red;*/
+    width: 500px;
+    height: 48px;
+}
+.button-box{
+    width: 500px;
+    height: 40px;
+    /*background-color: #0a58ca;*/
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+}
+.select-button{
+    width: 245px;
+    height: 35px;
+    border-radius: 5px;
+}
+.select-button:hover{
+    filter: brightness(90%);
+    transition: 0.5s;
+}
+.delete-button{
+    border: 1px solid lightgray;
+    background-color: white;
+    font-weight: 500;
+    color: rgb(51, 51, 51);
+}
+.order-button{
+    border: none;
+    /*border: 1px solid orangered;*/
+    font-weight: 520;
+    color: white;
+    background-color: orangered;
+}
+.price-text{
+    font-weight: 600;
+    margin-right: 5px;
+}
+
+
+
+

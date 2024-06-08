@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<th:block th:replace="~{header :: header}"></th:block>
+<head>
+    <meta charset="UTF-8">
+    <title>list</title>
+</head>
+<style>
+    .yes::before{
+        content: url("/dist/icon/lock-fill.svg");
+    }
+</style>
+<body>
+<h1>1:1 문의</h1>
+<button type="button" class="helpBtn" id="hb">문의하기</button>
+<!--<a href="/help/register"><button type="button" class="helpBtn" id="helpBtn" th:if="${session.name == null}" style="display: none">문의하기</button></a>-->
+<div class="input-group mb-3" style="width: 940px;">
+    <table class="table table-striped" id="resultTable">
+        <thead>
+        <tr>
+            <th>No</th>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>작성일</th>
+            <th>답변상태</th>
+        </tr>
+        </thead>
+        <tbody th:each="hvo:${myList}">
+        <tr>
+            <td>[[${hvo.hno}]]</td>
+            <td>
+                <a href="#" id="idInfo" th:data-id="${hvo.id}" th:data-hno="${hvo.hno}">
+                    <span th:text="${hvo.secret == 'Y' ? '비밀글입니다.' : hvo.title}"
+                          th:classappend="${hvo.secret == 'Y' ? 'yes' : ''}" class="secret"></span>
+                </a>
+            </td>
+            <td>[[${hvo.id}]]</td>
+            <td>[[${hvo.regAt}]]</td>
+            <td>
+                <span th:text="${hvo.reply == 'N' ? '답변대기' : '답변완료'}"></span>
+            </td>
+        </tr>
+
+        <tr th:if="${hvo.replyContent != null}">
+            <td colspan="5" class="replyAdmin">
+                <a href="#" class="adminReply" id="replyInfo" th:data-replyCheck="${hvo.reply}" th:data-secretCheck="${hvo.secret}" th:data-id="${hvo.id}" th:data-hno="${hvo.hno}">┗ 관리자 답변입니다.</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!--페이지네이션-->
+    <nav aria-label="Page navigation example" class="pageNav" th:if="${ph.totalCount != 0}">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${ph.prev == false} ? 'disabled' : ''">
+                <a class="page-link" th:href="@{/help/list(pageNum=${ph.startPage>1 ? ph.startPage - 1:1},pageSize=${ph.pgvo.pageSize})}" aria-label="Previous">
+                    <!--원래는 th:href="@{/help/list(pageNum=${ph.startPage-1} 처리하면 되는데 @관리자 답변 개수 때문에 이전버튼 누르면 에러남-->
+                    <span aria-hidden="true">≪</span>
+                </a>
+            </li>
+            <li th:each="i : ${#numbers.sequence(ph.startPage, ph.endPage)}"
+                th:classappend="${i == ph.pgvo.pageNum} ? 'active' : ''"
+                class="page-item">
+                <a class="page-link" th:href="@{/help/list(pageNum=${i}, pageSize=${ph.pgvo.pageSize})}" th:text="${i}"></a>
+            </li>
+            <li class="page-item" th:classappend="${ph.next == false} ? 'disabled' : ''">
+                <a class="page-link" th:href="@{/help/list(pageNum=${ph.endPage+1},pageSize=${ph.pgvo.pageSize})}" aria-label="Next">
+                    <span aria-hidden="true">≫</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<script th:inline="javascript">
+    var sesId = [[${session.id}]];
+    var sesName = [[${session.name}]];
+</script>
+<script th:src="@{/js/helpList.js}"></script>
+</body>
+<th:block th:replace="~{footer :: footer}"></th:block>
