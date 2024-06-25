@@ -1,16 +1,19 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" xmlns="http://www.w3.org/1999/html">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns="http://www.w3.org/1999/html">
 <th:block th:fragment="header">
     <head>
         <meta charset="UTF-8">
+        <script th:inline="javascript">
+            let id = [[${session.id}]];
+        </script>
         <link rel="stylesheet" th:href="@{/dist/css/bootstrap.min.css}">
-        <script th:src="@{/dist/js/bootstrap.bundle.min.js}"></script>
         <link rel="stylesheet" th:href="@{/dist/css/header.css}">
         <link rel="stylesheet" th:href="@{/dist/css/reset.css}">
         <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
         <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-
+        <script src="/js/bootstrap/bootstrap.bundle.min.js"></script>
     </head>
     <body>
     <header class="header">
@@ -24,9 +27,9 @@
                     </div>
                     <div class="search_part">
                         <input type="text" class="search_bar" id="autoComplete" placeholder="찾고 싶은 상품을 검색해보세요!"
-                               onfocus="this.placeholder=''" onblur='this.placeholder="찾고 싶은 상품을 검색해보세요!"'>
+                               onfocus="this.placeholder=''" onblur='this.placeholder="찾고 싶은 상품을 검색해보세요!"' onkeydown="handleEnter(event)">
                         <div id="recentSearch" style="display: none"></div>
-                        <button type="submit" id="searchButton"><img th:src="@{/dist/icon/search.gif}"></button>
+                        <button type="button" id="searchButton"><img th:src="@{/dist/icon/search.gif}"></button>
                     </div>
                     <div class="inner loginBox">
                         <th:block sec:authorize="isAnonymous()">
@@ -34,11 +37,23 @@
                             <a href="/login/form" class="login">로그인</a>
                         </th:block>
                         <th:block sec:authorize="isAuthenticated()">
-                            <p th:if="${session.id}" style="display: none" id="idValue">[[${id}]]</p>
-                            <a th:if="${session.name}" th:href="@{/customer/myPage}">
-                                [[${session.name}]] 님
-                            </a>
-                            <a href="/logout" id="logoutBtn" class="logout" >로그아웃</a>
+                            <th:block th:each="auth : ${#authentication.authorities}">
+                                <a class="member" th:if="${auth.authority == 'role_user'}">
+                                    <p th:utext="${#authentication.principal.status} ? '<img src=\'/dist/icon/memberShip.png\' alt=\'이미지\' style=\'width: 20px; height: 20px;\' />' : ''" class="memberIcon"></p>
+                                </a>
+                                <p th:if="${session.id}" style="display: none" id="idValue">[[${session.id}]]</p>
+                                <a th:if="${auth.authority == 'role_user'}" th:href="@{/customer/myPage}">
+                                    [[${#authentication.principal.nickName}]] 님
+                                </a>
+                                <a th:if="${auth.authority == 'role_seller'}" th:href="@{/seller/myRegisteredProduct}">
+                                    [[${#authentication.principal.shopName}]] 님
+                                </a>
+                                <a th:if="${auth.authority == 'role_admin'}" th:href="@{/admin/admin}">
+                                    [[${session.name}]] 님
+                                </a>
+
+                            </th:block>
+                            <a href="/logout" id="logoutBtn" class="logout">로그아웃</a>
                             <th:block th:if="${pwReset == 1}">
                                 <p style="display:none;" id="isReset"></p>
                             </th:block>
@@ -47,131 +62,180 @@
                 </div>
 
                 <div class="etc-part">
-                    <a href="#" id="bellBtn">
+                    <a id="notificationButton">
                         <img th:src="@{/dist/icon/bell.png}">
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notiBadge" th:if="${session.role == 'role_user'}">
+                            <span class="visually-hidden">unread messages</span>
+                        </span>
                     </a>
-                    <a href="#" id="cartBtn">
-                        <img th:src="@{/dist/icon/cart.png}">
+                    <a id="cartBtn" class="cartBtnPosition" onclick="showAlert(event, id)">
+                        <img th:src="@{/dist/icon/cart.png}" class="cart-icon">
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="basketBadge" th:if="${session.role == 'role_user'}">
+                            <span class="visually-hidden">unread messages</span>
+                        </span>
                     </a>
-                    <a href="#" id="heartBtn">
+                    <a id="heartBtn">
                         <img th:src="@{/dist/icon/heart.png}">
                     </a>
                 </div>
             </div>
+        </form>
+    </header>
 
-            <div class="inner menu">
-                <nav class="navbar" style="padding: 0">
-                    <ul class="menu_part">
+    <div class="inner menu">
+        <nav class="navbar" style="padding: 0">
+            <ul class="menu_part">
+                <li>
+                    <a href="#" class="bar">카테고리</a>
+                    <ul class="submenu">
                         <li>
-                            <a href="#" class="bar">카테고리</a>
-                            <ul class="submenu">
-                                <li>
-                                    <a href="#">채소</a>
-                                    <ul class="subsubmenu">
-                                        <li><a href="#">고구마·감자·당근</a></li>
-                                        <li><a href="#">양파·대파·마늘·배추</a></li>
-                                        <li><a href="#">쌈채소·나물</a></li>
-                                        <li><a href="#">콩나물·버섯</a></li>
-                                        <li><a href="#">브로콜리·양상추</a></li>
-                                        <li><a href="#">오이·호박·고추</a></li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="#">과일/견과/쌀</a>
-                                    <ul class="subsubmenu">
-                                        <li><a href="#">국산과일</a></li>
-                                        <li><a href="#">수입과일</a></li>
-                                        <li><a href="#">냉동·건과일</a></li>
-                                        <li><a href="#">견과류</a></li>
-                                        <li><a href="#">쌀·잡곡</a></li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="#">수산/해산/건어물</a>
-                                    <ul class="subsubmenu">
-                                        <li><a href="#">생선류</a></li>
-                                        <li><a href="#">오징어·낙지·문어</a></li>
-                                        <li><a href="#">새우·게</a></li>
-                                        <li><a href="#">해산물·전복·조개류</a></li>
-                                        <li><a href="#">멸치·황태</a></li>
-                                        <li><a href="#">어포·쥐포</a></li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="#">정육/가공육/계란</a>
-                                    <ul class="subsubmenu">
-                                        <li><a href="#">계란·가공란</a></li>
-                                        <li><a href="#">닭·오리고기</a></li>
-                                        <li><a href="#">돼지고기</a></li>
-                                        <li><a href="#">소고기</a></li>
-                                        <li><a href="#">양념육·가공육</a></li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="#">과자/빙과/베이커리</a>
-                                    <ul class="subsubmenu">
-                                        <li><a href="#">과자·간식</a></li>
-                                        <li><a href="#">초콜릿·젤리·캔디·껌</a></li>
-                                        <li><a href="#">빙과·아이스크림</a></li>
-                                        <li><a href="#">베이커리</a></li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="#">생수/음료</a>
-                                    <ul class="subsubmenu">
-                                        <li><a href="#">생수·탄산수</a></li>
-                                        <li><a href="#">탄산음료</a></li>
-                                        <li><a href="#">과일·야채음료</a></li>
-                                        <li><a href="#">스포츠·건강음료</a></li>
-                                        <li><a href="#">전통·차·기타음료</a></li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="#">우유/유제품</a>
-                                    <ul class="subsubmenu">
-                                        <li><a href="#">우유·두유</a></li>
-                                        <li><a href="#">요거트·요구르트</a></li>
-                                        <li><a href="#">연유·생크림·버터</a></li>
-                                        <li><a href="#">가공치즈</a></li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="#">면/양념/통조림</a>
-                                    <ul class="subsubmenu">
-                                        <li><a href="#">라면</a></li>
-                                        <li><a href="#">파스타면·생면</a></li>
-                                        <li><a href="#">밀가루·가루·믹스</a></li>
-                                        <li><a href="#">죽·스프·카레</a></li>
-                                        <li><a href="#">양념·액젓·장류</a></li>
-                                        <li><a href="#">햄·통조림·병조림</a></li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="#">밀키트/간편식</a>
-                                    <ul class="subsubmenu">
-                                        <li><a href="#">밀키트</a></li>
-                                    </ul>
-                                </li>
+                            <a href="/product/list?type=product&category=1">채소</a>
+                            <ul class="subsubmenu">
+                                <li><a href="/product/list?type=product&categoryDetail=1">고구마·감자·당근</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=2">양파·대파·마늘·배추</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=3">쌈채소·나물</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=4">콩나물·버섯</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=5">브로콜리·양상추</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=6">오이·호박·고추</a></li>
                             </ul>
                         </li>
                         <li>
-                            <a href="#" class="bar">세일</a>
+                            <a href="/product/list?type=product&category=2">과일/견과/쌀</a>
+                            <ul class="subsubmenu">
+                                <li><a href="/product/list?type=product&categoryDetail=7">국산과일</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=8">수입과일</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=9">냉동·건과일</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=10">견과류</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=11">쌀·잡곡</a></li>
+                            </ul>
                         </li>
                         <li>
-                            <a href="#" class="bar">베스트</a>
+                            <a href="/product/list?type=product&category=3">수산/해산/건어물</a>
+                            <ul class="subsubmenu">
+                                <li><a href="/product/list?type=product&categoryDetail=12">생선류</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=13">오징어·낙지·문어</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=14">새우·게</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=15">해산물·전복·조개류</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=16">멸치·황태</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=17">어포·쥐포</a></li>
+                            </ul>
                         </li>
                         <li>
-                            <a href="#" class="bar">신상품</a>
+                            <a href="/product/list?type=product&category=4">정육/가공육/계란</a>
+                            <ul class="subsubmenu">
+                                <li><a href="/product/list?type=product&categoryDetail=18">계란·가공란</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=19">닭·오리고기</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=20">돼지고기</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=21">소고기</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=22">양념육·가공육</a></li>
+                            </ul>
                         </li>
                         <li>
-                            <a href="/help/desk" id="helpBtn" class="bar">고객센터</a>
+                            <a href="/product/list?type=product&category=5">과자/빙과/베이커리</a>
+                            <ul class="subsubmenu">
+                                <li><a href="/product/list?type=product&categoryDetail=23">과자·간식</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=24">초콜릿·젤리·캔디·껌</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=25">빙과·아이스크림</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=26">베이커리</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="/product/list?type=product&category=6">생수/음료</a>
+                            <ul class="subsubmenu">
+                                <li><a href="/product/list?type=product&categoryDetail=27">생수·탄산수</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=28">탄산음료</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=29">과일·야채음료</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=30">스포츠·건강음료</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=31">전통·차·기타음료</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="/product/list?type=product&category=7">우유/유제품</a>
+                            <ul class="subsubmenu">
+                                <li><a href="/product/list?type=product&categoryDetail=32">우유·두유</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=33">요거트·요구르트</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=34">연유·생크림·버터</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=35">가공치즈</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="/product/list?type=product&category=8">면/양념/통조림</a>
+                            <ul class="subsubmenu">
+                                <li><a href="/product/list?type=product&categoryDetail=36">라면</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=37">파스타면·생면</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=38">밀가루·가루·믹스</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=39">죽·스프·카레</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=40">양념·액젓·장류</a></li>
+                                <li><a href="/product/list?type=product&categoryDetail=41">햄·통조림·병조림</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="/product/list?type=product&category=9">밀키트/간편식</a>
+                            <ul class="subsubmenu">
+                                <li><a href="/product/list?type=product&categoryDetail=42">밀키트</a></li>
+                            </ul>
                         </li>
                     </ul>
-                </nav>
-            </div>
-        </form>
-    </header>
+                </li>
+                <li>
+                    <a href="/product/list?type=sale" class="bar">세일</a>
+                </li>
+                <li>
+                    <a href="/product/list?type=best" class="bar">베스트</a>
+                </li>
+                <li>
+                    <a href="/product/list?type=new" class="bar">신상품</a>
+                </li>
+                <li>
+                    <a href="/help/desk" id="helpBtn" class="bar">고객센터</a>
+                    <ul class="submenu">
+                        <li>
+                            <a href="/notice/notice">공지사항</a>
+                            <a href="/help/desk">FAQ</a>
+                            <a href="/help/list">1:1문의</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <p th:text="${#authentication.authorities}" style="display: none" id="authRole"></p>
+
     </body>
+    <script th:inline="javascript">
+        let notificationList = /*[[${session.notificationList}]]*/ [];
+        let roleHeader = [[${session.role}]]
+        let loginId = [[${session.id}]];
+        function showAlert(event, id) {
+            id = [[${session.id}]];
+            if(id == null){
+                alert("로그인이 필요한 서비스입니다.");
+                event.preventDefault();
+                window.location.href = "http://localhost:8090/login/form";
+            }else if(!roleHeader.includes("user")){
+                alert("구매자만 접근가능한 서비스입니다. ")
+            }else{
+                window.location.href = "/basket/myBasket";
+            }
+        }
+        document.getElementById('heartBtn').addEventListener('click',()=>{
+            if(loginId == null){
+                alert("로그인이 필요한 서비스입니다.");
+                event.preventDefault();
+                window.location.href = "http://localhost:8090/login/form";
+            }else if(!roleHeader.includes("user")){
+                alert("구매자만 접근가능한 서비스입니다. ")
+
+            }else{
+                let newUrl = '/customer/myPage?defaultTab=d3';
+                window.location.href = newUrl;
+            }
+        })
+    </script>
     <script src="/js/header.js"></script>
+    <script th:inline="javascript">
+        GetBasketQuantity([[${session.id}]]);
+        getNotificationCount([[${session.id}]]);
+    </script>
 </th:block>
 </html>

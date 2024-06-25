@@ -1,0 +1,1049 @@
+@font-face {
+    font-family: 'NotoSans KR';
+    src: url("/dist/font/Noto_Sans_KR/NotoSansKR-VariableFont_wght.ttf");
+}
+
+#ordersBody {
+    font-family: 'NotoSans KR', serif;
+    color: black;
+}
+
+.mainDiv {
+    height: auto;
+    width: 940px;
+    margin: auto;
+    text-align: center;
+    align-items: center;
+}
+
+.basket1 {
+
+}
+
+.basket2 {
+    text-align: center;
+    margin: 50px;
+}
+
+.title1 {
+    font-size: 28px;
+    font-weight: 500;
+    width: 100%;
+    height: 100px;
+    text-align: center;
+    line-height: 100px;
+}
+
+.basket3 {
+    /* background-color: pink; */
+    width: 100%;
+    height: 250px;
+}
+
+a {
+    color: black;
+}
+
+.text1 {
+    /* margin-left: 10px;
+      margin-right: 10px; */
+}
+
+.text2 {
+    margin-left: 20px;
+}
+
+
+.basket4 {
+    background-color: rgba(211, 211, 211, 0.155);
+    width: 300px;
+    height: 350px;
+    float: right;
+    position: sticky;
+    top: 100px;
+    right: 80px;
+}
+
+.basket5 {
+    padding: 20px;
+    /* margin-bottom: 10px; */
+    border: 1px solid lightgray;
+    border-radius: 3px;
+}
+
+.text3,
+.text4,
+.text5,
+.text7 {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.text6 {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font-size: 12px;
+}
+
+.text7 {
+    margin-top: 50px;
+}
+
+.text8 {
+    text-align: right;
+    font-size: 12px;
+}
+
+.basket7 {
+    background-color: white;
+    width: 300px;
+    height: 30px;
+}
+
+.text9 {
+    font-size: 22px;
+    font-weight: 550;
+}
+
+.accumulate {
+    background-color: orange;
+    border-radius: 10px;
+    padding: 3px;
+    margin-right: 5px;
+    color: white;
+}
+
+.basket8 {
+    /* background-color: aqua; */
+    padding-top: 90px;
+}
+
+.text10,
+.text11 {
+    font-size: 12px;
+    margin-bottom: 20px;
+}
+
+.basket9 {
+    /*background-color: yellow;*/
+    width: 100%;
+    height: auto;
+}
+
+.product-box{
+    width: 100%;
+    height: 85px;
+    /*background-color: #03c75a;*/
+    display: flex;
+    align-items: center;
+}
+
+.image1 {
+    width: 66px;
+    height: auto;
+    /* background-color: aqua; */
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.product-name{
+    width: 45%;
+    height: 85px;
+    /*background-color: #6f42c1;*/
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 500;
+}
+.product-info{
+    width: 25%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+
+
+.product1 {
+    /* background-color: aqua; */
+    width: 100%;
+}
+
+.name1 {
+    /* background-color: aliceblue; */
+    width: 1300px;
+    height: 100px;
+    line-height: 100px;
+    margin-left: 20px;
+}
+
+.name2 {
+    width: 100px;
+    height: 100px;
+    line-height: 100px;
+    float: right;
+}
+
+.box1 {
+    /* background-color: pink; */
+    width: 100px;
+    height: 100px;
+    /* line-height: 100px; */
+    text-align: center;
+    display: flex;
+}
+
+.box2 {
+    width: 40px;
+    height: 100px;
+    /* background-color: yellow; */
+}
+
+.price {
+    /* background-color: aqua; */
+    width: 400px;
+    height: 100px;
+    line-height: 100px;
+    text-align: right;
+    margin-left: 20px;
+}
+
+
+.button1 {
+    border: 1px solid lightgray;
+    background-color: rgba(211, 211, 211, 0.174);
+    width: 20px;
+    height: 20px;
+    /* margin-top: 35px; */
+    align-items: center;
+    border: 1px solid black;
+    border-radius: 30px;
+}
+
+.order1 {
+    width: 100%;
+    height: 111px;
+    margin-top: 85px;
+}
+
+.order_text1 {
+    font-size: 20px;
+    height: 45px;
+    font-weight: 400;
+    display: flex;
+    border-bottom: 1px solid black;
+    text-align: 1%;
+}
+
+.order_text2 {
+    text-align: center;
+}
+
+.order2 {
+    /* background-color: aqua; */
+    width: 100%;
+    height: 250px;
+}
+
+.order_box {
+    width: 500px;
+    height: 70px;
+    /* background-color: blue; */
+}
+
+.addrAddBtn {
+    float: right;
+}
+
+.order_box1 {
+    /* background-color: yellow; */
+    width: 200px;
+    height: 50px;
+    float: left;
+}
+
+.order_box2 {
+    /* background-color: pink; */
+    width: 300px;
+    height: 50px;
+    float: right;
+}
+
+.orderAddrInfo {
+    /* background-color: aqua; */
+    margin-top: 84px;
+    width: 100%;
+    height: auto;
+}
+
+.order_text3 {
+    float: right;
+    margin-top: 10px;
+    font-size: 14px;
+    color: gray;
+    font-weight: 400;
+}
+
+.question {
+    color: gray;
+}
+
+.modal_wrap1 {
+    display: none;
+    width: 350px;
+    height: 50px;
+    position: absolute;
+    top: 108%;
+    left: 73%;
+    margin: -250px 0 0 -250px;
+    background: white;
+    border: 1px solid black;
+    border-radius: 10px;
+    z-index: 2;
+}
+
+.black_bg1 {
+    display: none;
+    position: absolute;
+    content: "";
+    width: 100%;
+    height: 100%;
+    /* background-color: rgba(0, 0, 0, 0.5); */
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.modal_close1 {
+    width: 26px;
+    height: 26px;
+    position: absolute;
+    top: -30px;
+    right: 0;
+}
+
+.modal_close1 > a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: url(https://img.icons8.com/metro/26/000000/close-window.png);
+    text-indent: -9999px;
+}
+
+.order_text4 {
+    color: black;
+    font-weight: 300;
+    text-align: center;
+    line-height: 50px;
+}
+
+.address1 {
+    width: 50px;
+    height: 50px;
+    background-color: yellow;
+}
+
+.order_box3 {
+    width: 200px;
+    height: 120px;
+    float: left;
+}
+
+.form-control {
+    width: auto;
+}
+
+.order_box4 {
+    width: 300px;
+    height: 120px;
+    float: right;
+}
+
+.order_address1 {
+    display: inline-block;
+    width: 200px;
+    height: 100px;
+}
+
+.order_box5 {
+    width: 200px;
+    height: 120px;
+    float: left;
+    /* background-color: aqua; */
+}
+
+.order_box6 {
+    width: 50%;
+    height: 120px;
+    margin: 49px 0;
+    background-color: yellow;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+}
+
+.order_box7 {
+    display: flex;
+    justify-content: space-between;
+}
+
+.order_text5 {
+    float: left;
+}
+
+.order_text6 {
+    margin-right: 200px;
+    float: right;
+    margin-bottom: 10px;
+}
+
+.order_text7 {
+    float: left;
+    color: gray;
+}
+
+.order_text8 {
+    margin-right: 200px;
+    float: right;
+    margin-bottom: 10px;
+    color: gray;
+}
+
+.cash1 {
+    width: 260px;
+    height: 30px;
+    border: 1px solid lightgray;
+    border-radius: 5px;
+}
+
+.cash2 {
+    width: 110px;
+    height: 30px;
+    background-color: white;
+    border: 1px solid lightgray;
+    border-radius: 5px;
+    color: gray;
+}
+
+.order4 {
+    /* background-color: aqua; */
+    width: 70%;
+    height: 500px;
+    float: left;
+}
+
+.order5 {
+    width: 100%;
+    margin: 79px auto 39px;
+    height: 300px;
+    float: left;
+}
+
+.basket6 {
+    text-align: center;
+    width: 300px;
+    height: 70px;
+    background-color: #a52834;
+    color: white;
+    font-size: 17px;
+    line-height: 70px;
+    border-radius: 5px;
+    margin: 64px auto;
+}
+
+.order6 {
+    /* background-color: aqua; */
+    width: 100%;
+    height: auto;
+    margin: 0 auto;
+}
+
+.payment {
+}
+
+.agreement {
+    width: 100%;
+    margin:71px auto 69px;
+    min-height: 280px;
+}
+
+.agreement1,
+.agreement2 {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 39px;
+    margin-bottom: 20px;
+}
+
+.agreement3 {
+    margin-top: 92px;
+    margin-bottom: 50px;
+}
+
+.agreement_text5 {
+    font-weight: 550;
+    font-size: 18px;
+}
+
+.agreement_text6 {
+    font-size: 13px;
+    color: gray;
+}
+
+.btn {
+    color: gray;
+    text-decoration: underline;
+    text-decoration-color: black;
+}
+
+.modal {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    /* Stay in place */
+    z-index: 1;
+    /* Sit on top */
+    left: 0;
+    top: -10;
+    width: 100%;
+    /* Full width */
+    height: 100%;
+    /* Full height */
+    overflow: auto;
+    /* Enable scroll if needed */
+    background-color: rgb(0, 0, 0);
+    /* Fallback color */
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 40px auto;
+    /* 15% from the top and centered */
+    border: 1px solid #888;
+    width: 40%;
+    padding: 30px;
+    /* Could be more or less, depending on screen size */
+}
+#modal_btn1{
+}
+
+.modal_first {
+    float: left;
+}
+
+/* The Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.order_modal1 {
+    font-size: 17px;
+    font-weight: 550;
+    margin-bottom: 30px;
+}
+
+.order_modal2 {
+    margin-bottom: 20px;
+}
+
+.order_modal3 {
+    font-size: 17px;
+    font-weight: 550;
+    margin-bottom: 30px;
+}
+
+.order_table {
+    border: 1px solid lightgray;
+    margin-bottom: 30px;
+}
+
+.order_table th {
+    /* padding: 10px; */
+    width: 33%;
+    height: 50px;
+    line-height: 50px;
+    background-color: #f4f4f4;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+.order_table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 12px;
+    line-height: 19px;
+}
+
+.order_table2 {
+    font-weight: 550;
+    font-size: 15px;
+    text-decoration: underline;
+}
+
+.order_modal4 {
+    padding: 0px 30px;
+    overflow-y: auto;
+    max-height: 450px;
+    margin-bottom: 30px;
+}
+
+.tit_main {
+    display: block;
+    padding-bottom: 15px;
+    font-weight: 500;
+    line-height: 21px;
+    color: #333;
+    font-weight: 500;
+    font-size: 20px;
+    margin-top: 15px;
+    font-weight: 550;
+}
+
+.terms_view {
+    font-size: 13px;
+}
+
+/*배송지*/
+.addrModalContainer {
+    align-items: center;
+}
+
+.addrClose {
+    float: right;
+    transform: translateY(-30px);
+}
+
+.mb-3 {
+    width: 50%;
+}
+
+.addrSpan {
+    font-weight: bold;
+}
+
+.addrDivContainer {
+    /*background-color: #4CAF50;*/
+    margin: 86px auto 115px;
+    width: 90%;
+    height: 210px;
+}
+
+.addrDivContainerinner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.addrDivLeft {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.addrDiv {
+    width: 18%;
+    margin-right: 10px;
+    text-align: left;
+    padding: 5px 0;
+}
+
+.addrDivInner {
+    width: 82%;
+    display: flex;
+    padding: 5px 0;
+}
+
+.selectAddr,
+.selectAddr:focus,
+.selectAddr:active {
+    outline: none;
+    width: 320px;
+}
+
+.selectAddr {
+    padding: 7px 14px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.selectAddr > option {
+    padding: 20px 14px;
+    margin: 5px 0;
+    background-color: white;
+}
+
+.selectAddr option:hover {
+    background-color: #f0f0f0;
+}
+
+.select-container {
+    width: 100%;
+    max-width: 320px;
+}
+
+.addrChange {
+    display: inline-block; /* 버튼 같은 줄에 표시 */
+    margin-left: 20px;
+    font-size: 12px;
+}
+
+.addrChange > button {
+    display: inline-block;
+    outline: none;
+    border: none;
+    background: transparent;
+}
+
+.addrDivInner span {
+    display: block;
+}
+
+.addrDivInner span:first-child {
+    margin-right: 10px;
+}
+
+.customerInput {
+    width: 320px;
+    height: 38.8px;
+    outline: none;
+    padding-left: 5px;
+    border: 1px solid lightgray;
+}
+
+#addrModifyBtn {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+#addrModifyBtn:hover {
+    text-decoration: underline;
+}
+
+
+.event-box {
+    width: 100%;
+    min-height: 111px;
+    /*background-color: #4CAF50;*/
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 52px;
+}
+
+.event-inner-box {
+    margin-top: 48px;
+    width: 100%;
+    height: 89px;
+    /*background-color: #0dcaf0;*/
+    display: flex;
+}
+
+.event-info-box {
+    width: 30%;
+    height: 100%;
+    align-items: center;
+    /*background-color: #4CAF50;*/
+    display: flex;
+    justify-content: center;
+    font-weight: 400;
+    font-size: 16px;
+}
+
+.event-content-box {
+    width: 70%;
+    height: 100%;
+    /*background-color: #6f42c1;*/
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.event-content-box > .content-select {
+    width: 500px;
+    height: 56px;
+    /* 추가적인 스타일링 */
+    outline: orangered;
+}
+
+.pay-info-box {
+    width: 45%;
+    height: 100%;
+}
+
+input[type=checkbox]{
+    margin-left: 12px;
+    width: 20px;
+    height: 20px;
+    margin-bottom: 8px;
+}
+
+.point-text-box{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    margin: 34px 0 27px 146px;
+}
+.point-text-box div{
+    width: 28%;
+    height: 100%;
+    font-size: 15px;
+    font-weight: 500;
+}
+.point-text-box div:first-child{
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+.point-text-box div:last-child{
+    display: flex;
+    justify-content: end;
+    align-items: center;
+}
+.point-text-box input{
+    width: 169px;
+    height: 37px;
+    border-radius: 4px;
+    outline: orangered;
+}
+
+#all-in{
+    width: 120px;
+    height: 35px;
+    border: 1px solid lightgray;
+    background-color: white;
+}
+.price-info{
+    width: 320px;
+    height: 353px;
+    position: fixed;
+    /*background-color: #6f42c1;*/
+    top: 40%;
+    right: 2%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.price-info > .info-title:first-child{
+    width: 100%;
+    height: 16%;
+    /*background-color: #03c75a;*/
+    font-size: 19px;
+    font-weight: 500;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+.price-desc{
+    width: 98%;
+    height: 85%;
+    background-color: rgb(250, 250, 250);
+    border: 1px solid rgb(242, 242, 242);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.main-desc{
+    width: 95%;
+    height: 46px;
+    /*background-color: #6f42c1;*/
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    font-weight: 500;
+}
+.sub-desc{
+    width: 95%;
+    height: 32px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 400;
+    font-size: 15px;
+}
+
+.main-content{
+    width: 35%;
+    height: 46px;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    /*border: 1px solid black;*/
+}
+
+.sub-title{
+    width: 50%;
+    height: 30px;
+    display: flex;
+    justify-content: start;
+}
+
+.sub-content{
+    width: 35%;
+    height: 30px;
+    display: flex;
+    justify-content: end;
+    /*border: 1px solid black;*/
+}
+.main-title{
+    justify-content: start;
+}
+.last-desc{
+    width: 95%;
+    height: 84px;
+    /*background-color: #6f42c1;*/
+    display: flex;
+    justify-content: space-between;
+    font-size: 19px;
+    font-weight: 500;
+    align-items: center;
+    border-top: 1px solid lightgray;
+}
+.last-content{
+    width: 35%;
+    height: 46px;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    /*border: 1px solid black;*/
+}
+.last-title{
+    justify-content: start;
+}
+
+.coupon-content{
+    width: 227px;
+    height: 48px;
+    /*background-color: #6f42c1;*/
+    margin-right: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.coupon-content button {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    border:1px solid lightgray;
+}
+
+/* The Modal (background) */
+.modal-coupon {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+    justify-content: center;
+    align-items: center;
+}
+
+/* Modal Content */
+.modal-content-coupon {
+    background-color: #fefefe;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 700px;
+    max-height: 80%;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s;
+    margin: auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+}
+
+/* The Close Button */
+.closeModal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.closeModal:hover,
+.closeModal:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Fade In Animation */
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+table {
+    width: 90%;
+    border-collapse: separate; /* 변경: 여백 추가를 위해 separate 사용 */
+    border-spacing: 0 15px; /* 변경: tr 사이의 여백을 15px로 증가 */
+    margin: 20px 0;
+    table-layout: fixed; /* 테이블 레이아웃을 고정으로 설정 */
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 15px; /* 변경: padding을 15px로 증가 */
+    text-align: center;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+#selectCoupon {
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#selectCoupon:hover {
+    background-color: #45a049;
+}

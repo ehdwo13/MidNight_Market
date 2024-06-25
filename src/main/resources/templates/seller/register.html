@@ -3,54 +3,178 @@
 <th:block th:replace="~{header :: header}"></th:block>
 <title>판매자 회원가입</title>
 <style>
-    .container1{
-        border: 1px solid black;
-        margin: auto;
-        width: 940px;
-        height: 700px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
+    .container1 {
+      /* border: 1px solid black; */
+      margin: auto;
+      width: 940px;
+      height: 700px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+    }
+
+    .seller_title {
+      text-align: center;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+
+    .seller_title_text {
+      font-size: 23px;
+      font-weight: 550;
+    }
+
+    .seller_box1 {
+      margin-left: 30px;
+      width: 150px;
+      height: auto;
+      float: left;
+      line-height: 40px;
+      font-size: 16px;
+    }
+
+    #idF,
+    #idB {
+      width: 200px;
+      height: 46px;
+      padding: 0px 11px 1px 15px;
+      border-radius: 4px;
+      border: 1px solid rgb(221, 221, 221);
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 1.5;
+      color: rgb(51, 51, 51);
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    #pw,
+    #pwC,
+    #shopName,
+    #tel {
+      width: 427px;
+      height: 46px;
+      padding: 0px 11px 1px 15px;
+      border-radius: 4px;
+      border: 1px solid rgb(221, 221, 221);
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 1.5;
+      color: rgb(51, 51, 51);
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    #emailDomain {
+      width: 130px;
+      height: 46px;
+      padding: 0px 11px 1px 15px;
+      border-radius: 4px;
+      border: 1px solid rgb(221, 221, 221);
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 1.5;
+      color: rgb(51, 51, 51);
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    #idCheck,
+    #shopNameCheck {
+      height: 46px;
+      border-radius: 4px;
+      border: 1px solid rgb(221, 221, 221);
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 1.5;
+      color: rgb(51, 51, 51);
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    #check {
+        width: 200px;
+        height: 70px;
+        background-color: orange;
+        line-height: 70px;
+        border-radius: 5px;
+        border-style: none;
+        font-size: 20px;
+        font-weight: 550;
+        cursor: pointer;
+        margin-left: 40%;
+    }
+
+    .seller_box {
+        border-top: 1px solid black;
+    }
+
+    .password_text {
+    margin-top: 10px;
+    margin-left: 180px;
     }
 </style>
 
 <form action="/seller/register" method="post">
     <div class="container1">
-        <h1>판매자 회원가입</h1>
-            <label>
-                아이디 : <input type="text" id="idF"> @
-                <input type="text" id="idB">
-                <select name="emailDomain" id="emailDomain" onchange="changeVal()">
-                    <option name="emailDomain" value="">직접입력</option>
-                    <option name="emailDomain" value="gmail.com">gmail.com</option>
-                    <option name="emailDomain" value="naver.com">naver.com</option>
-                    <option name="emailDomain" value="kakao.com">kakao.com</option>
-                    <option name="emailDomain" value="daum.net">daum.net</option>
-                    <option name="emailDomain" value="hanmail.net">hanmail.net</option>
-                    <option name="emailDomain" value="hotmail.com">hotmail.com</option>
+        <div class="seller_title">
+            <span class="seller_title_text">판매자 회원가입</span>
+        </div>
+        <div class="seller_box">
 
-                </select>
-                <input type="hidden" name="id" id="id">
-                <button type="button" id="idCheck">중복확인</button>
-            </label>
-            <label>
-                비밀번호 : <input type="password" name="pw" id="pw">
+        </div>
+        <label>
+            <div class="seller_box1">아이디</div>
+            <input type="text" id="idF"> @
+            <input type="text" id="idB">
+            <select name="emailDomain" id="emailDomain" onchange="changeVal()">
+                <option name="emailDomain" value="">직접입력</option>
+                <option name="emailDomain" value="gmail.com">gmail.com</option>
+                <option name="emailDomain" value="naver.com">naver.com</option>
+                <option name="emailDomain" value="kakao.com">kakao.com</option>
+                <option name="emailDomain" value="daum.net">daum.net</option>
+                <option name="emailDomain" value="hanmail.net">hanmail.net</option>
+                <option name="emailDomain" value="hotmail.com">hotmail.com</option>
+
+            </select>
+            <input type="hidden" name="id" id="id">
+            <button type="button" id="idCheck">중복확인</button>
+        </label>
+        <label>
+            <div class="seller_box1">
+                비밀번호
+            </div>
+            <input type="password" name="pw" id="pw">
+            <div class="password_text">
                 <span id="validText"></span>
-            </label>
-            <label>
-                비밀번호확인 : <input type="password" name="pwC" id="pwC">
+            </div>
+
+        </label>
+        <label>
+            <div class="seller_box1">
+                비밀번호확인
+            </div><input type="password" name="pwC" id="pwC">
+            <div class="password_text">
                 <span id="checkPw"></span>
-            </label>
-            <label>
-                쇼핑몰 이름 : <input type="text" name="shopName" id="shopName">
-                <button type="button" id="shopNameCheck">중복확인</button>
-            </label>
-            <label>
-                연락처 : <input type="tel" id="tel" name="tel" pattern="[0-9]{3}[0-9]{4}[0-9]{4}" required placeholder="-은 제외하고 입력"/>
-            </label>
+            </div>
+        </label>
+        <label>
+            <div class="seller_box1">
+                쇼핑몰 이름
+            </div><input type="text" name="shopName" id="shopName">
+            <button type="button" id="shopNameCheck">중복확인</button>
+        </label>
+        <label>
+            <div class="seller_box1">
+                연락처
+            </div>
+            <input type="tel" id="tel" name="tel" pattern="[0-9]{3}[0-9]{4}[0-9]{4}" required
+                   placeholder="-은 제외하고 입력" />
+        </label>
         <button type="submit" id="check">회원가입</button>
     </div>
 </form>
+
 <script>
     function changeVal(){
         let result ={};
@@ -69,7 +193,7 @@
                 alert("사용가능한 아이디입니다. ");
                 document.getElementById('id').value = id;
             }else{
-                alert("중복아이디 입니다. 다시 입력해주세요. ")
+                alert("중복아이디 입니다.\n다시 입력해주세요. ")
                 document.getElementById('id').value = '';
             }
         })
@@ -93,7 +217,7 @@
             if(result === "1"){
                 alert("사용가능한 쇼핑몰 이름입니다. ")
             }else{
-                alert("이미 사용중인 쇼핑몰 이름입니다. 다시 입력해주세요. ")
+                alert("이미 사용중인 쇼핑몰 이름입니다.\n다시 입력해주세요. ")
                 document.getElementById('shopName').value = '';
             }
         })

@@ -18,4 +18,12 @@ public interface BasketMapper {
     int delete(BasketVO bvo);
 
     int update(BasketVO basketVO);
+
+    int getBasketTotalCount(String username);
+
+    int myBasketCheckedUpdate(BasketVO basketVO);
+
+    int clearBasketOnPaymentSuccess(String customerId);
+
+    List<BasketVO> getReadyToCheckoutCartItems(String customerId);
 }

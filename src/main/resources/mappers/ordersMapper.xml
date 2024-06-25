@@ -6,9 +6,9 @@
 
     <insert id="register">
         INSERT INTO orders
-        (merchant_uid, customer_id, product_id, qty, pay_price)
+        (merchant_uid, customer_id, product_id, qty, original_price, pay_price)
         VALUES
-        (#{merchantUid}, #{customerId}, #{productId}, #{qty}, #{payPrice})
+        (#{merchantUid}, #{customerId}, #{productId}, #{qty}, #{originalPrice}, #{payPrice})
     </insert>
 
     <select id="getMyOrdersProduct" resultType="com.project.www.domain.OrdersVO">
@@ -20,8 +20,10 @@
     <update id="paySuccessUpdate">
         UPDATE orders
         SET
-        status = 'success',
-        orders_date = now()
+        imp_uid = #{impUid},
+        orders_date = now(),
+        status = '주문완료',
+        status_date = now()
         WHERE
         merchant_uid = #{merchantUid}
     </update>
@@ -29,7 +31,8 @@
     <select id="getMyPurchasedProductList" resultType="com.project.www.domain.OrdersVO">
         SELECT * FROM orders
         WHERE
-        customer_id = #{customerId}
+        customer_id = #{customerId} AND status != '주문대기'
+        ORDER BY orders_date DESC
     </select>
 
     <update id="isReviewCommentUpdate">
@@ -38,6 +41,84 @@
         is_review_comment = 1
         WHERE
         id = #{ordersId}
+    </update>
+
+    <select id="selectOne" resultType="com.project.www.domain.OrdersVO">
+        SELECT * FROM orders
+        WHERE
+        id = #{id}
+    </select>
+
+    <update id="refundUpdate">
+        UPDATE orders
+        SET
+        status = '환불처리',
+        status_date = now()
+        WHERE
+        id = #{id}
+    </update>
+    
+    <select id="getMyFrequentPurchasesList" resultType="com.project.www.domain.OrdersVO">
+        SELECT customer_id, product_id, COUNT(*) as qty
+        FROM orders
+        WHERE customer_id = #{customerId} AND status != '주문대기'
+        GROUP BY customer_id, product_id
+        ORDER BY qty DESC
+        LIMIT 5;
+    </select>
+
+    <select id="getMyWriteReviewList" resultType="com.project.www.domain.OrdersVO">
+        SELECT * FROM orders
+        WHERE
+        customer_id = #{customerId} and status = '배송완료' and is_review_comment = 0
+        ORDER BY orders_date DESC
+    </select>
+
+    <!-- 배송 완료로 상태 업데이트하고 업데이트된 고객 ID 리스트 반환하는 쿼리 -->
+    <update id="markAsDelivered">
+        UPDATE orders
+        SET
+        status = '배송완료',
+        status_date = now()
+        WHERE status IN ('주문완료', '구매확정');
+    </update>
+
+    <select id="getDeliveredCustomers" resultType="String">
+        SELECT customer_id FROM orders
+        WHERE
+        status = '배송완료'
+        ORDER BY status_date
+        LIMIT 0, #{deliveredCount}
+    </select>
+
+    <select id="getList" resultType="com.project.www.domain.OrdersVO">
+        select * from orders
+    </select>
+
+    <update id="confirmOrderUpdate">
+        UPDATE orders
+        SET
+        is_confirmed = 1
+        WHERE
+        id = #{id}
+    </update>
+  
+    <select id="findExpiredOrders" resultType="com.project.www.domain.OrdersVO">
+        SELECT * FROM orders
+        WHERE
+        merchant_uid = #{merchantUid}
+    </select>
+
+    <select id="getMyList" resultType="com.project.www.domain.OrdersVO">
+        select * from orders where customer_id = ${currentId}
+    </select>
+    
+    <update id="usedCombineDiscountUpdate">
+        UPDATE orders
+        SET
+        pay_price = #{payPrice}
+        WHERE
+        id = #{id}
     </update>
 
 </mapper>

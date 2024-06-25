@@ -101,23 +101,24 @@
 
         <div class="buy4">
                 <span class="buy_text1">[[${session.name}]]님의 주문이 완료되었습니다. <br>
-                    빠르게 배송해 드릴게요!dddd
+                    빠르게 배송해 드릴게요!
                 </span>
         </div>
+
         <div class="buy5">
                 <span class="buy_text2">
                     결제금액
                 </span>
             <span class="buy_text3">
-                    원
+                [[${paymentDTO.payPrice}]]원
                 </span>
         </div>
         <div class="buy6">
                 <span class="buy_text2">
-                    적립금
+                    주문확정시 적립 포인트
                 </span>
             <span class="buy_text3">
-                    + 원
+                    + [[${paymentDTO.originalPrice}]]원
                 </span>
         </div>
         <div class="buy7">
@@ -137,7 +138,7 @@
                     </span>
             </div>
         </div>
-        <a href="">
+        <a href="/customer/myPage">
             <div class="buy9">
                 <span class="buy_text5">주문 상세보기</span>
             </div>

@@ -1,6 +1,7 @@
 package com.project.www.service;
 
 import com.project.www.domain.HelpVO;
+import com.project.www.domain.NotificationVO;
 import com.project.www.domain.PagingVO;
 import com.project.www.repository.HelpMapper;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +16,8 @@ import java.util.List;
 @Service
 public class HelpServiceImpl implements HelpService {
     private final HelpMapper helpMapper;
+    private final NotificationService nsv;
 
-//    @Override
-//    public List<HelpVO> getList(PagingVO pgvo) {
-//        return helpMapper.getList(pgvo);
-//    }
     @Override
     public List<HelpVO> getList(PagingVO pgvo) {
         return helpMapper.getList(pgvo);
@@ -36,7 +34,8 @@ public class HelpServiceImpl implements HelpService {
     }
 
     @Override
-    public int modify(HelpVO hvo) {
+    public int
+    modify(HelpVO hvo) {
         return helpMapper.modify(hvo);
     }
 
@@ -50,6 +49,12 @@ public class HelpServiceImpl implements HelpService {
     public void replyRegister(HelpVO hvo) {
         helpMapper.replyUpdate(hvo);
         helpMapper.replyRegister(hvo);
+        long hno = hvo.getHno();
+        HelpVO helpVO = helpMapper.getDetail(hno);
+        NotificationVO nvo = new NotificationVO();
+        nvo.setCustomerId(helpVO.getCustomerId());
+        nvo.setNotifyContent("1대1문의사항 "+hno+"번게시글 답변이 등록되었습니다. ");
+        nsv.insert(nvo);
     }
 
     @Override
@@ -65,6 +70,11 @@ public class HelpServiceImpl implements HelpService {
     @Override
     public int getMyTotal(String name) {
         return helpMapper.getMyTotal(name);
+    }
+
+    @Override
+    public List<HelpVO> getListToAdmin() {
+        return helpMapper.getListToAdmin();
     }
 
 }

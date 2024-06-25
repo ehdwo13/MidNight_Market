@@ -9,78 +9,104 @@
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
     <title>loginSelect</title>
+
     <style>
-        .join{
-            width: 100%;
-            height: 500px;
-/*            background-color: beige;*/
-            padding-bottom: 20px;
+
+        @font-face {
+            font-family: 'NotoSans KR';
+            src: url("/dist/font/Noto_Sans_KR/NotoSansKR-VariableFont_wght.ttf");
         }
-        .join>.join1 {
-            width: 40%;
+
+        #selectBody {
+            font-family: 'NotoSans KR', serif;
+            color: black;
+            background-color: rgb(247, 247, 247);
+            box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .body1 {
+            width: 940px;
+            height: auto;
+            /* background-color: beige; */
+            margin : 20px auto;
+        }
+        .body1 button{
+            border: none;
+        }
+        .body1 > .join1{
+            width: calc(50%);
             height: 500px;
             /* background-color: beige; */
             float: left;
             position: relative;
             border-right: 1px solid lightgray;
-        <!--            margin-top: 30px;-->
+            /* margin-top: 30px; */
             margin-bottom: 30px;
         }
 
-        .join>.join2 {
-            width: 60%;
+        .body1 > .join2{
+            width: calc(50%);
             height: 500px;
             /* background-color:blanchedalmond; */
             float: right;
             position: relative;
         }
 
-        .join>.join1>.join3 {
+        .body1 >.join1 > .join3{
             position: absolute;
             top: 50%;
-            left: 40%;
+            left: 50%;
             transform: translate(-50%, -50%);
         }
 
-        .join>.join1>.join3>.text1 {
+        .body1 >.join1 > .join3 > .text1{
             font-size: 23px;
-            font-weight: bold;
+            font-weight: 500;
             line-height: 40px;
-            letter-spacing: -3px;
+            letter-spacing:-3px;
         }
 
-        .text2 {
+        .body1 >.join1 > .join3 > .text1:first-child{
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 40px;
+            letter-spacing:-3px;
+            color: darkorange;
+        }
+
+        .text2{
             font-size: 35px;
-            font-weight: 900;
+            font-weight: 700;
         }
 
-        .box1 {
+        .box1{
             width: 310px;
             height: 100px;
             border-radius: 10px;
             padding: 5px;
             margin-bottom: 10px;
             box-sizing: border-box;
-            background-image: linear-gradient(to left,
-            rgba(128, 0, 128, 0.717), rgba(255, 0, 0, 0.589));
+            background-image: linear-gradient(to right,
+            rgba(255, 136, 0, 0.39), orange);
             position: absolute;
             top: 38%;
             left: 50%;
             margin-top: 30px;
             margin-bottom: 30px;
-            padding-left: 20px;
-            padding-top: 20px;
             transform: translate(-50%, -50%);
-            color: white;
-            border: none;
+            color: black;
         }
 
-        .box2 {
+        .box1:hover {
+            background-image: linear-gradient(to right,
+            rgba(255, 136, 0, 0.486), orange);
+        }
+
+        .box2{
             width: 310px;
             height: 100px;
             border-radius: 10px;
             padding: 5px;
-            margin-bottom: 10px;
             box-sizing: border-box;
             background-color: rgba(211, 211, 211, 0.308);
             position: absolute;
@@ -88,37 +114,32 @@
             left: 50%;
             margin-top: 30px;
             margin-bottom: 30px;
-            padding-left: 20px;
-            padding-top: 20px;
             transform: translate(-50%, -50%);
             color: black;
-            border: none;
-        }
-        .box1:hover{
-            filter: brightness(85%);
-        }
-        .box2:hover{
-            filter: brightness(85%);
         }
 
-        .text3 {
+        .box2:hover {
+            background-color: rgba(211, 211, 211, 0.404);
+        }
+
+        .text3{
             display: block;
             margin-top: 10px;
         }
 
-        .text4 {
+        .text4{
             font-weight: 900;
         }
-        .custom-modal .modal-content{
-            width: 40% !important;
-            margin: 190px auto !important;
+        .modal-content .custom-header{
+            border: none;
+            margin-top: 23px;
         }
-
         .modal-title{
-            font-size: 30px;
+            font-size: 26px;
             font-weight: 700;
             position: absolute;
             left: 50%;
+            border: none;
             transform: translate(-50%);
         }
         #registerDescription{
@@ -127,13 +148,13 @@
             height: 50px;
             text-align: center;
             font-weight: bold;
-            font-size: 22px;
+            font-size: 18px;
             color: rgba(0, 0, 0, 0.53);
             border-bottom: 1px solid lightgrey;
         }
         .register-type{
             margin: 0 auto;
-            width: 55%;
+            width: 70%;
             height: 350px;
             display: flex;
             flex-direction: column;
@@ -152,8 +173,8 @@
             filter: brightness(85%);
         }
         .social-text{
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 16px;
+            font-weight: 700;
         }
         .social-image{
             position: absolute;
@@ -182,27 +203,53 @@
             flex: 1;
             border-bottom: 1px solid rgba(128, 128, 128, 0.63);
             margin: 0 10px;
-
         }
+        .custom-modal .modal-content{
+            width: 590px !important;
+            margin: 190px auto !important;
+        }
+
+        @keyframes wave {
+            0% { transform: translateY(100%); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .join3 span span {
+            display: inline-block;
+            animation: wave 0.5s ease-in-out forwards;
+            opacity: 0;
+        }
+
+        .join3 span:first-child span:nth-child(1) { animation-delay: 0s; }
+        .join3 span:first-child span:nth-child(2) { animation-delay: 0.1s; }
+        .join3 span:first-child span:nth-child(3) { animation-delay: 0.2s; }
+        .join3 span:first-child span:nth-child(4) { animation-delay: 0.3s; }
+        .join3 span:first-child span:nth-child(5) { animation-delay: 0.4s; }
+        .join3 span:first-child span:nth-child(6) { animation-delay: 0.5s; }
+        .join3 span:first-child span:nth-child(7) { animation-delay: 0.6s; }
+
 
     </style>
 </head>
 
 <th:block th:replace="~{header :: header}"></th:block>
 
-<body>
-
-<div class="join">
+<body id="selectBody">
+<div class="body1">
     <div class="join1">
         <div class="join3">
-            <span class="text1">믿고 사는 즐거움</span><br>
-            <span class="text2">이젠마켓</span>
+        <span class="text1">
+            <span>믿</span><span>고</span> <span>사</span><span>는</span> <span>즐</span><span>거</span><span>움</span>
+        </span><br>
+            <span class="text2">미드나잇 마켓</span>
             <span class="text1">에 오신것을 <br> 환영합니다</span>
+        </span>
         </div>
     </div>
 
     <div class="join2">
-            <button type="button" class="box1" data-bs-toggle="modal" data-bs-target="#myModal" id="customerRegister">
+        <button type="button" class="box1" data-bs-toggle="modal" data-bs-target="#myModal" id="customerRegister">
+
                     <span class="person">
                         <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
                              class="bi bi-person" viewBox="0 0 16 16">
@@ -212,9 +259,11 @@
                     </span>
                 <span class="text4">개인회원</span>
                 <span class="text3">본인인증 또는 SNS인증 후 가입</span>
-            </button>
 
-            <button type="button" class="box2" id="sellerRegister">
+        </button>
+
+        <button type="button" class="box2" id="sellerRegister">
+
                     <span class="person">
                         <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
                              class="bi bi-person" viewBox="0 0 16 16">
@@ -224,7 +273,8 @@
                     </span>
                 <span class="text4">사업자 회원</span>
                 <span class="text3">사업자번호 인증 후 가입</span>
-            </button>
+
+        </button>
 
     </div>
 </div>
@@ -233,7 +283,7 @@
 <div class="modal" id="myModal" tabindex="-1">
     <div class="modal-dialog custom-modal" style="max-width: none">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header custom-header">
                 <h5 class="modal-title">회원가입하기</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>

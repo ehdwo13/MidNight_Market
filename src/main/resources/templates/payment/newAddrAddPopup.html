@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .addrModalContainer {
+            border: 1px solid #ccc;
+            padding: 20px;
+            background-color: #f9f9f9;
+            width: 300px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .addrAddBtn,
+        .addrCloseBtn {
+            cursor: pointer;
+        }
+
+        .addrBtns {
+            display: flex;
+            justify-content: center;
+        }
+
+        .inputContent {
+            display: block;
+            margin-bottom: 20px;
+            padding: 8px;
+            width: calc(100% - 20px); /*가로 부모 요소 가로값 20px 뺀 정도*/
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+<form th:action="@{/address/register}" method="post" onsubmit="return registerAddress()">
+    <div id="addrModal">
+        <div class="addrModalContainer">
+            <div class="mb-3">
+                <div>
+                    주소 별칭 : <input type="text" class="inputContent" id="addrNickName" name="addrNickName">
+                    받으실 분 : <input type="text" class="inputContent" id="addrName" name="addrName">
+                    <input type="text" id="customerId" name="customerId" style="display: none">
+                    <label for="contactNumber"></label>
+                    연락처 : <input type="text" class="inputContent" placeholder="000-0000-0000" id="contactNumber" name="contactNum">
+                    <p id="validText" style="display: none; color: red;"></p>
+                </div>
+                <input type="text" id="sample6_postcode" class="inputContent" placeholder="우편번호">
+                <input type="button" class="btn" onclick="daumPost()" value="우편번호 찾기">
+                <input type="text" id="sample6_address" class="inputContent" placeholder="주소">
+                <input type="text" id="sample6_detailAddress" class="inputContent" placeholder="상세주소">
+                <input type="text" name="address" id="address" class="inputContent" style="display: none">
+                <div class="addrBtns">
+                    <button class="addrAddBtn" type="submit">등록</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<button type="button" class="btn" onclick="history.back()">이전 페이지로 돌아가기</button>
+
+<!--배송지 등록에 필요 script-->
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+    let addrAddBtn = document.querySelector('.addrAddBtn');
+    let addrModal = document.getElementById('addrModal');
+
+    // 배송지 등록
+    function daumPost() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                let addr = '';
+
+                if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                    addr = data.roadAddress;
+                } else { // 사용자가 지번 주소를 선택했을 경우
+                    addr = data.jibunAddress;
+                }
+
+                document.getElementById('sample6_postcode').value = data.zonecode; // 우편번호
+                document.getElementById("sample6_address").value = addr; // 주소
+                document.getElementById("sample6_detailAddress").focus();
+            }
+        }).open();
+    }
+
+    // 배송지 추가 모달
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelector('.addrAddBtn').addEventListener('click', function() {
+            let addrModal = document.getElementById('addrModal');
+            addrModal.style.display = 'block';
+        });
+    });
+
+    function validContactNumber (contactNumber) {
+        /*000-0000-0000 형식*/
+        return /^\d{3}-\d{4}-\d{4}$/.test(contactNumber);
+    }
+
+    document.getElementById('contactNumber').addEventListener("change", () => {
+        let contactNumberValue = document.getElementById('contactNumber').value;
+        let validText = document.getElementById('validText');
+        if (!validContactNumber(contactNumberValue)) {
+            validText.style.display = 'block';
+            validText.style.color = "red";
+            validText.style.fontSize = "12px";
+            validText.innerText = "연락처 형식은 000-0000-0000으로 입력해야 합니다.";
+        } else {
+            validText.style.display = 'none';
+        }
+    });
+
+    addrAddBtn.addEventListener('click', () => {
+        // 추가한 배송지
+        let code = document.getElementById('sample6_postcode').value;
+        let add1 = document.getElementById('sample6_address').value;
+        let add2 = document.getElementById('sample6_detailAddress').value;
+        document.getElementById('address').value = code+" "+add1+" "+add2;
+    });
+
+    // 등록 버튼 클릭 시
+    function registerAddress() {
+        document.getElementById('customerId').value = '[[${session.id}]]';
+
+        // 입력값 공란 확인
+        let addrNickName = document.getElementById('addrNickName').value;
+        let addrName = document.getElementById('addrName').value;
+        let contactNumber = document.getElementById('contactNumber').value;
+        let sample6_postcode = document.getElementById('sample6_postcode').value;
+        let sample6_address = document.getElementById('sample6_address').value;
+        let sample6_detailAddress = document.getElementById('sample6_detailAddress').value;
+
+        if (addrNickName === '' || addrName === '' || contactNumber === '' || sample6_postcode === ''
+            || sample6_address === '' || sample6_detailAddress === '') {
+            alert('모든 필드를 입력하세요.');
+            return false;
+        }else{
+            return true; //폼 제출(post 요청)
+        }
+    }
+</script>
+</body>
+</html>

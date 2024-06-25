@@ -1,15 +1,23 @@
 package com.project.www.controller;
 
 import com.project.www.config.oauth2.PrincipalDetails;
+import com.project.www.domain.AddressVO;
 import com.project.www.domain.CustomerVO;
+import com.project.www.domain.NotificationVO;
 import com.project.www.service.CustomerService;
 import com.project.www.service.MailService;
+import com.project.www.service.MemberCouponService;
+import com.project.www.service.NotificationService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @Slf4j
@@ -20,6 +28,8 @@ public class CustomerController {
     private final CustomerService csv;
     private final MailService msv;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final NotificationService nsv;
+    private final MemberCouponService mscv;
 
     @GetMapping("/insert")
     public void insert() {
@@ -31,7 +41,15 @@ public class CustomerController {
         cvo.setProvider("form");
         cvo.setProviderId(cvo.getId());
         cvo.setRole("ROLE_USER");
-        csv.insert(cvo);
+        int isOk = csv.insert(cvo);
+        if(isOk > 0){
+            NotificationVO nvo = new NotificationVO();
+            mscv.addCoupon(cvo.getId(),"1");
+            nvo.setCustomerId(cvo.getId());
+            nvo.setNotifyContent("회원가입을 환영합니다. 3천원 쿠폰이 발급되었습니다. ");
+            nsv.insert(nvo);
+            return "/customer/success";
+        }
         return "index";
     }
 
@@ -60,7 +78,6 @@ public class CustomerController {
 
     @GetMapping("/changePw")
     public void changePw() {
-        log.info("test");
     }
 
     @GetMapping("/findId")
@@ -87,9 +104,6 @@ public class CustomerController {
     @ResponseBody
     @GetMapping("/resetPw/{id}/{pw}")
     public String resetPw(@PathVariable("id") String id, @PathVariable("pw") String pw) {
-        log.info("test");
-        log.info("아이디 {}", id);
-        log.info("비번 {}", pw);
         String bCryptPw = bCryptPasswordEncoder.encode(pw);
         csv.updateDefaultPw(id, bCryptPw);
         return "1";
@@ -97,12 +111,31 @@ public class CustomerController {
 
     @GetMapping("/info")
     public @ResponseBody String user(@AuthenticationPrincipal PrincipalDetails principalDetails){
-        log.info("{}",principalDetails.getUsername());
-        log.info("{}",principalDetails.getAttributes());
-
         return principalDetails.getUsername();
     }
 
     @GetMapping("/myPage")
-    public void myPage() {}
+    public void myPage(Model m, HttpSession session) {
+        String CustomerId = (String) session.getAttribute("id");
+        List<AddressVO> list = csv.getMyAddrList(CustomerId);
+
+        // 기본배송지가 맨위로 오게
+        list.sort((a1, a2) -> {
+            if (a1.getIsMain().equals("Y") && a2.getIsMain().equals("N")) {
+                return -1; // a1이 우선순위
+            } else if (a1.getIsMain().equals("N") && a2.getIsMain().equals("Y")) {
+                return 1; // a2가 우선순위
+            } else {
+                return 0; // 동일하면 그대로
+            }
+        });
+        
+        m.addAttribute("list", list);
+    }
+
+    @ResponseBody
+    @GetMapping("/getList")
+    public List<CustomerVO> getList(){
+        return csv.getList();
+    }
 }

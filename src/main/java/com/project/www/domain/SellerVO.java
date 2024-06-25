@@ -8,7 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SellerVO {
-
     private String id;
     private String pw;
     private String shopName;

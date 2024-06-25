@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>멤버쉽 결제</title>
+    <link rel="stylesheet" href="/dist/css/reset.css">
+    <style>
+        @font-face {
+            font-family: 'NotoSans KR';
+            src: url("/dist/font/Noto_Sans_KR/NotoSansKR-VariableFont_wght.ttf");
+        }
+
+        body {
+            font-family: "NotoSans KR", serif;
+            background-color: #ffffff;
+        }
+
+        #membership-title {
+            width: 100%;
+            height: 111px;
+            background-color: orange;
+            color: white;
+            display: flex;
+            justify-content: end;
+        }
+        .title-box{
+            width: 90%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+        }
+        .title-box p:first-child{
+            font-size: 19px;
+        }
+        .title-box p:last-child{
+            font-size: 25px;
+            font-weight: 600;
+        }
+        .content-box{
+            width: 100%;
+            height: 500px;
+        }
+
+        .memberShipPaymentButton-box{
+            width: 100%;
+            height: 88px;
+            background-color: rebeccapurple;
+        }
+        .memberShipPaymentButton-box>button{
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: violet;
+            color: white;
+            font-size: 23px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .memberShipPaymentButton-box>button:hover{
+            filter: brightness(95%);
+        }
+
+        .content-box > div:nth-child(1){
+            width: 100%;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: end;
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        @keyframes slideInFromLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .content-box > div:first-child > p {
+            font-size: 30px;
+        }
+
+        .content-box>ul{
+            width: 100%;
+            height: 250px;
+            margin-top: 59px;
+        }
+
+        .content-box ul li {
+            width: 100%;
+            height: 33%;
+            font-size: 18px;
+            font-weight: 500;
+            opacity: 0;
+            animation: slideInFromLeft 1s forwards; /* forwards 애니메이션 끝나고 상태 유지(애니메이션 1번만 적용) */
+            display: flex;
+            justify-content: center;
+        }
+
+        .content-box ul li:nth-child(1) {
+            animation-delay: 0.6s;
+        }
+
+        .content-box ul li:nth-child(2) {
+            animation-delay: 1.8s;
+        }
+
+        .content-box ul li:nth-child(3) {
+            animation-delay: 3.0s;
+        }
+
+        .content-box ul li:nth-child(4) {
+            animation-delay: 4.2s;
+            font-size: 24px;
+            font-weight: 700;
+            color: #833131;
+        }
+
+        @keyframes wave {
+            0% { transform: translateY(100%); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        .content-box ul .wave {
+            display: inline-block;
+            animation: wave 0.5s ease-in-out forwards;
+            opacity: 0;
+        }
+        .content-box ul .wave:nth-child(1) { animation-delay: 4.7s; }
+        .content-box ul .wave:nth-child(2) { animation-delay: 4.8s; margin-right: 5px; }
+        .content-box ul .wave:nth-child(3) { animation-delay: 4.9s; }
+        .content-box ul .wave:nth-child(4) { animation-delay: 5.0s; margin-right: 5px; }
+        .content-box ul .wave:nth-child(5) { animation-delay: 5.1s; }
+        .content-box ul .wave:nth-child(6) { animation-delay: 5.2s; }
+        .content-box ul .wave:nth-child(7) { animation-delay: 5.3s; }
+        .content-box ul .wave:nth-child(8) { animation-delay: 5.4s; }
+        .content-box ul .wave:nth-child(9) { animation-delay: 5.5s; }
+        .content-box ul .wave:nth-child(10) { animation-delay: 5.6s; }
+        .content-box ul .wave:nth-child(11) { animation-delay: 5.7s; }
+    </style>
+</head>
+<body>
+
+<div id="membership-title">
+    <div class="title-box">
+    <p>Midnight Market Plus +</p>
+    <p>멤버십 가입하기</p>
+    </div>
+</div>
+
+<div class="content-box">
+    <div><p>멤버십의 혜택은?</p></div>
+    <ul>
+        <li>상품 구매시 구매금액의 5% 적립!</li>
+        <li>상품 구매후 리뷰 등록시 포인트 지급 2배!</li>
+        <li>3,000원 할인쿠폰 x3장 증정!</li>
+        <li style="display: flex; justify-content: center;">
+            <span class="wave">지</span><span class="wave">금</span><span class="wave">바</span><span class="wave">로</span>
+            <span class="wave">시</span><span class="wave">작</span><span class="wave">해</span><span class="wave">보</span>
+            <span class="wave">세</span><span class="wave">요</span><span class="wave">!</span>
+        </li>
+    </ul>
+</div>
+
+
+<div class="memberShipPaymentButton-box">
+    <button id="membership-paymentButton">4,900원 결제하기</button>
+</div>
+<script th:inline="javascript">
+    const customerId = [[${session.id}]];
+    const nickName = [[${session.name}]];
+</script>
+<script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script th:src="@{/js/memberShipPayment.js}"></script>
+</body>
+</html>

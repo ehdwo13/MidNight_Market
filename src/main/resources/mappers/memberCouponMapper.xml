@@ -1,0 +1,29 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.www.repository.MemberCouponMapper">
+    <insert id="addCoupon">
+        insert into member_coupon(customer_id, coupon_id) values(#{customerId}, #{couponId})
+    </insert>
+    <select id="getMemberCouponList" resultType="com.project.www.domain.MemberCouponVO">
+        select * from member_coupon where customer_id = #{customerId} AND use_status = 0
+    </select>
+    <select id="isExist" resultType="int">
+        select count(*) from member_coupon where customer_id = #{customerId} and coupon_id = #{couponId}
+    </select>
+    <select id="getCount" resultType="int">
+        select count(*) from member_coupon
+        where
+        customer_id = #{customer_id} AND use_status = 0
+    </select>
+    
+    <update id="usedCouponUpdate">
+        UPDATE member_coupon
+        SET
+        use_status = 1,
+        use_date = now()
+        WHERE
+        customer_id = #{customerId} AND coupon_id = #{couponId}
+    </update>
+
+</mapper>

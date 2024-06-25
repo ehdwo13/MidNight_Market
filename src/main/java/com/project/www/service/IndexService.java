@@ -5,9 +5,9 @@ import com.project.www.domain.ProductVO;
 import java.util.List;
 
 public interface IndexService {
-    List<ProductVO> getNewProductList();
+    List<ProductVO> getIndexNewProductList();
 
-    List<ProductVO> getHeavySoldList();
+    List<ProductVO> getIndexHeavySoldList();
 
-    List<ProductVO> getDiscountProductList();
+    List<ProductVO> getIndexDiscountProductList();
 }

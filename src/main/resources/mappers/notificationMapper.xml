@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.www.repository.NotificationMapper">
+    <insert id="insert">
+        insert into notification(notify_content, customer_id)
+        values (#{notifyContent}, #{customerId})
+    </insert>
+    <select id="getList" resultType="com.project.www.domain.NotificationVO">
+        select * from notification where customer_id = #{username}
+    </select>
+    <delete id="deleteByContent">
+        DELETE FROM notification WHERE notify_content = #{content} and customer_id = #{id}
+    </delete>
+    <select id="getCount" resultType="int">
+        select count(*) from notification where customer_id = #{customerId}
+    </select>
+</mapper>

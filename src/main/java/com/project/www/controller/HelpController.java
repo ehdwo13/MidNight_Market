@@ -34,16 +34,9 @@ public class HelpController {
 
   @PostMapping("/register")
   public String register(HelpVO hvo){
-    log.info("hvo{}",hvo);
     isOK = hsv.register(hvo);
     return "redirect:/help/list";
   }
-
-//  @GetMapping("/list")
-//  public void list(Model m){
-//    List<HelpVO> list = hsv.getList();
-//    m.addAttribute("list", list);
-//  }
 
   @GetMapping("/list")
   public void list(Model m, PagingVO pgvo){
@@ -75,7 +68,6 @@ public class HelpController {
 
   @PostMapping("/modify")
   public String modify(HelpVO hvo){
-    log.info("hvo{}",hvo);
     isOK = hsv.modify(hvo);
       return "redirect:/help/list?hno="+hvo.getHno();
   }
@@ -83,15 +75,12 @@ public class HelpController {
   @GetMapping("/delete")
   public String delete(Model m, @RequestParam("hno") long hno){
     isOK = hsv.delete(hno);
-    log.info("hno{}",hno);
     m.addAttribute("test", isOK);
     return "redirect:/help/list";
   }
 
   @PostMapping("/reply")
   public String reply(HelpVO hvo){
-    log.info("hvo{}",hvo);
-
     hsv.replyRegister(hvo);
     return "redirect:/help/detail?hno="+hvo.getHno();
   }
@@ -105,7 +94,6 @@ public class HelpController {
   //내가 쓴 글만 보기
   @GetMapping("/myList")
   public void myList(HttpServletRequest request, PagingVO pgvo, Model m){
-    log.info("myList 진입");
 
     HttpSession ses = request.getSession();
     String name = (String)ses.getAttribute("name");
@@ -118,6 +106,12 @@ public class HelpController {
       m.addAttribute("myList", myList);
       m.addAttribute("ph", ph);
     }
+  }
+
+  @ResponseBody
+  @GetMapping("/getList")
+  public List<HelpVO> getListToAdmin(){
+    return hsv.getListToAdmin();
   }
 
 

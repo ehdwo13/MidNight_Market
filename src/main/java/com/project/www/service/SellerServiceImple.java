@@ -14,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 @Slf4j
-public class SellerServiceImple implements SellerService{
+public class SellerServiceImple implements SellerService {
 
     private final SellerMapper sellerMapper;
     private final ProductMapper productMapper;
@@ -25,25 +25,62 @@ public class SellerServiceImple implements SellerService{
     }
 
     @Override
-    public  List<ProductVO> getMyRegisteredProduct(String id) {
+    public List<ProductVO> getMyRegisteredProduct(String id) {
         return productMapper.getMyRegisteredProduct(id);
     }
 
     @Override
-    public int productQtyUpdate(ProductVO productVO) {
-        return productMapper.productQtyUpdate(productVO);
+    public String myRegisteredProductUpdate(ProductVO productVO) {
+
+        String type = productVO.getDescription();
+
+
+        switch (type) {
+            case "quantity" -> {
+                productMapper.productQtyUpdate(productVO);
+                return "수량이 " + productVO.getTotalQty() + "개 추가되었습니다.";  //수량변경
+            }
+            case "price" -> {
+                productMapper.productPriceUpdate(productVO);
+                return "가격이 " + productVO.getPrice() + "원 으로 변경되었습니다.";  //기존가 변경
+            }
+            case "discount" -> {
+                productMapper.updateProductDiscountRate(productVO);
+                return "할인율이 " + productVO.getDiscountRate() + "% 으로 변경되었습니다.";  //할인율 변경
+            }
+            case "discountDelete"->{
+                productMapper.updateProductDiscountRateDelete(productVO);
+                return "할인율이 삭제되었습니다.";  //할인율 변경
+            }
+        }
+        return "비상식적인 요청입니다.";
     }
 
     @Override
     public int checkId(String id) {
-       int count = sellerMapper.checkId(id);
-       return count;
+        int count = sellerMapper.checkId(id);
+        return count;
     }
 
     @Override
     public int checkShopName(String shopName) {
         int count = sellerMapper.checkShopName(shopName);
         return count;
+    }
+
+    @Override
+    public List<SellerVO> getList() {
+        return sellerMapper.getList();
+    }
+
+    @Override
+    public String getShopName(String sellerId) {
+        return sellerMapper.getShopName(sellerId);
+    }
+
+    @Override
+    public String getSellerId(String marketName) {
+        return sellerMapper.getSellerId(marketName);
     }
 
 

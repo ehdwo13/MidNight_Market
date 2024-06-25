@@ -11,8 +11,8 @@
     </select>
 
     <insert id="insert">
-        INSERT into help(id,title,content,secret)
-        values(#{id},#{title},#{content},#{secret})
+        INSERT into help(id,title,content,secret, customer_id)
+        values(#{id},#{title},#{content},#{secret},#{customerId})
     </insert>
 
     <select id="getDetail" resultType="com.project.www.domain.HelpVO">
@@ -23,7 +23,7 @@
     <update id="modify">
         UPDATE help
         set
-        title=#{title}, content=#{content}, mod_at = now()
+        title=#{title}, content=#{content}, secret=#{secret}, mod_at = now()
         where hno = #{hno}
     </update>
 
@@ -58,5 +58,8 @@
     <select id="getMyTotal" resultType="int">
         select count(hno) from help
         where id = #{name}
+    </select>
+    <select id="getListToAdmin" resultType="com.project.www.domain.HelpVO">
+        select * from help where reply = "N"
     </select>
 </mapper>

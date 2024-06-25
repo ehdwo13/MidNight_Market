@@ -15,12 +15,11 @@
 }
 
 .notice0 {
-  width: 1050px;
+  width: 940px;
   height: auto;
   /* background-color: aqua; */
   display: flex;
-  padding: 2% 7%;
-  margin-left: 7%;
+  margin: auto;
 }
 
 .notice2 {
@@ -30,7 +29,7 @@
 }
 
 .mypage2_text1 {
-  font-size: 20px;
+  font-size: 35px;
   font-weight: 550;
 }
 
@@ -49,6 +48,7 @@
 
 .notice2_box1 {
   margin: 30px 10px;
+  height: auto;
 }
 
 .notice2_box2 {
@@ -62,7 +62,7 @@
 .notice2_box2_1 {
   flex-basis: 50px;
   text-align: center;
-  line-height: 20px;
+  line-height: 30px;
   font-weight: 400;
   color: rgb(51, 51, 51);
 }
@@ -71,25 +71,36 @@
   -webkit-box-flex: 1;
   flex-grow: 1;
   text-align: center;
-  line-height: 20px;
+  line-height: 30px;
   font-weight: 400;
   color: rgb(51, 51, 51);
    color : black;
+}
+
+.notice2_box2_2_1 {
+  -webkit-box-flex: 1;
+  flex-grow: 1;
+  /* text-align: center; */
+  line-height: 30px;
+  font-weight: 400;
+  color: rgb(51, 51, 51);
+  margin-left: 20px;
 }
 
 
 .notice2_box2_3 {
   flex-basis: 100px;
   text-align: center;
-  line-height: 20px;
+  line-height: 30px;
   font-weight: 400;
   color: rgb(51, 51, 51);
+  margin-right: 30px
 }
 
 .notice2_box2_4 {
-  flex-basis: 100px;
+  flex-basis: 150px;
   text-align: center;
-  line-height: 20px;
+  line-height: 30px;
   font-weight: 400;
   color: rgb(51, 51, 51);
 }
@@ -129,6 +140,27 @@
   background-color: rgba(211, 211, 211, 0.34);
   margin-bottom: 10px;
   }
+
+nav.pageNav {
+margin-top: 30px;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: orange;
+    border-color: orange;
+    color: white;
+}
+.pagination .page-link {
+    color: black;
+}
+
+.pagination .page-link:hover {
+    font-weight: 700;
+}
+.notice2_box2 > div {
+    font-size: 19px;
+    font-weight: 600;
+}
     </style>
 
 </head>
@@ -140,9 +172,9 @@
     <div class="notice2">
         <div class="notice2_box1">
             <span class="mypage2_text1">공지 사항</span>
-            <span class="mypage2_text2">최대 지난 3년간의 주문내역까지 확인할 수 있어요.</span>
+            <span class="mypage2_text2">새로운 소식들과 유용한 정보들을 한 눈에 확인하세요.</span>
             <form action="/notice/notice" method="post">
-                <a href="/notice/register"><button type="button" class="write1">
+                <a href="/notice/register" id="writeNotice"><button type="button" class="write1">
                     글쓰기
                 </button></a>
 
@@ -151,21 +183,48 @@
         <div class="notice2_box2">
             <div class="notice2_box2_1">번호</div>
             <div class="notice2_box2_2">제목</div>
+            <div class="notice2_box2_3">작성자</div>
             <div class="notice2_box2_4">작성일</div>
         </div>
         <ul class="notice2_ul1">
             <li>
                 <div class="notice2_li1" th:each="nvo:${list}">
                     <div class="notice2_box2_1">[[${nvo.id}]]</div>
-                    <a th:href="@{/notice/detail(id=${nvo.id})}" class="notice2_box2_2">[[${nvo.title}]]</a>
-                    <div class="notice2_box2_4">[[${nvo.registerDate}]]</div>
+                    <a th:href="@{/notice/detail(id=${nvo.id})}" class="notice2_box2_2_1">[[${nvo.title}]]</a>
+                    <div class="notice2_box2_3">관리자</div>
+                    <div class="notice2_box2_4">[[${nvo.formattedDate}]]</div>
                 </div>
             </li>
         </ul>
-
     </div>
 </div>
 
+<!--페이지네이션-->
+<nav aria-label="Page navigation example" class="pageNav" th:if="${ph.totalCount != 0}">
+    <ul class="pagination justify-content-center">
+        <li class="page-item" th:classappend="${ph.prev == false} ? 'disabled' : ''">
+            <a class="page-link" th:href="@{/notice/notice(pageNum=${ph.startPage-1},pageSize=${ph.pgvo.pageSize})}" aria-label="Previous">
+                <span aria-hidden="true">≪</span>
+            </a>
+        </li>
+        <li th:each="i : ${#numbers.sequence(ph.startPage, ph.endPage)}"
+            th:classappend="${i == ph.pgvo.pageNum} ? 'active' : ''"
+            class="page-item">
+            <a class="page-link" th:href="@{/notice/notice(pageNum=${i}, pageSize=${ph.pgvo.pageSize})}" th:text="${i}"></a>
+        </li>
+        <li class="page-item" th:classappend="${ph.next == false} ? 'disabled' : ''">
+            <a class="page-link" th:href="@{/notice/notice(pageNum=${ph.endPage+1},pageSize=${ph.pgvo.pageSize})}" aria-label="Next">
+                <span aria-hidden="true">≫</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+
 </body>
+<script th:inline="javascript">
+    if(roleHeader != "role_admin"){
+        document.getElementById('writeNotice').style.display ="none";
+    }
+</script>
 
 <th:block th:replace="~{footer :: footer}"></th:block>

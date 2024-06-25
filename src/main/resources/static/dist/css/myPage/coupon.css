@@ -1,0 +1,244 @@
+@import '//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css';
+@import 'https://fonts.googleapis.com/css?family=Oswald';
+
+
+.custom-ticket {
+    position: relative;
+    padding: 0 20vmin;
+    color: rgba(255,255,255,1);
+    border: 1px solid rgba(255,255,255,.7);
+    font-size: 1.4em;
+    font-weight: 100;
+    line-height: 2.4em;
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    overflow: hidden;
+}
+.custom-ticket::after {
+    position: absolute;
+    content: '';
+    top: calc(50% - 50px);
+    left: -50px;
+    width: 20px;
+    height: 100px;
+    background: rgba(255,255,255,1);
+    -webkit-transform: rotate(30deg);
+    transform: rotate(30deg);
+    -webkit-transition: all 1000ms cubic-bezier(0.23, 1, 0.32, 1);
+    transition: all 1000ms cubic-bezier(0.23, 1, 0.32, 1);
+    opacity: 0;
+}
+.-ticket:hover::after {
+    left: calc(100% + 50px);
+    opacity: 1;
+}
+
+
+/* Global box-sizing */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+
+/* Ticket styles */
+.ticket {
+    background: #fff;
+    -webkit-box-shadow: inset 0 0 0 .25rem #444; /* Using $black variable */
+    /*left: calc(50% - 15rem); !* Using $ticket-width variable *!*/
+    height: 12.5rem; /* Using $ticket-height variable */
+    overflow: hidden;
+    position: relative;
+    top: calc(50% - 6.25rem); /* Using $ticket-height variable */
+    width: 30rem; /* Using $ticket-width variable */
+    margin-bottom: 30px;
+}
+
+.ticket-inner {
+    box-shadow: 0 0 0 .5rem #444; /* Using $black variable */
+    border-radius: .5rem;
+    height: 8.5rem; /* Calculated from $ticket-height */
+    margin: 2rem 2.5rem;
+    position: relative;
+    width: 25rem; /* Calculated from $ticket-width */
+}
+
+.ticket-headline {
+    font-size: 26px;
+    font-weight: 600;
+    padding: 1rem;
+    padding-bottom: 0;
+    text-align: center;
+}
+
+.ticket-headline svg {
+    display: inline-block;
+    height: 2rem;
+    stroke: #444; /* Using $black variable */
+    transform: translateY(.25rem);
+    width: 2rem;
+}
+
+.ticket-headline .pro {
+    background: linear-gradient(135deg, darken(#e5e696, 10%) 0%, darken(#d1d360, 20%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.ticket-star {
+    background: linear-gradient(to right, transparent 25%, black 50%, transparent 75%);
+    background-position: 0 50%;
+    background-repeat: no-repeat;
+    background-size: 100% 1px;
+    height: 1rem;
+    width: 100%;
+    text-align: center;
+}
+
+.ticket-star .fa-star-o {
+    background: white;
+    padding: 0 .25rem;
+}
+
+.ticket-admit {
+    font-family: 'Oswald';
+    font-size: 2rem;
+    text-align: center;
+    margin-top: 14px;
+}
+
+.ticket-admit .char:nth-of-type(1) {
+    text-shadow: 1.5px 2px 0 #ccc;
+}
+
+.ticket-admit .char:nth-of-type(2) {
+    text-shadow: 1px 2px 0 #ccc;
+}
+
+.ticket-admit .char:nth-of-type(3) {
+    text-shadow: 0.5px 2px 0 #ccc;
+}
+
+.ticket-admit .char:nth-of-type(4) {
+    text-shadow: 0px 2px 0 #ccc;
+}
+
+.ticket-admit .char:nth-of-type(5) {
+    text-shadow: -0.5px 2px 0 #ccc;
+}
+
+.ticket-admit .char:nth-of-type(6) {
+    text-shadow: -1px 2px 0 #ccc;
+}
+
+.ticket-admit .char:nth-of-type(7) {
+    text-shadow: -1.5px 2px 0 #ccc;
+}
+
+.ticket-admit .char:nth-of-type(8) {
+    text-shadow: -2px 2px 0 #ccc;
+}
+
+.ticket-admit .char:nth-of-type(9) {
+    text-shadow: -2.5px 2px 0 #ccc;
+}
+
+.ticket-numbers {
+    border-top: .25rem solid #444; /* Using $black variable */
+    color: #666; /* lighten($black, 10%) */
+    font-size: 1.25rem;
+    font-weight: bold;
+    left: 0;
+    letter-spacing: .25rem;
+    height: 5rem; /* Using $height variable */
+    padding: 1.25rem;
+    position: absolute;
+    top: 2.5rem;
+    transform: rotate(90deg) translate(-.75rem, 3rem);
+    width: 9rem; /* Using $width variable */
+}
+
+.ticket-numbers.second {
+    transform: rotate(-90deg) translate(.75rem, 19rem);
+}
+
+[class*="ticket-edge"] {
+    background: white;
+    border: .25rem solid #444; /* Using $black variable */
+    border-radius: 50%;
+    height: 3rem;
+    position: absolute;
+    width: 3rem;
+}
+
+[class*="top"] {
+    top: -1rem;
+}
+
+[class*="bottom"] {
+    top: calc(12.5rem - 1rem); /* Using $ticket-height variable */
+}
+
+[class*="left"] {
+    left: -1rem;
+}
+
+[class*="right"] {
+    right: -1rem;
+}
+
+.ticket-punches,
+.ticket-punches-right {
+    background: #eee;
+    border: .25rem solid #444; /* Using $black variable */
+    border-radius: 50%;
+    height: 2rem;
+    left: -1rem;
+    position: absolute;
+    top: 6rem;
+    width: 2rem;
+}
+
+.ticket-punches::before,
+.ticket-punches-right::before,
+.ticket-punches::after,
+.ticket-punches-right::after {
+    content: '';
+    display: block;
+    left: -.25rem;
+    top: 0;
+}
+
+.ticket-punches::before,
+.ticket-punches::after {
+    @extend .ticket-punches;
+}
+
+.ticket-punches::before {
+    top: -2.25rem;
+}
+
+.ticket-punches::after {
+    top: 1.75rem;
+}
+
+.ticket-punches-right {
+    left: 29rem; /* Adjusted position */
+}
+
+.issueDate{
+    position: absolute;
+    top:146px;
+    left: 46px;
+    font-size: 13px;
+    font-weight: 500;
+}
+.endDate{
+    position: absolute;
+    top:39px;
+    left: 385px;
+    font-size: 13px;
+    font-weight: 500;
+}

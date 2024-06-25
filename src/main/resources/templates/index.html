@@ -1,17 +1,31 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>index</title>
     <link rel="stylesheet" th:href="@{/dist/css/reset.css}">
     <link rel="stylesheet" th:href="@{/dist/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/dist/css/main.css}">
-    <script th:src="@{/dist/js/bootstrap.bundle.min.js}"></script>
+    <link rel="stylesheet" th:href="@{dist/css/popup.css}">
 </head>
 <th:block th:replace="~{header :: header}"></th:block>
 
-<body>
-
+<body class="index-body">
+<!-- 팝업창 -->
+<form name="notice_form">
+    <div id="divpop1" class="divpop">
+        <a href="">
+            <img th:src="@{/dist/image/3000원 할인쿠폰.jpg}" width="100%" alt="이미지 없음" class="popupImg">
+        </a>
+        <div class="button_area">
+            <div class="button_area1">
+                <input type='checkbox' name='chkbox' id='todaycloseyn' value='Y'>
+                <label for="todaycloseyn" class="button_area3">오늘 하루 안 보기</label>
+            </div>
+            <a href='#' onclick="javascript:closeWin(1);" class="button_area2">닫기</a>
+        </div>
+    </div>
+</form>
 <section>
     <!--광고배너(자동슬라이드&버튼)-->
     <div class="inner sectionBox">
@@ -30,7 +44,7 @@
                     <img th:src="@{/dist/image/banner_ad/banner_ad4.jpg}">
                 </div>
                 <div class="slideImg">
-                    <img th:src="@{/dist/image/banner_ad/banner_ad5.png}">
+                    <img th:src="@{/dist/image/banner_ad/banner_ad5.jpg}">
                 </div>
                 <div class="slideImg">
                     <img th:src="@{/dist/image/banner_ad/banner_ad6.jpg}">
@@ -44,89 +58,178 @@
     </div>
 </section>
 
+
 <main>
-    <!-- 세일 상품 -->
+    <!-- 신상품 -->
     <div class="inner mainBox">
         <div class="mainComment">금주의 다양한 신상품!</div>
-        <div>
+        <div class="product-type">
             <p>NEW</p>
             <p>신상품</p>
         </div>
         <ul>
             <th:block th:each="newProductList:${newProductList}">
             <li><a th:href="@{/product/detail(id = ${newProductList.id})}">
-                <img th:src="${newProductList.mainImage}">
-                <div class="product">
-                    <span>[[${newProductList.name}]]</span>
+                <div class="image-box">
+                <img class="product-image" th:src="${newProductList.mainImage}" alt="">
                 </div>
-                <div class="product">
-                    <span th:text="${#numbers.formatDecimal(newProductList.price, 0, 'COMMA', -1, 'POINT')} + ' 원'"></span>
+                    <button class="basket-button" th:attr="data-productId=${newProductList.id}">
+                    <img class="cart-image" th:src="@{/dist/icon/cart.png}" alt="" style="margin-top: 3px">담기
+                </button>
+
+
+                <div class="product-desc-text">
+
+                    <p class="product-name-text">[[${newProductList.name}]]</p>
+
+                    <th:block th:if="${newProductList.discountRate != 0}">
+                        <p class="no-discount-price" th:text="${#numbers.formatDecimal(newProductList.price, 0, 'COMMA', -1, 'POINT')} + ' 원'"></p>
+                        <span class="discountRate-text">[[${newProductList.discountRate}]]%</span>
+                    </th:block>
+
+                        <span class="product-real-price-text" th:text="${#numbers.formatDecimal(newProductList.discountPrice, 0, 'COMMA', -1, 'POINT')} + '원'"></span>
+                        <p class="review-text">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-right-dots" viewBox="0 0 16 16" style="margin-right: 6px">
+                            <path d="M2 1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h9.586a2 2 0 0 1 1.414.586l2 2V2a1 1 0 0 0-1-1zm12-1a2 2 0 0 1 2 2v12.793a.5.5 0 0 1-.854.353l-2.853-2.853a1 1 0 0 0-.707-.293H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2z"/>
+                            <path d="M5 6a1 1 0 1 1-2 0 1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+                            </svg>[[${newProductList.reviewCount}]]+
+                        </p>
                 </div>
-                <div class="product">
-                    <span><img th:src="@{/dist/icon/review.png}" style="width: 15px" height="15px">리뷰수</span>
-                </div>
+
                 </a>
             </li>
             </th:block>
         </ul>
     </div>
 
+
+
     <!-- 베스트 상품 -->
     <div class="inner mainBox">
         <div class="mainComment">가장 많이 팔린 상품!</div>
-        <div>
+        <div class="product-type">
             <p>BEST</p>
             <p>베스트 상품</p>
         </div>
         <ul>
             <th:block th:each="heavySoldList:${heavySoldList}">
-            <li><a th:href="@{/product/detail(id = ${heavySoldList.id})}">
-                <img th:src="${heavySoldList.mainImage}">
-                <div class="product">
-                    <span>[[${heavySoldList.name}]]</span>
-                </div>
-                <div class="product">
-                    <span th:text="${#numbers.formatDecimal(heavySoldList.price, 0, 'COMMA', -1, 'POINT')} + ' 원'"></span>
-                </div>
-                <div class="product">
-                    <span><img th:src="@{/dist/icon/review.png}" style="width: 15px" height="15px">리뷰수</span>
-                </div>
-            </a>
-            </li>
-            </th:block>
+                <li><a th:href="@{/product/detail(id = ${heavySoldList.id})}">
+                    <div class="image-box">
+                        <img class="product-image" th:src="${heavySoldList.mainImage}" alt="">
+                    </div>
+                    <button class="basket-button" th:attr="data-productId=${heavySoldList.id}">
+                        <img class="cart-image" th:src="@{/dist/icon/cart.png}" alt="" style="margin-top: 3px">담기
+                    </button>
 
+
+                    <div class="product-desc-text">
+
+                        <p class="product-name-text">[[${heavySoldList.name}]]</p>
+
+                        <th:block th:if="${heavySoldList.discountRate != 0}">
+                            <p class="no-discount-price" th:text="${#numbers.formatDecimal(heavySoldList.price, 0, 'COMMA', -1, 'POINT')} + ' 원'"></p>
+                            <span class="discountRate-text">[[${heavySoldList.discountRate}]]%</span>
+                        </th:block>
+
+                        <span class="product-real-price-text" th:text="${#numbers.formatDecimal(heavySoldList.discountPrice, 0, 'COMMA', -1, 'POINT')} + '원'"></span>
+                        <p class="review-text"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-right-dots" viewBox="0 0 16 16" style="margin-right: 6px">
+                            <path d="M2 1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h9.586a2 2 0 0 1 1.414.586l2 2V2a1 1 0 0 0-1-1zm12-1a2 2 0 0 1 2 2v12.793a.5.5 0 0 1-.854.353l-2.853-2.853a1 1 0 0 0-.707-.293H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2z"/>
+                            <path d="M5 6a1 1 0 1 1-2 0 1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+                        </svg>[[${heavySoldList.reviewCount}]]+</p>
+                    </div>
+
+                </a>
+                </li>
+            </th:block>
         </ul>
     </div>
 
-    <!-- 신상품 -->
+
+
+    <!-- 세일상품 -->
     <div class="inner mainBox">
         <div class="mainComment">놓치면 후회할 가격!</div>
-        <div>
+        <div class="product-type">
             <p>SALE</p>
             <p>세일 상품</p>
         </div>
         <ul>
             <th:block th:each="discountProductList:${discountProductList}">
-                <!-- 변수 선언 -->
-            <li><a th:href="@{/product/detail(id = ${discountProductList.id})}">
-                <img th:src="${discountProductList.mainImage}">
-                <div class="product">
-                    <span>[[${discountProductList.name}]]</span>
-                </div>
-                <div class="product">
-                    <span th:text="${#numbers.formatDecimal(discountProductList.price, 0, 'COMMA', -1, 'POINT')} + ' 원'" style="text-decoration: line-through; color: red;"></span>
-                    <span style="margin:0 10px;">([[${discountProductList.discountRate}]]%)-></span>
-                    <span th:text="${#numbers.formatDecimal(discountProductList.discountPrice, 0, 'COMMA', -1, 'POINT')} + ' 원'"></span>
-                </div>
-                <div class="product">
-                    <span><img th:src="@{/dist/icon/review.png}" style="width: 15px" height="15px">리뷰수</span>
-                </div>
-            </a>
-            </li>
+                <li><a th:href="@{/product/detail(id = ${discountProductList.id})}">
+                    <div class="image-box">
+                        <img class="product-image" th:src="${discountProductList.mainImage}" alt="">
+                    </div>
+                    <button class="basket-button" th:attr="data-productId=${discountProductList.id}">
+                        <img class="cart-image" th:src="@{/dist/icon/cart.png}" alt="" style="margin-top: 3px">담기
+                    </button>
+
+
+                    <div class="product-desc-text">
+
+                        <p class="product-name-text">[[${discountProductList.name}]]</p>
+
+                        <th:block th:if="${discountProductList.discountRate != 0}">
+                            <p class="no-discount-price" th:text="${#numbers.formatDecimal(discountProductList.price, 0, 'COMMA', -1, 'POINT')} + ' 원'"></p>
+                            <span class="discountRate-text">[[${discountProductList.discountRate}]]%</span>
+                        </th:block>
+
+                        <span class="product-real-price-text" th:text="${#numbers.formatDecimal(discountProductList.discountPrice, 0, 'COMMA', -1, 'POINT')} + '원'"></span>
+                        <p class="review-text"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-right-dots" viewBox="0 0 16 16" style="margin-right: 6px">
+                            <path d="M2 1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h9.586a2 2 0 0 1 1.414.586l2 2V2a1 1 0 0 0-1-1zm12-1a2 2 0 0 1 2 2v12.793a.5.5 0 0 1-.854.353l-2.853-2.853a1 1 0 0 0-.707-.293H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2z"/>
+                            <path d="M5 6a1 1 0 1 1-2 0 1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+                        </svg>[[${discountProductList.reviewCount}]]+</p>
+                    </div>
+
+                </a>
+                </li>
             </th:block>
         </ul>
     </div>
 </main>
+
+<!--양쪽 배너-->
+<div class="memberShip">
+    <a href="#" id="membershipPayment">
+        <img th:src="@{/dist/image/banner_ad/membership_banner_ad.png}" id="memberShipImg" alt="">
+    </a>
+</div>
+<div class="outer_rightBanner">
+<div class="rightBanner">
+    <a>
+        <img th:src="@{/dist/icon/cart.svg}" style="width: 30px; height: 30px;" id="bannerBasket">장바구니
+    </a>
+    <hr>
+    <a>
+        <img th:src="@{/dist/icon/heart.svg}" style="width: 28px; height: 28px;" id="bannerSlang">찜
+    </a>
+    <hr>
+    <a>
+        <img th:src="@{/dist/icon/bot.png}" style="width: 30px; height: 30px;" id="bannerInquiry">채팅문의
+    </a>
+    <hr>
+    <div class="RecentlyViewed">
+        <p>최근 본 상품</p>
+        <div id="recentViewContainer"></div>
+    </div>
+</div>
+</div>
+
+<script th:inline="javascript">
+    const customerId = [[${session.id}]];
+    const role = [[${session.role}]];
+    const mStatus = [[${session.mStatus}]];
+    let value = null;
+    document.getElementById('membershipPayment').style.display="";
+    if(role == "role_admin" || role == "role_seller"){
+        document.getElementById('membershipPayment').style.display="none";
+    }else if(mStatus == true){
+        document.getElementById('membershipPayment').style.display="none";
+    }
+</script>
+<script src="/js/sidebar.js"></script>
+<script th:src="@{/js/banner.js}"></script>
 <script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/commonBasket.js}"></script>
+<script th:src="@{/js/popup.js}"></script>
 </body>
 <th:block th:replace="~{footer :: footer}"></th:block>

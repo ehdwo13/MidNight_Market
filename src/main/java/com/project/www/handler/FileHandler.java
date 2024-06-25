@@ -50,7 +50,7 @@ public class FileHandler {
             file.transferTo(storeFile);
             File thumbNail = new File(folders, uuidStr + "_th_" + fileName);
             //썸네일 이미지 크기 조절
-            Thumbnails.of(storeFile).size(100, 100).toFile(thumbNail);
+            Thumbnails.of(storeFile).size(84, 84).toFile(thumbNail);
 
             //productVO에 주소 저장
             productVO.setMainImage("/upload/" + today + "/" + fullFileName);

@@ -29,24 +29,42 @@
     
     <update id="productQtyUpdate">
         UPDATE product SET
-        total_qty = #{totalQty}
+        total_qty = total_qty + #{totalQty}
         WHERE
         id = #{id}
     </update>
 
-    <select id="getNewProductList" resultType="com.project.www.domain.ProductVO">
+    <update id="productPriceUpdate">
+        UPDATE product
+        SET
+        price = #{price},
+        discount_price = #{price} - (#{price} * discount_rate / 100)
+        WHERE
+        id = #{id}
+    </update>
+
+    <update id="updateProductDiscountRateDelete">
+        UPDATE product
+        SET
+        discount_rate = 0,
+        discount_price = price
+        WHERE
+        id = #{id}
+    </update>
+
+    <select id="getIndexNewProductList" resultType="com.project.www.domain.ProductVO">
         SELECT * from product
         ORDER BY register_date DESC
         limit 0,4
     </select>
 
-    <select id="getHeavySoldList" resultType="com.project.www.domain.ProductVO">
+    <select id="getIndexHeavySoldList" resultType="com.project.www.domain.ProductVO">
         SELECT * from product
         ORDER BY total_sold_qty DESC
         limit 0,4
     </select>
 
-    <select id="getDiscountProductList" resultType="com.project.www.domain.ProductVO">
+    <select id="getIndexDiscountProductList" resultType="com.project.www.domain.ProductVO">
         SELECT * from product
         ORDER BY discount_rate DESC
         limit 0,4
@@ -60,6 +78,122 @@
         WHERE
         id = #{productId}
     </update>
+    
+    <update id="reviewCountUpdate">
+        UPDATE product
+        SET
+        review_count = review_count + 1
+        WHERE
+        id = #{productId}
+    </update>
+
+    <select id="getList" resultType="com.project.www.domain.ProductVO">
+        SELECT * from ${type}
+        <include refid="category"/>
+        <include refid="categoryDetail"/>
+        <include refid="search"/>
+        <include refid="subType"/>
+        LIMIT #{pageStart}, #{qty}
+    </select>
+
+    <select id="getTotalCount" resultType="int">
+        SELECT COUNT(*) FROM ${type}
+        <include refid="category"/>
+        <include refid="categoryDetail"/>
+        <include refid="search"/>
+    </select>
+
+    <update id="rollbackRefundQuantity">
+        UPDATE product
+        SET
+        total_qty = total_qty + #{totalQty},
+        total_sold_qty = total_sold_qty - #{totalQty}
+        WHERE
+        id = #{id}
+    </update>
+
+
+    <update id="updateProductDiscountRate">
+        UPDATE product SET
+        discount_rate = #{discountRate},
+        discount_price = price - (price * #{discountRate} / 100)
+        WHERE id = #{id}
+    </update>
+
+
+    <sql id="category">
+        <if test="category != null and category != ''">
+            <trim prefix="WHERE(" suffix=")">
+                <choose>
+                    <when test="category == '1'.toString()">
+                        product_category_detail_id BETWEEN 1 AND 6
+                    </when>
+                    <when test="category == '2'.toString()">
+                        product_category_detail_id BETWEEN 7 AND 11
+                    </when>
+                    <when test="category == '3'.toString()">
+                        product_category_detail_id BETWEEN 12 AND 17
+                    </when>
+                    <when test="category == '4'.toString()">
+                        product_category_detail_id BETWEEN 18 AND 22
+                    </when>
+                    <when test="category == '5'.toString()">
+                        product_category_detail_id BETWEEN 23 AND 26
+                    </when>
+                    <when test="category == '6'.toString()">
+                        product_category_detail_id BETWEEN 27 AND 31
+                    </when>
+                    <when test="category == '7'.toString()">
+                        product_category_detail_id BETWEEN 32 AND 35
+                    </when>
+                    <when test="category == '8'.toString()">
+                        product_category_detail_id BETWEEN 36 AND 41
+                    </when>
+                    <when test="category == '9'.toString()">
+                        product_category_detail_id = 42
+                    </when>
+                </choose>
+            </trim>
+        </if>
+    </sql>
+
+    <sql id="categoryDetail">
+        <if test="categoryDetail != null and categoryDetail != ''">
+            <trim prefix="WHERE (" suffix=")">
+                product_category_detail_id = #{categoryDetail}
+            </trim>
+        </if>
+    </sql>
+
+    <sql id="subType">
+        <if test="subType != null and subType != ''">
+            <choose>
+                <when test="subType == 'new'">
+                    ORDER BY register_date DESC
+                </when>
+                <when test="subType == 'famous'">
+                    ORDER BY total_sold_qty DESC
+                </when>
+                <when test="subType == 'manyReview'">
+                    ORDER BY review_count DESC
+                </when>
+                <when test="subType == 'expensive'">
+                    ORDER BY discount_price DESC
+                </when>
+                <when test="subType == 'cheap'">
+                    ORDER BY discount_price ASC
+                </when>
+            </choose>
+        </if>
+    </sql>
+
+    <sql id="search">
+        <if test="search != null and search != ''">
+            <trim prefix="WHERE (" suffix=")">
+                name LIKE concat ('%', #{search}, '%')
+            </trim>
+        </if>
+    </sql>
 
 
 </mapper>

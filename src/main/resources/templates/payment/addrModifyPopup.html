@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>배송지 변경</title>
+    <style>
+        @font-face {
+            font-family: 'NanumSquareRoundL KR';
+            src: url("/dist/font/nanum-square-round/NanumSquareRoundL.ttf");
+        }
+        body {
+            font-size: 14px;
+            font-family: 'NanumSquareRoundL KR';
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse; /*border 안겹치게*/
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: left;
+        }
+        .mainAddress {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .mypage2_text4 {
+            margin: 0 20px;
+            padding: 5px;
+            font-size: 12px;
+            border: 1px solid lightgray;
+            background-color: rgba(211, 211, 211, 0.247);
+            border-radius: 15%;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <h3>기본 배송지</h3>
+    <div id="mainAddress"></div>
+</div>
+<hr>
+<table>
+    <thead>
+    <tr>
+        <th>선택</th>
+        <th>주소 별칭</th>
+        <th>받으실 분</th>
+        <th>주소</th>
+        <th>연락처</th>
+        <th>삭제</th>
+    </tr>
+    </thead>
+    <tbody id="addressTbody">
+    <!-- 추가한 배송지 목록 -->
+    </tbody>
+</table>
+<hr>
+<button type="button" id="addrChange">기본배송지 변경</button>
+<button type="button" id="newAddrAdd">새 배송지 추가</button>
+
+<script th:inline="javascript">
+let customerId = [[${session.id}]];
+
+    let newAddrAdd = document.getElementById('newAddrAdd');
+    // 선택한 주소 정보 저장
+    let selectedAddress = null;
+
+    newAddrAdd.addEventListener('click', () => {
+        window.location.href = '/payment/newAddrAddPopup';
+    });
+
+    document.getElementById('addrChange').addEventListener('click', async () => {
+        if (!selectedAddress) {
+            alert('배송지를 선택해주세요.');
+            return;
+        }
+
+        try {
+            const url = `/address/updateIsMain`;
+            const config = {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ano: selectedAddress.ano,
+                    customerId: customerId,
+                })
+            };
+            const resp = await fetch(url, config);
+            const result = await resp.json();
+            // 자식창에서 부모창으로 값 전달 (opener)
+            opener.document.getElementById('address').innerText = result.address;
+            opener.document.getElementById('addName').innerText = result.addrName;
+            if (resp.ok) { // 응답성공시
+                displayMainAddress(selectedAddress); // 선택된 주소 화면에 뿌림
+                alert('기본배송지로 설정되었습니다.');
+                if(opener.location.href.includes("customer")) {
+                    opener.location.href = '/customer/myPage?reload=1';
+                }
+                window.close();
+            } else {
+                alert('기본배송지 설정에 실패하였습니다.');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('기본배송지 설정 중 오류가 발생하였습니다.');
+        }
+    });
+
+    // 주소 목록을 서버에서 리스트로 가져와
+    async function fetchAddresses() {
+        try {
+            const url = '/address/list';
+            // method = get, config생략
+            const resp = await fetch(url);
+            const addresses = await resp.json();
+            addresses.forEach(address => addAddressToTable(address));
+        } catch (e) {
+            console.error(e);
+            alert('주소 목록을 가져오는 중 오류가 발생하였습니다.');
+        }
+    }
+
+    // table에 주소 추가
+    function addAddressToTable(address) {
+        const tableBody = document.getElementById('addressTbody');
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+            `<td><input type="radio" name="selectedAddress" data-address-id="${address.ano}"></td>
+                <td>${address.addrNickName}</td>
+                <td>${address.addrName}</td>
+                <td>${address.address}</td>
+                <td>${address.contactNum}</td>
+                <td><button class="delBtn">삭제</button></td>`;
+        tableBody.appendChild(tr);
+
+        // 라디오 버튼 기본배송지 선택
+        const radio = tr.querySelector('input[type="radio"]'); //<tr>내에서 라디오타입 가진 요소 document(x)
+        radio.addEventListener('change', () => {
+            if (radio.checked) {
+                selectedAddress = address;
+            }
+        });
+
+        // 주소 삭제
+        const delBtn = tr.querySelector('.delBtn');
+        delBtn.addEventListener('click', async () => {
+            try {
+                const url = `/address/delete/${address.ano}`;
+                const config = {
+                    method: 'DELETE'
+                };
+                const resp = await fetch(url, config);
+                if (resp.ok) {
+                    tr.remove(); // <tr> 내에 삭제한 행 제거
+                    alert('배송지가 삭제되었습니다.');
+                    if(opener.location.href.includes("customer")){
+                        opener.location.href = '/customer/myPage?reload=1';
+                    }
+                } else {
+                    alert('배송지 삭제에 실패하였습니다.');
+                }
+            } catch (e) {
+                console.log(e);
+                alert('배송지 삭제 중 오류가 발생하였습니다.');
+            }
+        });
+    }
+
+    // 페이지 로드 후 실행
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchAddresses(); // 주소 목록을 가져와 테이블에 추가
+        if(opener.location.href.includes("customer")) {
+            opener.location.href = '/customer/myPage?reload=1';
+        }
+    });
+
+    // 기본 배송지 값
+    function displayMainAddress(address) {
+        const mainAddressDiv = document.getElementById('mainAddress');
+        mainAddressDiv.innerHTML =
+            `<span class="mypage2_text4 hidden" th:text="${address.isMain == 'Y' ? '기본배송지' : '추가배송지'}">
+            </span>${address.addrName}
+            <div>
+                <span>${address.address}</span>
+            </div>`;
+    }
+
+// 부모창에서 자식창으로 값 가져옴 (opener)
+let parentAddName = opener.document.getElementById('addName').innerText;
+let parentAddress = opener.document.getElementById('address').innerText;
+let str = '';
+str+=`<span>`;
+str+=parentAddName;
+str+=`</span><br><span>`;
+str+=parentAddress;
+str+=`</span>`;
+document.getElementById('mainAddress').innerHTML = str;
+</script>
+</body>
+</html>

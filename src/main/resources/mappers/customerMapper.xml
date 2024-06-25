@@ -28,4 +28,52 @@
     <select id="findByUserName" resultType="com.project.www.domain.CustomerVO">
         SELECT * FROM customer where provider_id = #{providerId}
     </select>
+    <select id="getList" resultType="com.project.www.domain.CustomerVO">
+        select * from customer where role = "role_user"
+    </select>
+
+    <select id="selectOne" resultType="com.project.www.domain.CustomerVO">
+        SELECT * FROM customer
+        WHERE
+        id = #{id}
+    </select>
+    
+    <update id="pointUpdate">
+        UPDATE customer
+        SET
+        point = #{point}
+        WHERE
+        id = #{id}
+    </update>
+
+    <update id="memberShipJoinUpdate">
+        UPDATE customer
+        SET
+        m_status = 1,
+        m_reg_date = now()
+        WHERE
+        id = #{customerId}
+    </update>
+
+    <select id="getMyAddrList" resultType="com.project.www.domain.AddressVO">
+        SELECT * from address
+        WHERE
+        customer_id = #{customerId}
+    </select>
+
+    <update id="usedPointUpdate">
+        UPDATE customer
+        SET
+        point = point - #{point}
+        WHERE
+        id = #{id}
+    </update>
+
+    <update id="rollbackRefundPoint">
+        UPDATE customer
+        SET
+        point = point + #{point}
+        WHERE
+        id = #{id}
+    </update>
 </mapper>

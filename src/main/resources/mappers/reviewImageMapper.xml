@@ -11,4 +11,9 @@
         </foreach>
     </insert>
 
+    <select id="getReviewImgList" resultType="com.project.www.domain.ReviewImageVO">
+        select * from review_image
+        where review_id = #{id}
+    </select>
+
 </mapper>

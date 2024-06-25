@@ -1,5 +1,6 @@
 package com.project.www.repository;
 
+import com.project.www.domain.ListPagingVO;
 import com.project.www.domain.OrdersVO;
 import com.project.www.domain.ProductVO;
 import org.apache.ibatis.annotations.Mapper;
@@ -17,13 +18,27 @@ public interface ProductMapper {
 
     List<ProductVO> getMyRegisteredProduct(String id);
 
-    int productQtyUpdate(ProductVO productVO);
+    void productQtyUpdate(ProductVO productVO);
 
-    List<ProductVO> getNewProductList();
+    List<ProductVO> getIndexNewProductList();
 
-    List<ProductVO> getHeavySoldList();
+    List<ProductVO> getIndexHeavySoldList();
 
-    List<ProductVO> getDiscountProductList();
+    List<ProductVO> getIndexDiscountProductList();
 
-    void orderUpdate(OrdersVO ordersVO);
+    int orderUpdate(OrdersVO ordersVO);
+
+    int reviewCountUpdate(long productId);
+
+    List<ProductVO> getList(ListPagingVO pgvo);
+
+    int getTotalCount(ListPagingVO pgvo);
+
+    int rollbackRefundQuantity(ProductVO productVO);
+
+    void updateProductDiscountRate(ProductVO productVO);
+
+    void productPriceUpdate(ProductVO productVO);
+
+    void updateProductDiscountRateDelete(ProductVO productVO);
 }

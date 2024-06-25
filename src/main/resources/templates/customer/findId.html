@@ -1,24 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="~{header :: header}"></th:block>
 <head>
     <meta charset="UTF-8">
     <title>아이디 찾기</title>
     <style>
-        .ft{
-            font-size: 50px;
+        section {
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
         }
-        section{
+        .mainDiv {
+            font-family: 'NanumSquareRoundL';
+            width: 940px;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
+        }
+        .mainDiv > span {
+            font-size: 19px;
+        }
+        .ft {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 29px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #666;
+            text-align: left;
+        }
+        #nickName {
+            width: 31%;
+            padding: 12px;
+            margin: 14px 0 28px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 19px;
+            box-sizing: border-box;
+        }
+        #nickName:focus {
+            border-color: darkorange;
+            outline: none;
+        }
+
+        #findId {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            background-color: darkorange;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        #findId:hover {
+            background-color: #955201;
         }
     </style>
 </head>
 <body>
     <section>
-        <p class="ft">아이디 찾기</p>
-        <label for="nickName"></label>닉네임
-        <input type="text" name="nickName" id="nickName"><br>
-        <button type="button" id="findId">확인</button>
-        <div id="resultDiv" style="display: none">
-
+        <div class="mainDiv">
+            <p class="ft">아이디 찾기</p>
+            <label for="nickName"></label>
+            <span>닉네임 : </span>
+            <input type="text" name="nickName" id="nickName"><br>
+            <button type="button" id="findId">확인</button>
+            <div id="resultDiv" style="display: none"></div>
         </div>
     </section>
 </body>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" >
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="~{header :: header}"></th:block>
 <head>
     <meta charset="UTF-8">
@@ -7,6 +7,16 @@
 
     <style>
 
+        #select-change {
+            font-family: 'NanumSquareRoundL';
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            /*display: flex;*/
+            /*justify-content: center;*/
+            align-items: center;
+            height: 80vh;
+        }
 
         .login-box{
             margin: 0 auto;
@@ -32,21 +42,32 @@
             width: 300px;
             height: 35px;
             outline: none;
+            padding-left: 8px;
         }
         .other-info-box{
             width: 75%;
             height: 50px;
             /*border: 1px solid black;*/
-            font-size: 11px;
+            font-size: 13px;
             color: black;
+            margin-left: 17px;
         }
         .other-info-box a{
             color: black;
+        }
+        .other-info-box span:hover{
+            text-decoration: underline;
         }
         .form-box{
             background-color: orangered;
             color: white;
             border: none;
+            height: 43px;
+            font-weight: 600;
+        }
+
+        .form-box:hover{
+            background-color: #955201;
         }
         .social-icon{
             width: 75%;
@@ -73,7 +94,18 @@
             /*border: 1px solid black;*/
             display: flex;
             justify-content: center;
+            align-items: center;
+            font-size: 20px;
+        }
+        .errMsg{
+            margin: 0 auto;
+            width: 500px;
+            height: 40px;
+            /*border: 1px solid black;*/
+            display: flex;
+            justify-content: center;
             align-items: end;
+            color: red;
         }
         .select-box{
             width: 100px;
@@ -83,103 +115,145 @@
             outline: none;
             border-bottom: 1px solid lightgrey;
             cursor: pointer;
+            background-color: #f0f2f5;
         }
         .select-box:hover{
             filter: brightness(90%);
+        }
+
+        .socialLogin > div:hover {
+            filter: brightness(70%);
         }
 
     </style>
 
 </head>
 <body>
-                <form id="select-change" action="/login/form" method="post">
-                    <h1 style="margin: 30px auto; font-size: 30px; font-weight: 700; text-align: center">로그인</h1>
+<form id="select-change" action="/login/form" method="post">
+    <h1 style="margin: 30px auto; font-size: 32px; font-weight: 700; text-align: center; padding-top: 86px">로그인</h1>
 
-                    <div class="login-select-box">
-                        <button type="button" class="select-box" id="customer">고객</button>
-                        <button type="button" class="select-box" id="seller">판매자</button>
-                    </div>
+    <div class="login-select-box">
+        <button type="button" class="select-box" id="customer">고객</button>
+        <button type="button" class="select-box" id="seller">판매자</button>
+    </div>
+    <div th:if="${param.error}" class="errMsg">
+        <p th:if="${param.error == 'disabled'}">Your account is disabled.</p>
+        <p th:if="${param.error == 'badCredentials'}">아이디, 비밀번호가 일치하지 않습니다. </p>
+        <p th:if="${param.error != 'disabled' and param.error != 'expired' and param.error != 'badCredentials'}">아이디, 비밀번호가 일치하지 않습니다. </p>
+    </div>
 
 
-                    <div class="login-box">
-                        <div class="input-box">
+    <div class="login-box">
+        <div class="input-box">
 
-                            <input type="text" class="box-size" name="id" placeholder="아이디">
-                            <input type="password" class="box-size" name="pw" placeholder="비밀번호">
-                        </div>
-                        <div class="other-info-box">
-                            <label>
-                                <input type="checkbox">
-                                <span style="margin-right: 15px;">아이디저장</span>
-                            </label>
-                            <a href="/customer/findId" id="cusOnly1"><span>아이디 찾기 |</span></a>
-                            <a href="/customer/changePw" id="cusOnly2"><span>비밀번호 재설정 |</span></a>
-                            <a href="/customer/insert" id="cusOnly3"><span>회원가입</span></a>
-                        </div>
-                        <button type="submit" class="box-size form-box">로그인</button>
-                        <div class="social-icon">
-                            <a href="/oauth2/authorization/google"><div style="background-image: url(/dist/image/social-image/google.png);"></div></a>
-                            <a href="/oauth2/authorization/kakao"><div style="background-image: url(/dist/image/social-image/kakao.png);"></div></a>
-                            <a href="/oauth2/authorization/naver"><div style="background-image: url(/dist/image/social-image/naver.png);"></div></a>
-                        </div>
-                    </div>
-                </form>
-                <script>
-                    document.addEventListener('DOMContentLoaded', () => {
-                        const select_btn = document.querySelectorAll('.select-box');
+            <input type="text" class="box-size" name="id" id="id" placeholder="아이디">
+            <input type="password" class="box-size" name="pw" placeholder="비밀번호">
+        </div>
+        <div class="other-info-box">
+            <label>
+                <input type="checkbox" id="rememberId">
+                <span style="margin-right: 5px;">아이디저장</span>
+            </label>
+            <a href="/customer/findId" id="cusOnly1"><span>아이디 찾기 |</span></a>
+            <a href="/customer/changePw" id="cusOnly2"><span>비밀번호 재설정 |</span></a>
+            <a href="/customer/insert" id="cusOnly3"><span>회원가입</span></a>
+        </div>
+        <button type="submit" class="box-size form-box" id="login">로그인</button>
+        <div class="social-icon">
+            <a href="/oauth2/authorization/google" class="socialLogin"><div style="background-image: url(/dist/image/social-image/google.png);"></div></a>
+            <a href="/oauth2/authorization/kakao"  class="socialLogin"><div style="background-image: url(/dist/image/social-image/kakao.png);"></div></a>
+            <a href="/oauth2/authorization/naver"  class="socialLogin"><div style="background-image: url(/dist/image/social-image/naver.png);"></div></a>
+        </div>
 
-                        // 첫 번째 버튼이 있는 경우 클릭하고 스타일 적용
-                        if(select_btn.length > 0){
-                            select_btn[0].click();
-                            select_btn[0].style.color = 'black';
-                            select_btn[0].style.borderBottom = '2px solid black';
-                            select_btn[0].style.fontWeight = '700';
-                        }
+    </div>
+</form>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const select_btn = document.querySelectorAll('.select-box');
 
-                        document.addEventListener('click', (e) => {
-                            const clicked_btn = e.target.closest('.select-box');
+        // 첫 번째 버튼이 있는 경우 클릭하고 스타일 적용
+        if(select_btn.length > 0){
+            select_btn[0].click();
+            select_btn[0].style.color = 'black';
+            select_btn[0].style.borderBottom = '2px solid black';
+            select_btn[0].style.fontWeight = '700';
+        }
 
-                            if(clicked_btn) {
-                                // 모든 select-box 버튼의 스타일 초기화
-                                select_btn.forEach(btn => {
-                                    btn.style.color = 'black';
-                                    btn.style.borderBottom = '1px solid lightgray';
-                                    btn.style.fontWeight = 'normal';
-                                });
+        document.addEventListener('click', (e) => {
+            const clicked_btn = e.target.closest('.select-box');
 
-                                // 클릭된 버튼에 스타일 적용
-                                clicked_btn.style.color = 'black';
-                                clicked_btn.style.borderBottom = '2px solid black';
-                                clicked_btn.style.fontWeight = '700';
-                            }
+            if(clicked_btn) {
+                // 모든 select-box 버튼의 스타일 초기화
+                select_btn.forEach(btn => {
+                    btn.style.color = 'black';
+                    btn.style.borderBottom = '1px solid lightgray';
+                    btn.style.fontWeight = 'normal';
+                });
 
-                            // 고객일 경우
-                            if(e.target.id == 'customer'){
-                                console.log('고객일 경우');
-                                let form = document.getElementById('select-change');
-                                form.action = "/customer/form";
-                                console.log(form);
-                                document.querySelector('.social-icon').style.display = '';
-                                document.getElementById('cusOnly1').style.display = '';
-                                document.getElementById('cusOnly2').style.display = '';
-                                document.getElementById('cusOnly3').innerText = '회원가입';
-                            }
+                // 클릭된 버튼에 스타일 적용
+                clicked_btn.style.color = 'black';
+                clicked_btn.style.borderBottom = '2px solid black';
+                clicked_btn.style.fontWeight = '700';
+            }
 
-                            // 판매자일 경우
-                            if(e.target.id == 'seller'){
-                                console.log('판매자일 경우');
-                                let form = document.getElementById('select-change');
-                                form.action = "/판매자의 로그인으로 이동할 주소 넣으면 됍니다.";
-                                console.log(form);
-                                document.querySelector('.social-icon').style.display = 'none';
-                                document.getElementById('cusOnly1').style.display = 'none';
-                                document.getElementById('cusOnly2').style.display = 'none';
-                                document.getElementById('cusOnly3').innerText = '관리자에게 문의해주세요. ';
-                            }
-                        });
-                    });
+            // 고객일 경우
+            if(e.target.id == 'customer'){
+                let form = document.getElementById('select-change');
+                form.action = "/login/form";
+                document.querySelector('.social-icon').style.display = '';
+                document.getElementById('cusOnly1').style.display = '';
+                document.getElementById('cusOnly2').style.display = '';
+                document.getElementById('cusOnly3').innerText = '회원가입';
+            }
 
-  </script>
+            // 판매자일 경우
+            if(e.target.id == 'seller'){
+                let form = document.getElementById('select-change');
+                form.action = "/login/seller/form";
+                document.querySelector('.social-icon').style.display = 'none';
+                document.getElementById('cusOnly1').style.display = 'none';
+                document.getElementById('cusOnly2').style.display = 'none';
+                document.getElementById('cusOnly3').innerText = '관리자에게 문의해주세요. ';
+            }
+        });
+    });
+    let checkBox = document.getElementById('rememberId');
+    checkBox.addEventListener('click',()=>{
+        if(checkBox.checked){
+            let id = document.getElementById('id').value;
+            let obj = {
+                id : id,
+                saveStatus : true
+            };
+            window.localStorage.setItem("saveId",JSON.stringify(obj));
+        }else if(!checkBox.checked){
+            window.localStorage.removeItem("saveId");
+            document.getElementById('id').value = '';
+        }
+    })
+    document.getElementById('login').addEventListener('click',()=>{
+        if(checkBox.checked){
+            let saveData = window.localStorage.getItem("saveId");
+            let parseData = JSON.parse(saveData);
+            parseData.id = document.getElementById('id').value;
+            window.localStorage.setItem("saveId", JSON.stringify(parseData));
+        }
+    })
+
+
+    let saveData = window.localStorage.getItem("saveId");
+    let parseData = JSON.parse(saveData);
+    if(parseData.saveStatus == true){
+        checkBox.checked = true;
+        document.getElementById('id').value = parseData.id;
+    }
+    let social = document.querySelectorAll('.socialLogin');
+    for(let i=0; i<social.length; i++){
+        social[i].addEventListener('click',()=>{
+            window.localStorage.removeItem("saveId");
+        })
+    }
+</script>
 
 </body>
 <th:block th:replace="~{footer :: footer}"></th:block>

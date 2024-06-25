@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자페이지</title>
+</head>
+<style>
+    body {
+        display: flex;
+        height: 100vh;
+        margin: 0;
+        font-family: 'Arial', sans-serif;
+        background-color: #f0f0f0;
+    }
+    .container {
+        display: flex;
+        width: 100%;
+        overflow: hidden;
+    }
+    .sidebar {
+        width: 220px;
+        background-color: #fb763f;
+        padding: 20px;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        height: 100vh;
+        overflow-y: auto;
+
+    }
+    .content {
+        flex-grow: 1;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 20px;
+    }
+    .sidebar ul {
+        list-style: none;
+        padding: 0;
+    }
+    .sidebar ul li {
+        margin-bottom: 20px;
+        color: white;
+    }
+    .sidebar ul li:first-child {
+        margin-bottom: 50px;
+
+    }
+    .sidebar ul li a {
+        text-decoration: none;
+        color: #ffffff;
+        display: block;
+        padding: 12px 15px;
+        border-radius: 5px;
+        font-weight: 600;
+        transition: background-color 0.3s;
+    }
+    .sidebar ul li a:hover {
+        background-color: #ffeaae;
+        color: #fc8825;
+    }
+    .content {
+        flex-grow: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+    .sidebar ul li.title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        text-align: center;
+        color: #555;
+    }
+    #contentDisplay {
+        border: 1px solid #ddd;
+        padding: 30px;
+        width: 100%;
+        max-width: 800px;
+        box-sizing: border-box;
+        text-align: center;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    #contentDisplay input[type="text"],
+    #contentDisplay input[type="number"],
+    #contentDisplay input[type="date"],
+    #contentDisplay button {
+        margin: 10px 0;
+        padding: 10px;
+        width: calc(100% - 20px);
+        max-width: 300px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+        box-sizing: border-box;
+        margin-left: 20px;
+    }
+
+    #contentDisplay button {
+        background-color: #fb763f;
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    #contentDisplay button:hover {
+        color: #f8d3b1;
+    }
+    table{
+        width: 100%;
+    }
+</style>
+<body>
+<div class="container">
+    <div class="sidebar">
+        <ul>
+            <li class="title" style="color: white">관리자 페이지</li>
+            <li><a id="couponPublish">쿠폰 발행하기</a></li>
+            <li><a id="couponList">발급한 쿠폰 리스트</a></li>
+            <li><a id="inquiry">1대1 문의 질문</a></li>
+            <li><a id="orders">결제 내역</a></li>
+            <li><a id="sellerList">판매자 리스트 출력</a></li>
+            <li><a id="memberList">회원 리스트 출력</a></li>
+            <li><a th:href="@{/}">홈으로</a></li>
+        </ul>
+    </div>
+    <div class="content">
+        <div id="contentDisplay"></div>
+    </div>
+</div>
+<script src="/js/admin.js">
+</script>
+</body>
+</html>

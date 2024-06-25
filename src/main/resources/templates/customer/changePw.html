@@ -1,12 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="~{header :: header}"></th:block>
 <head>
     <title>비밀번호 재설정</title>
     <style>
-        .ft{
-            font-size: 50px;
+        section {
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
         }
-        section{
+        .mainDiv {
+            font-family: 'NanumSquareRoundL';
+            width: 940px;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
+        }
+        .mainDiv > span {
+            font-size: 19px;
+        }
+        .ft {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 29px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #666;
+            text-align: left;
+        }
+        #id {
+            width: 31%;
+            padding: 12px;
+            margin: 14px 0 28px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 19px;
+            box-sizing: border-box;
+        }
+        #id:focus {
+            border-color: darkorange;
+            outline: none;
+        }
+
+        #findId {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            background-color: darkorange;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        #findId:hover {
+            background-color: #955201;
         }
     </style>
 </head>
@@ -15,9 +73,10 @@
 <section>
     <div class="mainDiv">
     <p class="ft">비밀번호 재설정</p>
-    <label for="id"></label>아이디
+    <label for="id"></label>
+    <span>ID : </span>
     <input type="text" name="id" id="id"><br>
-    <button type="button" id="findId">이메일전송</button>
+    <button type="button" id="findId">이메일 전송</button>
     </div>
 </section>
 
@@ -27,10 +86,10 @@
         let id = document.getElementById('id').value;
         checkId(id).then(result =>{
             if(result === "1"){
-                alert("이메일 전송이 완료되었습니다. 로그인 후 비밀번호를 변경해주세요. ")
+                alert("이메일 전송이 완료되었습니다.\n로그인 후 비밀번호를 변경해주세요. ")
                 window.location.href = '/';
             }else{
-                alert("해당하는 정보가 없습니다. 다시 입력해주세요. ")
+                alert("해당하는 정보가 없습니다.\n다시 입력해주세요. ")
             }
         })
     })

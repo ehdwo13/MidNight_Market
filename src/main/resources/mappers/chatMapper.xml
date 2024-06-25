@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.www.repository.ChatMapper">
+    <insert id="insertChatRoom" parameterType="com.project.www.domain.ChatRoomVO">
+        INSERT INTO chat_room (customer_id, seller_id) VALUES (#{customerId}, #{sellerId})
+    </insert>
+
+    <select id="findChatRoomsByUserId" parameterType="String" resultType="com.project.www.domain.ChatRoomVO">
+        SELECT * FROM chat_room WHERE customer_id = #{userId} OR seller_id = #{userId}
+    </select>
+
+    <select id="findMessagesByChatRoomId" parameterType="Long" resultType="com.project.www.domain.MessageVO">
+        SELECT * FROM message WHERE chat_room_id = #{chatRoomId} ORDER BY send_time ASC
+    </select>
+
+    <insert id="insertMessage" parameterType="com.project.www.domain.MessageVO">
+        INSERT INTO message (chat_room_id, sender_id, sender_type, content)
+        VALUES (#{chatRoomId}, #{senderId}, #{senderType}, #{content})
+    </insert>
+
+    <delete id="deleteChatRoom" parameterType="Long">
+        DELETE FROM chat_room WHERE id = #{chatRoomId}
+    </delete>
+
+    <select id="getTargetChatRoom" resultType="Long">
+        select id from chat_room where customer_id = #{customerId} and seller_id = #{sellerId}
+    </select>
+</mapper>

@@ -10,6 +10,8 @@
 
     <select id="getList" resultType="com.project.www.domain.NoticeVO">
         select * from notice
+        order by id desc
+        limit #{pageStart}, #{pageSize}
     </select>
 
     <select id="getDetail" resultType="com.project.www.domain.NoticeVO">
@@ -28,4 +30,8 @@
     <delete id="remove">
         delete from notice where id = #{id}
     </delete>
+
+    <select id="getTotal" resultType="int">
+        SELECT count(id) from notice
+    </select>
 </mapper>

@@ -19,11 +19,42 @@
     <update id="paySuccessUpdate">
         UPDATE payment
         SET
-        status = 'success',
+        status = '결제완료',
         pay_method = #{payMethod},
         pay_date = now()
         WHERE
         merchant_uid = #{merchantUid}
     </update>
+
+    <update id="refundUpdate">
+        UPDATE payment
+        SET
+        pay_price = #{payPrice},
+        status = '환불처리'
+        WHERE
+        merchant_uid = #{merchantUid}
+    </update>
+
+    <select id="findExpiredPayments" resultType="String" parameterType="java.time.LocalDateTime">
+        SELECT * FROM payment
+        WHERE
+        status = '결제대기' AND pay_date &lt; #{expiredDateTime}
+    </select>
+    
+    <delete id="deleteExpiredPayments">
+        DELETE FROM payment
+        WHERE
+        merchant_uid = #{merchantUid}
+    </delete>
+
+    <update id="usedPointAndCouponUpdate">
+        UPDATE payment
+        SET
+        used_point = #{usedPoint},
+        used_coupon_id = #{usedCouponId}
+        WHERE
+        merchant_uid = #{merchantUid}
+    </update>
+
 
 </mapper>

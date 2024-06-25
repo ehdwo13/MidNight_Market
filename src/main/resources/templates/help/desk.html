@@ -2,16 +2,16 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>desk</title>
+    <title>1:1문의</title>
     <link rel="stylesheet" href="/dist/css/helpDesk.css">
 </head>
 <th:block th:replace="~{header :: header}"></th:block>
-<body>
+<body id="help-body">
 
 <!--con1-->
 
 <div class="con con1">
-    <p> 고객 센터 </p>
+    <p>FAQ</p>
 </div>
 
 <!--con2-->
@@ -33,7 +33,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body top-body">
-                <p id="mText">외않되.</p>
+                <p id="mText"></p>
             </div>
             <div class="modal-footer">
             </div>
@@ -57,7 +57,6 @@
     </div>
 
 </div>
-
 <script th:src="@{/js/helpDesk.js}"></script>
 </body>
 

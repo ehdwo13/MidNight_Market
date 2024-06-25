@@ -2,58 +2,170 @@
 <th:block th:replace="~{header :: header}"></th:block>
 <head>
     <meta charset="UTF-8">
-    <title>list</title>
+    <title>1:1문의</title>
 </head>
 <style>
-    .yes::before{
+    body {
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .container {
+        width: 940px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        }
+
+    .containerInner {
+        width: 940px;
+        margin: 24px auto;
+        border-top: 1px solid lightgray;
+        border-bottom: 1px solid lightgray;
+    }
+
+    .tr:first-child {
+        border-top: 2px solid black;
+        border-bottom: 1px solid black;
+    }
+
+    .tr > th {
+        height: 49px;
+        line-height: 49px;
+        font-size: 19px;
+    }
+
+    .table th,
+    .table td {
+        text-align: center;
+    }
+
+    .yes::before {
         content: url("/dist/icon/lock-fill.svg");
     }
-</style>
-<body>
-<h1>1:1 문의</h1>
-<button type="button" class="helpBtn" id="hb">문의하기</button>
-<!--<a href="/help/register"><button type="button" class="helpBtn" id="helpBtn" th:if="${session.name == null}" style="display: none">문의하기</button></a>-->
-<div class="input-group mb-3" style="width: 940px;">
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>No</th>
-            <th>제목</th>
-            <th>작성자</th>
-            <th>작성일</th>
-            <th>답변상태</th>
-        </tr>
-        </thead>
-        <tbody th:each="hvo:${list}">
-        <tr>
-            <td>[[${hvo.hno}]]</td>
-            <td>
-                <a href="#" id="idInfo" th:data-id="${hvo.id}" th:data-hno="${hvo.hno}">
-                    <span th:text="${hvo.secret == 'Y' ? '비밀글입니다.' : hvo.title}"
-                          th:classappend="${hvo.secret == 'Y' ? 'yes' : ''}" class="secret"></span>
-                </a>
-            </td>
-            <td>[[${hvo.id}]]</td>
-            <td>[[${hvo.regAt}]]</td>
-            <td>
-                <span th:text="${hvo.reply == 'N' ? '답변대기' : '답변완료'}"></span>
-            </td>
-        </tr>
 
-        <tr th:if="${hvo.replyContent != null}">
-            <td colspan="5" class="replyAdmin">
-                <a href="#" class="adminReply" id="replyInfo" th:data-replyCheck="${hvo.reply}" th:data-secretCheck="${hvo.secret}" th:data-id="${hvo.id}" th:data-hno="${hvo.hno}">┗ 관리자 답변입니다.</a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+    .buttons {
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        margin: 30px 0 30px 178px;
+    }
+
+    .btn {
+        margin-right: 10px;
+    }
+
+    #hb {
+        background-color: darkorange;
+        color: #fff;
+    }
+
+    #hb:hover {
+        background-color: #c65d01;
+    }
+
+    #myHelpBtn {
+        background-color: #28a745;
+        color: #fff;
+    }
+
+    #myHelpBtn:hover {
+        background-color: #1b8331;
+    }
+
+    .adminReply {
+        float: left !important;;
+        margin-left: 144px !important;;
+        color: darkgray;
+    }
+    .adminReply:hover {
+        font-weight: bold;
+    }
+    .helpBox {
+        margin: 40px auto;
+        height: auto;
+        width: 940px;
+    }
+    .help1 {
+        font-size: 35px;
+        font-weight: 550;
+    }
+
+    .help2 {
+        font-size: 13px;
+        color: gray;
+    }
+    .pagination .page-item.active .page-link {
+        background-color: orange;
+        border-color: orange;
+        color: white;
+    }
+    .pagination .page-link {
+        color: black;
+    }
+
+    .pagination .page-link:hover {
+        font-weight: 700;
+    }
+    #idInfo:hover {
+        font-weight: bold;
+    }
+
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="helpBox">
+        <span class="help1">1:1 문의</span>
+        <span class="help2">궁금한 점이나 도움이 필요하신 게 있으면 언제든 문의해주세요.</span>
+    </div>
+    <div class="containerInner">
+        <table class="table table-striped" style="margin-bottom: 0">
+            <thead>
+            <tr class="tr">
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>작성일</th>
+                <th>답변상태</th>
+            </tr>
+            </thead>
+            <tbody th:each="hvo:${list}">
+            <tr>
+                <td>[[${hvo.hno}]]</td>
+                <td>
+                    <a href="#" id="idInfo" th:data-id="${hvo.id}" th:data-hno="${hvo.hno}" style="color: black">
+                        <span th:text="${hvo.secret == 'Y' ? '비밀글입니다.' : hvo.title}"
+                              th:classappend="${hvo.secret == 'Y' ? 'yes' : ''}" class="secret"></span>
+                    </a>
+                </td>
+                <td>[[${hvo.id}]]</td>
+                <td>[[${hvo.regAt}]]</td>
+                <td>
+                    <span th:text="${hvo.reply == 'N' ? '답변대기' : '답변완료'}"></span>
+                </td>
+            </tr>
+
+            <tr th:if="${hvo.replyContent != null}">
+                <td colspan="5" class="replyAdmin">
+                    <a href="#" class="adminReply" id="replyInfo" th:data-replyCheck="${hvo.reply}" th:data-secretCheck="${hvo.secret}" th:data-id="${hvo.id}" th:data-hno="${hvo.hno}">┗ 관리자 답변입니다.</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="buttons">
+        <button type="button" class="btn" id="hb">문의하기</button>
+        <a href="/help/myList" th:if="${session.name != null}"><button type="button" id="myHelpBtn" class="btn">내 문의글</button></a>
+    </div>
+    <!--<a href="/help/register"><button type="button" class="btn btn-primary helpBtn" id="helpBtn" th:if="${session.name == null}" style="display: none">문의하기</button></a>-->
 
     <!--페이지네이션-->
     <nav aria-label="Page navigation example" class="pageNav" th:if="${ph.totalCount != 0}">
         <ul class="pagination justify-content-center">
             <li class="page-item" th:classappend="${ph.prev == false} ? 'disabled' : ''">
-                <a class="page-link" th:href="@{/help/list(pageNum=${ph.startPage>1 ? ph.startPage - 1:1},pageSize=${ph.pgvo.pageSize})}" aria-label="Previous">
-                    <!--원래는 th:href="@{/help/list(pageNum=${ph.startPage-1} 처리하면 되는데 @관리자 답변 개수 때문에 이전버튼 누르면 에러남-->
+                <a class="page-link" th:href="@{/help/list(pageNum=${ph.startPage > 1 ? ph.startPage - 1 : 1},pageSize=${ph.pgvo.pageSize})}" aria-label="Previous">
                     <span aria-hidden="true">≪</span>
                 </a>
             </li>
@@ -63,11 +175,10 @@
                 <a class="page-link" th:href="@{/help/list(pageNum=${i}, pageSize=${ph.pgvo.pageSize})}" th:text="${i}"></a>
             </li>
             <li class="page-item" th:classappend="${ph.next == false} ? 'disabled' : ''">
-                <a class="page-link" th:href="@{/help/list(pageNum=${ph.endPage+1},pageSize=${ph.pgvo.pageSize})}" aria-label="Next">
+                <a class="page-link" th:href="@{/help/list(pageNum=${ph.endPage + 1},pageSize=${ph.pgvo.pageSize})}" aria-label="Next">
                     <span aria-hidden="true">≫</span>
                 </a>
             </li>
-            <a href="/help/myList"><button type="button" id="myHelpBtn" th:if="${session.name != null}">내 문의글</button></a>
         </ul>
     </nav>
 </div>

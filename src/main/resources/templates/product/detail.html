@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>상품 상세</title>
@@ -7,12 +7,12 @@
 </head>
 <th:block th:replace="~{header :: header}"></th:block>
 
-<body>
+<body id="detailBody">
 
 <div class="product-container">
-
     <div class="first-content">
-        <div class="main-image-box"><img th:src="${productDTO.productVO.mainImage}" style="width: 100%; height: 100%">
+        <div class="main-image-box"><img th:src="${productDTO.productVO.mainImage}"
+                                         style="width: 100%; height: 100%; border-radius: 5px">
         </div>
 
         <div class="right-content-box">
@@ -23,24 +23,30 @@
                     <p>카테고리 > [[${productDTO.pcVO.name}]] > [[${productDTO.pcdVO.name}]] </p>
                 </div>
 
-                <div class="product-description-box">
+                <div class="product-description-box" style="margin: 16px 0;">
                     <p>[[${productDTO.productVO.name}]]</p>
                 </div>
 
                 <div class="product-description-box">
-                    <p>[[${productDTO.productVO.price}]]원</p>
+                    <p>[[${productDTO.productVO.description}]]</p>
+                </div>
+
+                <div class="product-description-box" style="margin-top:10px">
+                    <span id="starAverage"></span>
+                    <span id="reviewCounter" style="margin-left:12px;"></span>
                 </div>
 
                 <div class="product-description-box">
-                    <p>별점 : ⭐⭐⭐⭐⭐ (+카운트)</p>
+                    <p>판매자 : [[${productDTO.shopName}]]</p>
                 </div>
 
-                <div class="product-description-box">
-                    <p>판매자</p>
+                <div class="product-description-box" style="margin-top: 15px; margin-bottom: 12px; font-weight: 600; font-size: 24px">
+                    <span th:if="${productDTO.productVO.discountRate != 0}" style="margin-right: 11px; color: orangered">[[${productDTO.productVO.discountRate}]]%</span>
+                    <span th:text="${#numbers.formatDecimal(productDTO.productVO.discountPrice, 0, 'COMMA', -1, 'POINT')} + ' 원'"></span>
                 </div>
 
-                <div class="product-description-box">
-                    <p>3,000원(40,000원 이상 무료)</p>
+                <div th:if="${productDTO.productVO.discountRate != 0}" class="product-description-box">
+                    <s th:text="${#numbers.formatDecimal(productDTO.productVO.price, 0, 'COMMA', -1, 'POINT')} + ' 원'"></s>
                 </div>
             </div>
 
@@ -57,30 +63,33 @@
                         <div class="total-sum">
                             <span style="font-size: 27px; margin: 0 50px 0 100px">합계</span>
                             <span class="product-price-text" id="productPrice"
-                                  th:text="${#numbers.formatDecimal(productDTO.productVO.price, 0, 'COMMA', -1, 'POINT')} + ' 원'"></span>
+                                  th:text="${#numbers.formatDecimal(productDTO.productVO.discountPrice, 0, 'COMMA', -1, 'POINT')} + ' 원'"></span>
                         </div>
                     </div>
 
                     <div class="buy-or-pick-box">
-                        <button class="like-button" id="slangBtn" th:attr="data-type=${productDTO.slangVO == null ? 'post' : 'delete'}"}>
+                        <button class="like-button" id="slangBtn"
+                                th:attr="data-type=${productDTO.slangVO == null ? 'post' : 'delete'}" }>
                             <th:block th:if="${productDTO.slangVO == null}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="gray"
-                                 class="bi bi-suit-heart" viewBox="0 0 16 16">
-                                <path d="m8 6.236-.894-1.789c-.222-.443-.607-1.08-1.152-1.595C5.418 2.345 4.776 2 4 2 2.324 2 1 3.326 1 4.92c0 1.211.554 2.066 1.868 3.37.337.334.721.695 1.146 1.093C5.122 10.423 6.5 11.717 8 13.447c1.5-1.73 2.878-3.024 3.986-4.064.425-.398.81-.76 1.146-1.093C14.446 6.986 15 6.131 15 4.92 15 3.326 13.676 2 12 2c-.777 0-1.418.345-1.954.852-.545.515-.93 1.152-1.152 1.595zm.392 8.292a.513.513 0 0 1-.784 0c-1.601-1.902-3.05-3.262-4.243-4.381C1.3 8.208 0 6.989 0 4.92 0 2.755 1.79 1 4 1c1.6 0 2.719 1.05 3.404 2.008.26.365.458.716.596.992a7.6 7.6 0 0 1 .596-.992C9.281 2.049 10.4 1 12 1c2.21 0 4 1.755 4 3.92 0 2.069-1.3 3.288-3.365 5.227-1.193 1.12-2.642 2.48-4.243 4.38z"/>
-                            </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="gray"
+                                     class="bi bi-suit-heart" viewBox="0 0 16 16">
+                                    <path d="m8 6.236-.894-1.789c-.222-.443-.607-1.08-1.152-1.595C5.418 2.345 4.776 2 4 2 2.324 2 1 3.326 1 4.92c0 1.211.554 2.066 1.868 3.37.337.334.721.695 1.146 1.093C5.122 10.423 6.5 11.717 8 13.447c1.5-1.73 2.878-3.024 3.986-4.064.425-.398.81-.76 1.146-1.093C14.446 6.986 15 6.131 15 4.92 15 3.326 13.676 2 12 2c-.777 0-1.418.345-1.954.852-.545.515-.93 1.152-1.152 1.595zm.392 8.292a.513.513 0 0 1-.784 0c-1.601-1.902-3.05-3.262-4.243-4.381C1.3 8.208 0 6.989 0 4.92 0 2.755 1.79 1 4 1c1.6 0 2.719 1.05 3.404 2.008.26.365.458.716.596.992a7.6 7.6 0 0 1 .596-.992C9.281 2.049 10.4 1 12 1c2.21 0 4 1.755 4 3.92 0 2.069-1.3 3.288-3.365 5.227-1.193 1.12-2.642 2.48-4.243 4.38z"/>
+                                </svg>
                             </th:block>
                             <th:block th:if="${productDTO.slangVO != null}">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="rgba(255, 0, 0, 0.685)"
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                     fill="rgba(255, 0, 0, 0.685)"
                                      class="bi bi-heart-fill" viewBox="0 0 16 16">
-                                    <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/>
+                                    <path fill-rule="evenodd"
+                                          d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/>
                                 </svg>
                             </th:block>
                         </button>
-                        <button class="buy-or-pick-select" style="background-color: blueviolet;" id="basketButton">
+                        <button class="buy-or-pick-select" style="background-color: darkorchid;" id="basketButton">
                             장바구니
                         </button>
                         <button class="buy-or-pick-select" id="orderButton"
-                                style="background-color: rgba(255, 69, 0, 0.81);">상품주문
+                                style="background-color: coral;">상품주문
                         </button>
                     </div>
                 </div>
@@ -95,73 +104,140 @@
     <div class="second-content">
         <div class="detailMenuBar">
             <ul>
-                <li><a href="">상품상세정보</a></li>
-                <li><a href="">상품후기</a></li>
-                <li><a href="">문의</a></li>
-                <li><a href="">배송/교환/반품안내</a></li>
+                <li id="product-detail">상품상세정보</li>
+                <li id="product-review">상품후기</li>
+                <li id="product_qna">문의</li>
+                <li id="product-info">교환/반품안내</li>
             </ul>
         </div>
 
         <div class="detailMenu">
+            <p class="product-detail" style="overflow: hidden"></p>
             <th:block th:each="i:${productDTO.imageList}">
-                <img th:src="${i.detailImage}">
+                <img th:src="${i.detailImage}" class="detailImage">
             </th:block>
-            <p>상품후기</p>
-            <div class="review">
-                <p>포토리뷰</p>
-                <button type="button" class="imgDetailBtn" onclick="openWindow()">더보기 ></button>
-            </div>
-
+            <p class="product-review">상품후기</p>
             <div class="detailReviewBox">
                 <div class="reviewList">
-                    <p class="after">추천순</p>
-                    <p>최신순</p>
-                </div>
-
-                <div class="reviewImg">
-                    <a href=""><img src="/dist/image/product_thumbnail/고구마.jpg" alt=""></a>
-                    <a href=""><img src="/dist/image/product_thumbnail/고구마.jpg" alt=""></a>
-                    <a href=""><img src="/dist/image/product_thumbnail/고구마.jpg" alt=""></a>
-                    <a href=""><img src="/dist/image/product_thumbnail/고구마.jpg" alt=""></a>
-                    <a href=""><img src="/dist/image/product_thumbnail/고구마.jpg" alt=""></a>
-                    <a href=""><img src="/dist/image/product_thumbnail/고구마.jpg" alt=""></a>
-                </div>
-
-                <div class="review">
-                    <div>
-                        <p>등급 작성자</p>
-                    </div>
-                    <p>별점</p>
-                    <p>상품명</p>
-                    <p class="reviewContent">리뷰내용</p>
-                    <div class="reviewImgDatail">
-                        <img src="/dist/image/product_thumbnail/고구마.jpg" alt="">
-                        <img src="/dist/image/product_thumbnail/고구마.jpg" alt="">
-                    </div>
-                    <p>날짜<button type="button">도움돼요<img src="/dist/icon/hand-thumbs-up-fill.svg"></button></p>
+                    <p class="after" id="sortedByRecommendation">추천순</p>
+                    <p id="sortedByNewest">최신순</p>
                 </div>
 
             </div>
+            <!--페이지네이션-->
+            <nav aria-label="Page navigation example" class="pageNav" th:if="${ph.totalCount != 0}">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${ph.prev == false} ? 'disabled' : ''">
+                        <a class="page-link"
+                           th:href="@{/product/detail(id=${ph.id}, pageNum=${ph.startPage-1},pageSize=${ph.pgvo.pageSize})}"
+                           aria-label="Previous">
+                            <span aria-hidden="true">≪</span>
+                        </a>
+                    </li>
+                    <li th:each="i : ${#numbers.sequence(ph.startPage, ph.endPage)}"
+                        th:classappend="${i == ph.pgvo.pageNum} ? 'active' : ''"
+                        class="page-item">
+                        <a class="page-link"
+                           th:href="@{/product/detail(id=${ph.id}, pageNum=${i}, pageSize=${ph.pgvo.pageSize})}"
+                           th:text="${i}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${ph.next == false} ? 'disabled' : ''">
+                        <a class="page-link"
+                           th:href="@{/product/detail(id=${ph.id}, pageNum=${ph.endPage+1},pageSize=${ph.pgvo.pageSize})}"
+                           aria-label="Next">
+                            <span aria-hidden="true">≫</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
 
-            <p>상품문의</p>
-            <p>배송안내</p>
-            <p>교환/반품 안내</p>
+            <hr>
+            <div class="product-qna">
+                <div class="product_qna_title" style="text-align: center">
+                    <span style="font-size: 20px; font-weight: 700">1대1 채팅으로 문의해보세요!</span><br><br>
+                    <button class="chatBtn" onclick="openPopup()"> [[${productDTO.shopName}]]에 문의하기</button>
+                </div>
+                <hr>
+            </div>
+            <div class="productDetailInfo">
+                <img th:src="@{/dist/image/product_detail/productDetailInfo.png}" class="productDetailInfoImg">
+            </div>
         </div>
     </div>
-</div>
 
+    <!--양쪽 배너-->
+    <div class="memberShip">
+        <a href="#" id="membershipPayment">
+            <img th:src="@{/dist/image/banner_ad/membership_banner_ad.png}" id="memberShipImg" alt="">
+        </a>
+    </div>
+    <div class="rightBanner" id="rightBanner">
+        <a>
+            <img th:src="@{/dist/icon/cart.svg}" style="width: 30px; height: 30px;" id="bannerBasket">장바구니
+        </a>
+        <hr>
+        <a>
+            <img th:src="@{/dist/icon/heart.svg}" style="width: 30px; height: 30px;" id="bannerSlang">찜
+        </a>
+        <hr>
+        <a onclick="openPopup()">
+            <img th:src="@{/dist/icon/bot.png}" style="width: 30px; height: 30px;" id="bannerInquiry">채팅문의
+        </a>
+        <hr>
+        <div class="RecentlyViewed">
+            <p>최근 본 상품</p>
+            <div id="recentViewContainer"></div>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    <script sec:authorize="isAuthenticated()">
+        let customerId = `[[${#authentication.name}]]`;
+    </script>
+    <script th:if="${not #authorization.expression('isAuthenticated()')}">
+        let customerId = null; // 로그인하지 않은 경우
+    </script>
+    <script th:inline="javascript">
+        const productDTO = [[${productDTO}]];
+        let rvo = [[${rvo}]];
+        const productId = [[${productId}]];
+        let isAuthenticated = [[${isAuthenticated}]];
+        let sellerCheck = [[${sellerCheck}]];
+        let value = [[${productDTO.shopName}]];
+        const role = [[${session.role}]];
+        const mStatus = [[${session.mStatus}]];
+        const List = /*[[${rvo}]]*/[]; //reviewVO 배열로 받아오기
+        let pThumb = encodeURIComponent([[${productDTO.productVO.thumbImage}]]);
+        let pName = encodeURIComponent([[${productDTO.productVO.name}]]);
+        let pPrice = encodeURIComponent([[${productDTO.productVO.price}]]);
+        let pLink = encodeURIComponent(window.location.href);
+        let setCookie = function(cookieName, thumb, name, price, link) {
+            let existingCookies = document.cookie.split('; ').find(row => row.startsWith(cookieName + '='));
+            let recentViews = existingCookies ? existingCookies.split('=')[1].split('|') : [];
+            let currentProduct = thumb + "@" + name + "@" + price + "@" + link;
+            recentViews = recentViews.filter(view => !view.includes(name));
+            recentViews.unshift(currentProduct);
+            while (recentViews.length > 3) {
+                recentViews.pop();
+            }
+            document.cookie = cookieName + "=" + recentViews.join('|') + "; path=/";
+        }
+        setCookie("recentView", pThumb, pName, pPrice, pLink);
 
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script th:inline="javascript">
-    const productDTO = [[${productDTO}]];
-    const customerId = [[${session.id}]];
-    const productId = [[${productId}]];
-    console.log(productDTO);
-    console.log(customerId);
-    console.log(productId);
-</script>
-<script th:src="@{/js/productDetail.js}"></script>
+        //멤버쉽 배너 가입하면 안보이게 설정
+        document.getElementById('membershipPayment').style.display="";
+        if(role == "role_admin" || role == "role_seller"){
+            document.getElementById('membershipPayment').style.display="none";
+        }else if(mStatus == true){
+            document.getElementById('membershipPayment').style.display="none";
+        }
+    </script>
+    <script src="/js/sidebar.js"></script>
+    <script th:src="@{/js/banner.js}"></script>
+    <script th:src="@{/js/productDetail.js}"></script>
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('sortedByRecommendation').click();
+        });
+    </script>
 </body>
-
-<!--<th:block th:replace="~{footer :: footer}"></th:block>-->
+<th:block th:replace="~{footer :: footer}"></th:block>

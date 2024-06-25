@@ -58,6 +58,8 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
         return cvo.getNickName();
     }
 
+    public Boolean getStatus(){return cvo.isMStatus();}
+
     @Override
     public boolean isAccountNonExpired() {
         return true;
@@ -82,7 +84,19 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
     public String getName() {
         return null;
     }
+
     public String getAuth(){
         return cvo.getRole();
     }
+    public Boolean getMStatus(){
+        return cvo.isMStatus();
+    }
+
+    public long getPoint(){return  cvo.getPoint();}
+
+    public void updatePoints(long point) {
+        cvo.setPoint(point);
+    }
+
+    public void updateMStatus(boolean mStatus) {cvo.setMStatus(mStatus);}
 }

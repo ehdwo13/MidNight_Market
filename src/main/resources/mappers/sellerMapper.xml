@@ -5,14 +5,28 @@
 <mapper namespace="com.project.www.repository.SellerMapper">
     
     <insert id="register">
-        INSERT INTO seller(id,pw,shop_name)
-        VALUES (#{id}, #{pw}, #{shopName})
+        INSERT INTO seller(id,pw,shop_name,tel)
+        VALUES (#{id}, #{pw}, #{shopName}, #{tel})
     </insert>
     <select id="checkId" resultType="int">
         select count(id) from seller where id = #{id}
     </select>
     <select id="checkShopName" resultType="int">
         select count(shop_name) from seller where shop_name = #{shopName}
+    </select>
+    <select id="findById" resultType="com.project.www.domain.SellerVO">
+        select * from seller where id = #{id}
+    </select>
+    <select id="getList" resultType="com.project.www.domain.SellerVO">
+        select * from seller
+    </select>
+    <select id="getShopName" resultType="String">
+        SELECT shop_name from seller
+        WHERE id = #{sellerId}
+    </select>
+    <select id="getSellerId" resultType="String">
+        select id from seller
+        where shop_name = #{marketName}
     </select>
 
 

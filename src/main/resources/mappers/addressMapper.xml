@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.www.repository.AddressMapper">
+
+    <insert id="register">
+        INSERT into address(customer_id, address, addr_nick_name, addr_name, contact_num)
+        VALUES (#{customerId}, #{address}, #{addrNickName}, #{addrName}, #{contactNum})
+    </insert>
+
+    <select id="getList" resultType="com.project.www.domain.AddressVO">
+        SELECT * from address
+    </select>
+
+    <update id="resetIsMain">
+        UPDATE address
+        SET isMain = 'N'
+        WHERE customer_id = #{customerId}
+    </update>
+
+    <update id="update">
+        UPDATE address
+        SET isMain = 'Y'
+        WHERE ano = #{ano}
+    </update>
+
+    <delete id="delete">
+        DELETE from address
+        WHERE ano = #{ano}
+    </delete>
+
+    <select id="getIsMain" resultType="com.project.www.domain.AddressVO">
+        SELECT * from address
+        WHERE
+        customer_id = #{customerId}
+        AND
+        isMain = 'Y'
+    </select>
+
+    <select id="getAddress" resultType="com.project.www.domain.AddressVO">
+        SELECT * from address
+        WHERE
+        customer_id = #{customerId}
+        AND
+        isMain = 'Y'
+    </select>
+
+</mapper>

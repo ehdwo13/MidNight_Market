@@ -6,9 +6,10 @@ CREATE TABLE customer (
 	provider VARCHAR(256),
 	provider_id VARCHAR(256),
 	register_date DATETIME DEFAULT NOW(),
-	class VARCHAR(50) DEFAULT 'BRONZE',
-	address VARCHAR(400),
 	role VARCHAR(20) DEFAULT 'role_user',
+	m_status tinyint default 0,
+	m_reg_date datetime default now(),
+	point bigint default 0,
 	PRIMARY KEY (id)
 );
 
@@ -38,6 +39,7 @@ CREATE TABLE product (
 	thumb_image VARCHAR(256),
 	seller_id VARCHAR(50) NOT NULL,
 	is_del VARCHAR(5) DEFAULT "N",
+	review_count bigint default 0,
 	PRIMARY KEY (id)
 );
 
@@ -45,20 +47,31 @@ CREATE TABLE product (
 CREATE TABLE orders (
     id bigint AUTO_INCREMENT,
 	merchant_uid VARCHAR(256) NOT NULL,
+	imp_uid VARCHAR(256),
 	customer_id VARCHAR(150) NOT NULL,
 	product_id bigint NOT NULL,
 	qty bigint NOT NULL,
+	original_price bigint NOT NULL,
 	pay_price bigint NOT NULL,
 	orders_date DATETIME DEFAULT NOW(),
-	status VARCHAR(10) default 'stand_by',
+	status VARCHAR(10) default '주문대기',
+	#status가 변경될때마다 변경 (삭제하기 위해)
+	status_date DATETIME DEFAULT NOW(),
+	is_confirmed TINYINT DEFAULT 0,
 	is_review_comment tinyint DEFAULT 0,
 	PRIMARY KEY(id)
 );
 
 #수정완료
 CREATE TABLE address (
-	address VARCHAR(400) NOT NULL,
-	customer_id VARCHAR(150)
+    ano bigint NOT NULL AUTO_INCREMENT,
+    address VARCHAR(400) NOT NULL,
+    customer_id VARCHAR(30) NOT NULL,
+    isMain VARCHAR(30) DEFAULT 'N',
+    addr_nick_name VARCHAR(30) NOT NULL,
+    addr_name VARCHAR(30) NOT NULL,
+    contact_num VARCHAR(30) NOT NULL,
+    PRIMARY KEY(ano)
 );
 
 #수정완료
@@ -69,6 +82,7 @@ CREATE TABLE review (
 	register_date DATETIME DEFAULT NOW(),
 	rev_up_count bigint DEFAULT 0,
 	customer_id VARCHAR(150) NOT NULL,
+	nick_name VARCHAR(30) NOT NULL,
 	product_id bigint NOT NULL,
 	orders_id bigint NOT NULL,
 	PRIMARY KEY (id)
@@ -89,13 +103,10 @@ CREATE TABLE review_like(
 
 #수정완료
 CREATE TABLE member_coupon (
-	coupon_id bigint NOT NULL AUTO_INCREMENT,
-	issue_date DATETIME DEFAULT NOW(),
-	end_date DATETIME,
-	use_status BOOLEAN,
+	use_status BOOLEAN default 0,
 	use_date DATETIME,
 	customer_id VARCHAR(150) NOT NULL,
-	PRIMARY KEY (coupon_id)
+	coupon_id bigint
 );
 
 #수정완료
@@ -103,7 +114,8 @@ CREATE TABLE coupon (
 	id bigint NOT NULL AUTO_INCREMENT,
 	name VARCHAR(100) NOT NULL,
 	discount_amount bigint,
-	discount_percentage bigint,
+	issue_date DATETIME DEFAULT NOW(),
+    end_date DATETIME,
 	PRIMARY KEY (id)
 );
 
@@ -111,7 +123,8 @@ CREATE TABLE coupon (
 CREATE TABLE basket (
 	customer_id VARCHAR(150) NOT NULL,
 	qty bigint NOT NULL,
-	product_id bigint NOT NULL
+	product_id bigint NOT NULL,
+	is_checked TINYINT DEFAULT 1
 );
 
 #수정완료
@@ -162,15 +175,17 @@ CREATE TABLE payment (
 	pay_price bigint NOT NULL,
 	pay_method VARCHAR(100),
 	address VARCHAR(400),
-	status VARCHAR(10) DEFAULT 'stand_by',
+	status VARCHAR(10) DEFAULT '결제대기',
+	used_coupon_id BIGINT DEFAULT 0,
+	used_point BIGINT DEFAULT 0,
 	PRIMARY KEY (merchant_uid)
 );
 
 #수정완료
 CREATE TABLE notification (
-	notify_type VARCHAR(100) NOT NULL,
-	notify_content VARCHAR(200) NOT NULL,
+	notify_content VARCHAR(500) NOT NULL,
 	notify_date DATETIME DEFAULT NOW(),
+	is_read tinyint default 0,
 	customer_id VARCHAR(150) NOT NULL
 );
 
@@ -223,6 +238,25 @@ CREATE TABLE slang (
     register_date DATETIME DEFAULT NOW()
 );
 
+#소켓채팅
+CREATE TABLE chat_room (
+    id BIGINT AUTO_INCREMENT NOT NULL,
+    customer_id VARCHAR(150) NOT NULL,
+    seller_id VARCHAR(150) NOT NULL,
+    PRIMARY KEY (id)
+);
+#소켓채팅
+CREATE TABLE message (
+    id BIGINT AUTO_INCREMENT NOT NULL,
+    chat_room_id BIGINT NOT NULL,
+    sender_id varchar(150) not null,
+    sender_type varchar(50) not null,
+    content TEXT NOT NULL,
+    send_time DATETIME DEFAULT NOW(),
+    PRIMARY KEY (id),
+    FOREIGN KEY (chat_room_id) REFERENCES chat_room(id)
+);
+
 
 ALTER TABLE product_category_detail ADD CONSTRAINT FK_product_category_TO_product_category_detail_1 FOREIGN KEY (
 	product_category_id
@@ -265,7 +299,10 @@ ALTER TABLE orders ADD CONSTRAINT FK_payment_TO_orders_1 FOREIGN KEY (
 )
 REFERENCES payment (
 	merchant_uid
-);
+)
+#payment가 삭제되면 orders도 같이 삭제
+ON DELETE CASCADE
+;
 
 ALTER TABLE review ADD CONSTRAINT FK_customer_TO_review_1 FOREIGN KEY (
 	customer_id
@@ -378,6 +415,13 @@ ALTER TABLE review_image ADD CONSTRAINT FK_review_TO_review_image_1 FOREIGN KEY 
 REFERENCES review (
 	id
 );
+#쿠폰 연결
+ALTER TABLE `member_coupon` ADD CONSTRAINT `FK_coupon_TO_member_coupon_1` FOREIGN KEY (
+	`coupon_id`
+)
+REFERENCES `coupon` (
+	`id`
+);
 
 #상품 좋아요 연결
 ALTER TABLE review_like ADD CONSTRAINT FK_review_TO_review_like_1 FOREIGN KEY (
@@ -410,6 +454,10 @@ REFERENCES product (
 	id
 );
 
+insert into coupon(name, discount_amount, end_date) values("신규회원", 3000 , "2099-12-31");
+insert into coupon(name, discount_amount, end_date) values("멤버쉽1", 3000 , "2099-12-31");
+insert into coupon(name, discount_amount, end_date) values("멤버쉽2", 3000 , "2099-12-31");
+insert into coupon(name, discount_amount, end_date) values("멤버쉽3", 3000 , "2099-12-31");
 
 -- 카테고리
 INSERT INTO PRODUCT_CATEGORY VALUES (1, "채소");
@@ -469,23 +517,6116 @@ INSERT INTO PRODUCT_CATEGORY_DETAIL VALUES (42, "밀키트", 9);
 INSERT INTO customer(id, pw, nick_name, provider, provider_id, role)
 VALUES ('admin', '$2a$10$bYu2jPdVKXbYf.x7/hpzEeft1gW8j9eguBjp4ICp5ij4.RUt4R1Oy', 'admin', 'form', 'admin', 'role_admin');
 
-#TEST DATA
-INSERT INTO customer(id,pw,nick_name)
-VALUES ('oco0217@gmail.com', 'cksdnd12', '고객');
+#view Table
 
-INSERT INTO seller(id,pw,shop_name,tel)
-VALUES ('dbscksdnd','cksdnd12','이젠마켓','010-6374-6951');
+#베스트 (가장 많이 팔린 view)
+CREATE VIEW best AS
+SELECT *
+FROM product
+ORDER BY total_sold_qty DESC
+LIMIT 300;
 
-INSERT INTO product(name, price,discount_price, product_category_detail_id, description, total_qty, total_sold_qty, main_image, thumb_image, seller_id)
-VALUES('길고 긴 바나나', 150, 150, 15, '너무맛잇어서 문제', 7, 0,
-'/upload/2024\\06\\03/3a514557-d3e8-4f03-b0bb-7ec45c360032_바나나메인.jpg',
-'/upload/2024\\06\\03/3a514557-d3e8-4f03-b0bb-7ec45c360032_th_바나나메인.jpg',
-'dbscksdnd'),
-('토마토', 250, 250, 2, '엄청맛잇음', 24, 0,
-'/upload/2024\\06\\03/f25071f1-957b-4751-afd9-0398837be89c_토마토메인.jpg',
-'/upload/2024\\06\\03/f25071f1-957b-4751-afd9-0398837be89c_th_토마토메인.jpg',
-'dbscksdnd'),
-('사과', 750, 750, 8, '엄청맛잇음', 12, 0,
-'/upload/2024\\06\\03/795f4f2f-f273-4c9d-9c86-f61c9e733cc3_사과메인.jpeg',
-'/upload/2024\\06\\03/795f4f2f-f273-4c9d-9c86-f61c9e733cc3_th_사과메인.jpeg',
-'dbscksdnd');
+#세일 (가장 많이 세일중인 view)
+CREATE VIEW sale AS
+SELECT *
+FROM product
+ORDER BY discount_rate DESC
+LIMIT 50;
+
+#신상품 (가장 최근에 나온 view)
+CREATE VIEW new AS
+SELECT *
+FROM product
+ORDER BY register_date DESC
+LIMIT 300;
+
+INSERT INTO `seller`
+VALUES      ('ehdwo@test.com',
+             '$2a$10$vxG/p6/mUG9uL1GZ.6BOEeBoe4jllBRsQWlKqhFU8JRbM7Qdq5l/y',
+             '올인마켓',
+             '01012321344',
+             'role_seller'),
+            ('lhj6399@naver.com',
+             '$2a$10$YhsgnNfLutYKa.hioGtAOOSOyhLCYTnSBz4TyoYO0jHVcUgw5KGvO',
+             '학준마켓',
+             '01085055097',
+             'role_seller'),
+            ('nara@naver.com',
+             '$2a$10$TBzMeTU5m/S0xRQ/H3HtPukQMsnGLlvAQIC87VzC0LDSWSK66Zs2K',
+             '리마켓',
+             '01012345678',
+             'role_seller'),
+            ('yoon@naver.com',
+             '$2a$10$x0Qh6kcEG70T1Z8U7w10H.DV14y84e3WXynPxGVpCyAytbKGWCbLu',
+             '웅마켓',
+             '01063746951',
+             'role_seller');
+
+INSERT INTO `product`
+VALUES      (1,
+             '햇감자 1kg',
+             5990,
+             0,
+             5990,
+             1,
+             '땅에서 갓 캐낸 햇감자',
+             100,
+             0,
+             '2024-06-14 10:09:11',
+'/upload/2024\\06\\14/612d6600-5040-4c3a-9107-4c1b884ca0b0_감자1.jpg',
+'/upload/2024\\06\\14/612d6600-5040-4c3a-9107-4c1b884ca0b0_th_감자1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (2,
+             '[가농바이오] 단백이',
+             8980,
+             0,
+             8980,
+             18,
+             '삶은 계란의 흰자만 먹고 싶을 때',
+             100,
+             0,
+             '2024-06-14 10:11:40',
+'/upload/2024\\06\\14/bf5829f9-52bc-4883-958c-866e6a8ce0a4_main.jpg',
+'/upload/2024\\06\\14/bf5829f9-52bc-4883-958c-866e6a8ce0a4_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (3,
+             '[YOZM] 플레인그릭요거트 100g',
+             3900,
+             0,
+             3900,
+             33,
+             '크림치즈같은 진득한 텍스처',
+             100,
+             0,
+             '2024-06-14 10:11:44',
+'/upload/2024\\06\\14/e1702162-2b51-45e4-85a4-beed706c5b7e_main.jpg',
+'/upload/2024\\06\\14/e1702162-2b51-45e4-85a4-beed706c5b7e_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (4,
+             '한끼 감자',
+             2390,
+             0,
+             2390,
+             1,
+             '다양한 요리에 더하는 고소한 단맛',
+             100,
+             0,
+             '2024-06-14 10:13:18',
+'/upload/2024\\06\\14/01084b9c-8f48-4f59-b400-4c091e527f9d_감자2.jpg',
+'/upload/2024\\06\\14/01084b9c-8f48-4f59-b400-4c091e527f9d_th_감자2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (5,
+             '[가농바이오] 모닝에그',
+             8900,
+             0,
+             8900,
+             18,
+             '촉촉한 수란을 간편하게',
+             100,
+             0,
+             '2024-06-14 10:13:37',
+'/upload/2024\\06\\14/79d70948-4c9d-4d9f-8164-907a1ea00a7c_main.jpg',
+'/upload/2024\\06\\14/79d70948-4c9d-4d9f-8164-907a1ea00a7c_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (6,
+             '친환경 감자',
+             5390,
+             0,
+             5390,
+             1,
+             '안심하고 즐기는 파근파근함',
+             100,
+             0,
+             '2024-06-14 10:13:48',
+'/upload/2024\\06\\14/70674e37-2099-42fc-8e0d-38bbdeb1ea83_감자3.jpg',
+'/upload/2024\\06\\14/70674e37-2099-42fc-8e0d-38bbdeb1ea83_th_감자3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (7,
+             ' 친환경 깐 감자',
+             4490,
+             0,
+             4490,
+             1,
+             '껍질을 벗겨 간편한 감자',
+             100,
+             0,
+             '2024-06-14 10:14:07',
+'/upload/2024\\06\\14/2f025d29-61d9-4c3f-89df-b12065485c03_감자4.jpg',
+'/upload/2024\\06\\14/2f025d29-61d9-4c3f-89df-b12065485c03_th_감자4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (8,
+             '[그릭데이] 그릭요거트 시그니처 100g',
+             3800,
+             0,
+             3800,
+             33,
+             '꾸덕꾸덕한 질감의 농축 요거트',
+             100,
+             0,
+             '2024-06-14 10:14:11',
+'/upload/2024\\06\\14/3902ac1c-280d-40c4-999d-efb67a26abf0_main.jpg',
+'/upload/2024\\06\\14/3902ac1c-280d-40c4-999d-efb67a26abf0_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (9,
+             '[조인] 동물복지 유정 구운란 20구',
+             13500,
+             0,
+             13500,
+             18,
+             '탱글하고 고소한 영양 간식',
+             100,
+             0,
+             '2024-06-14 10:14:18',
+'/upload/2024\\06\\14/2cb2dd12-2afc-4770-bb16-c50f99b9896a_main.jpeg',
+'/upload/2024\\06\\14/2cb2dd12-2afc-4770-bb16-c50f99b9896a_th_main.jpeg',
+'nara@naver.com',
+'N',
+0),
+            (10,
+             '[CJ] 맛밤 4개입',
+             6950,
+             0,
+             6950,
+             23,
+             '알알이 들어찬 달콤한 행복',
+             100,
+             0,
+             '2024-06-14 10:14:28',
+'/upload/2024\\06\\14/50838afc-4e4e-4926-842e-58ad5e43f29d_main.jpg',
+'/upload/2024\\06\\14/50838afc-4e4e-4926-842e-58ad5e43f29d_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (11,
+             '영암 친환경 꿀고구마',
+             15900,
+             0,
+             15900,
+             1,
+             '노란 속살에 배어든 달콤한 가득',
+             100,
+             0,
+             '2024-06-14 10:14:41',
+'/upload/2024\\06\\14/e4260c34-d4cf-4c30-8647-2c41bc16c047_고구마1.jpg',
+'/upload/2024\\06\\14/e4260c34-d4cf-4c30-8647-2c41bc16c047_th_고구마1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (12,
+             ' 호박고구마',
+             7490,
+             0,
+             7490,
+             1,
+             '더욱 촉촉하고 달콤한',
+             100,
+             0,
+             '2024-06-14 10:15:02',
+'/upload/2024\\06\\14/bf3753b8-2564-4a70-9a3e-fdcb571c3f80_고구마2.jpg',
+'/upload/2024\\06\\14/bf3753b8-2564-4a70-9a3e-fdcb571c3f80_th_고구마2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (13,
+             '[요플레] ONLY2 플레인 요거트 대용량 1',
+             9480,
+             0,
+             9480,
+             33,
+             '깔끔하고 담백하게 완성한 요거트',
+             100,
+             0,
+             '2024-06-14 10:15:13',
+'/upload/2024\\06\\14/761427e3-3734-45ff-ae59-8155928d438e_main.jpg',
+'/upload/2024\\06\\14/761427e3-3734-45ff-ae59-8155928d438e_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (14,
+             '[상하농원] 순갈색 동물복지 유정란 15구',
+             9200,
+             0,
+             9200,
+             18,
+             '자연을 품은 영양 듬뿍 달걀',
+             100,
+             0,
+             '2024-06-14 10:15:20',
+'/upload/2024\\06\\14/8adaece8-39ea-4087-98cc-d6e6a3b51e0e_main.jpg',
+'/upload/2024\\06\\14/8adaece8-39ea-4087-98cc-d6e6a3b51e0e_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (15,
+             '한입 꿀고구마',
+             5990,
+             0,
+             5990,
+             1,
+             '아담한 사이즈로 즐기는 달콤함',
+             100,
+             0,
+             '2024-06-14 10:15:24',
+'/upload/2024\\06\\14/037a2bec-c594-4980-96f3-8fc87257bbb7_고구마3.jpg',
+'/upload/2024\\06\\14/037a2bec-c594-4980-96f3-8fc87257bbb7_th_고구마3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (16,
+             '더 달콤한 무농약 숙성 고구마',
+             11900,
+             0,
+             11900,
+             1,
+             '숙성 과정에서 농축된 진한 달콤함',
+             100,
+             0,
+             '2024-06-14 10:15:44',
+'/upload/2024\\06\\14/8e0a70de-49f9-4008-9d3e-3ddea4a96cd4_고구마4.jpg',
+'/upload/2024\\06\\14/8e0a70de-49f9-4008-9d3e-3ddea4a96cd4_th_고구마4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (17,
+             '[맥스봉] 치즈 소시지 525g',
+             6980,
+             0,
+             6980,
+             23,
+             '고소한 체다 치즈를 더한 소시지',
+             100,
+             0,
+             '2024-06-14 10:15:50',
+'/upload/2024\\06\\14/65be6d77-30c7-469a-a977-14b9f494b224_main.jpg',
+'/upload/2024\\06\\14/65be6d77-30c7-469a-a977-14b9f494b224_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (18,
+             '[요플레] 플레인 화이트430g',
+             3680,
+             0,
+             3680,
+             33,
+             '국산 원유의 순수함 그대로 ',
+             100,
+             0,
+             '2024-06-14 10:15:55',
+'/upload/2024\\06\\14/c71a52de-baf9-4b40-9196-a290d58ca8d7_main.jpg',
+'/upload/2024\\06\\14/c71a52de-baf9-4b40-9196-a290d58ca8d7_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (19,
+             '제주 흙당근',
+             6990,
+             0,
+             6990,
+             1,
+             '제주도에서 자란 영양 가득 채소',
+             100,
+             0,
+             '2024-06-14 10:16:14',
+'/upload/2024\\06\\14/45e36323-46b4-4b76-ba52-353ed61f678f_당근1.jpg',
+'/upload/2024\\06\\14/45e36323-46b4-4b76-ba52-353ed61f678f_th_당근1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (20,
+             '[자연애찬] 지정농장 동물복지 유정란 20구',
+             9990,
+             0,
+             9990,
+             18,
+             '항생제 없이 키운 닭이 낳아 안심',
+             100,
+             0,
+             '2024-06-14 10:16:17',
+'/upload/2024\\06\\14/ac46546d-48b6-45a3-bd73-a30d6f129af1_main.jpg',
+'/upload/2024\\06\\14/ac46546d-48b6-45a3-bd73-a30d6f129af1_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (21,
+             '친환경 햇당근',
+             5290,
+             0,
+             5290,
+             1,
+             '베타카로틴이 풍부한 주황빛 채소',
+             100,
+             0,
+             '2024-06-14 10:16:38',
+'/upload/2024\\06\\14/da045c0b-0757-4d34-93a2-33c70034148a_당근2.jpg',
+'/upload/2024\\06\\14/da045c0b-0757-4d34-93a2-33c70034148a_th_당근2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (22,
+             '[남양] 이오 요구르트 (80mL X 10개입',
+             4900,
+             0,
+             4900,
+             33,
+             '안심하고 건네는 발효유',
+             100,
+             0,
+             '2024-06-14 10:16:52',
+'/upload/2024\\06\\14/46b6b779-baa4-463a-bb30-d82c272d595e_main.jpg',
+'/upload/2024\\06\\14/46b6b779-baa4-463a-bb30-d82c272d595e_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (23,
+             '밀크 클래식 쌀과자 240g',
+             3980,
+             0,
+             3980,
+             23,
+             '진한 우유 향이 매력적인 쌀과자',
+             100,
+             0,
+             '2024-06-14 10:16:53',
+'/upload/2024\\06\\14/cf44d17d-0bd1-48dc-bb7f-31c25c1ee021_main.jpg',
+'/upload/2024\\06\\14/cf44d17d-0bd1-48dc-bb7f-31c25c1ee021_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (24,
+             '[상하농원] 순갈색 동물복지 유정란 15구',
+             14900,
+             0,
+             14900,
+             18,
+             '영양만점 깨끗한 청란',
+             100,
+             0,
+             '2024-06-14 10:16:56',
+'/upload/2024\\06\\14/f830e8d4-cb96-468d-b049-165f5046b718_main.jpg',
+'/upload/2024\\06\\14/f830e8d4-cb96-468d-b049-165f5046b718_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (25,
+             '한끼 당근',
+             1990,
+             0,
+             1990,
+             1,
+             '베타카로틴이 풍부한 주홍빛 채소',
+             100,
+             0,
+             '2024-06-14 10:16:57',
+'/upload/2024\\06\\14/fbb28b53-2c36-4277-b910-d1b54a5551fe_당근3.jpg',
+'/upload/2024\\06\\14/fbb28b53-2c36-4277-b910-d1b54a5551fe_th_당근3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (26,
+             '당근채',
+             3490,
+             0,
+             3490,
+             1,
+             '손쉽게 더하는 산뜻한 매력',
+             100,
+             0,
+             '2024-06-14 10:17:15',
+'/upload/2024\\06\\14/43bb349d-686c-4bdd-a902-606ef4ee2514_당근4.jpg',
+'/upload/2024\\06\\14/43bb349d-686c-4bdd-a902-606ef4ee2514_th_당근4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (27,
+             '[상하목장] 마시는 유기농 요구르트 (100m)',
+             2680,
+             0,
+             2680,
+             33,
+             '정직하게 만든 유기농 요구르트',
+             100,
+             0,
+             '2024-06-14 10:17:36',
+'/upload/2024\\06\\14/396f6242-354b-472e-97af-1eab905361de_main.jpg',
+'/upload/2024\\06\\14/396f6242-354b-472e-97af-1eab905361de_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (28,
+             '[자연실록] 동물복지 한입 닭가슴살 1kg',
+             14700,
+             0,
+             14700,
+             19,
+             '넉넉히 구비하는 촉촉한 닭가슴살',
+             100,
+             0,
+             '2024-06-14 10:17:53',
+'/upload/2024\\06\\14/4c63dbdb-ff65-4478-a380-013da28a8941_main.jpeg',
+'/upload/2024\\06\\14/4c63dbdb-ff65-4478-a380-013da28a8941_th_main.jpeg',
+'nara@naver.com',
+'N',
+0),
+            (29,
+             '[체리쉬] 망고 푸딩 젤리 840g',
+             10980,
+             0,
+             10980,
+             24,
+             '코코넛 알갱이가 콕콕',
+             100,
+             0,
+             '2024-06-14 10:18:16',
+'/upload/2024\\06\\14/d568e306-cdc2-4ba0-96c0-bb530ea32ea1_main.jpg',
+'/upload/2024\\06\\14/d568e306-cdc2-4ba0-96c0-bb530ea32ea1_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (30,
+             '[서울우유] 요구르트 (65mL X 20개)',
+             3300,
+             0,
+             3300,
+             33,
+             '손에 쥐고 마시는 국민 간식',
+             100,
+             0,
+             '2024-06-14 10:18:29',
+'/upload/2024\\06\\14/55316220-00dc-4570-a070-d573ebd44217_main.jpg',
+'/upload/2024\\06\\14/55316220-00dc-4570-a070-d573ebd44217_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (31,
+             '양파',
+             4590,
+             0,
+             4590,
+             2,
+             '넉넉하게 즐기는 단골 식재료',
+             100,
+             0,
+             '2024-06-14 10:18:31',
+'/upload/2024\\06\\14/3e0d134c-8dda-4b16-909d-4beae8fbbb2b_양파1.jpg',
+'/upload/2024\\06\\14/3e0d134c-8dda-4b16-909d-4beae8fbbb2b_th_양파1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (32,
+             '[자연실록] 무항생제 닭 다리살 (정육) 500g',
+             10200,
+             0,
+             10200,
+             19,
+             '부드럽고 고소한 닭 다리살',
+             100,
+             0,
+             '2024-06-14 10:18:39',
+'/upload/2024\\06\\14/2856ebb3-2ae3-42ca-95dd-77011c2e14b7_main.jpeg',
+'/upload/2024\\06\\14/2856ebb3-2ae3-42ca-95dd-77011c2e14b7_th_main.jpeg',
+'nara@naver.com',
+'N',
+0),
+            (33,
+             '양파',
+             3490,
+             0,
+             3490,
+             2,
+             '알싸한 속이 꽉 찬',
+             100,
+             0,
+             '2024-06-14 10:18:53',
+'/upload/2024\\06\\14/0186c258-d1f4-4424-9b0e-ea48291b92c1_양파2.jpg',
+'/upload/2024\\06\\14/0186c258-d1f4-4424-9b0e-ea48291b92c1_th_양파2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (34,
+             '[신앙촌] 런 요구르트 120mL 2종',
+             12000,
+             0,
+             12000,
+             33,
+             '온 가족이 함께 먹는 무지방 요구르트',
+             100,
+             0,
+             '2024-06-14 10:19:12',
+'/upload/2024\\06\\14/23114eb8-cc76-4d18-a940-e820624f6d3b_main.jpg',
+'/upload/2024\\06\\14/23114eb8-cc76-4d18-a940-e820624f6d3b_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (35,
+             '[하림] 치킨스테이크 다리살 320g',
+             8200,
+             0,
+             8200,
+             19,
+             '근사하게 즐기는 국내산 닭다리살',
+             100,
+             0,
+             '2024-06-14 10:19:19',
+'/upload/2024\\06\\14/8194782e-4381-433b-a774-dc31c05ee87c_main.jpeg',
+'/upload/2024\\06\\14/8194782e-4381-433b-a774-dc31c05ee87c_th_main.jpeg',
+'nara@naver.com',
+'N',
+0),
+            (36,
+             '[키토케토] 다크 MCT 무설탕 초콜릿 28개',
+             24500,
+             0,
+             24500,
+             24,
+             'MCT오일을 함유한 무설탕 초콜릿',
+             100,
+             0,
+             '2024-06-14 10:19:38',
+'/upload/2024\\06\\14/cd0d205c-d0db-431a-8f7b-637778e4df74_main.jpg',
+'/upload/2024\\06\\14/cd0d205c-d0db-431a-8f7b-637778e4df74_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (37,
+             '친환경 깐 양파',
+             3090,
+             0,
+             3090,
+             2,
+             '바로 활용하는 손질 양파',
+             100,
+             0,
+             '2024-06-14 10:31:15',
+'/upload/2024\\06\\14/70991187-083c-4522-b787-8789abf36805_양파3.jpg',
+'/upload/2024\\06\\14/70991187-083c-4522-b787-8789abf36805_th_양파3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (38,
+             '유기농 양파',
+             6990,
+             0,
+             6990,
+             2,
+             '건강하게 누리는 단골 식재료',
+             100,
+             0,
+             '2024-06-14 10:31:42',
+'/upload/2024\\06\\14/4cf251db-81a9-4047-b03f-9e9acc76bb9b_양파4.jpg',
+'/upload/2024\\06\\14/4cf251db-81a9-4047-b03f-9e9acc76bb9b_th_양파4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (39,
+'[킷캣] 미니 오리지널 초코 웨이퍼 405g (9g x 45개입)',
+13980,
+0,
+13980,
+24,
+'넉넉히 즐기는 달콤한 간식',
+100,
+0,
+'2024-06-14 10:32:02',
+'/upload/2024\\06\\14/aa48fa59-add1-433b-9670-84da75d527d3_main.jpg',
+'/upload/2024\\06\\14/aa48fa59-add1-433b-9670-84da75d527d3_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (40,
+             '깐대파',
+             3490,
+             0,
+             3490,
+             2,
+             '시원한 국물 맛의 비밀',
+             100,
+             0,
+             '2024-06-14 10:32:15',
+'/upload/2024\\06\\14/d2847d0c-d2d1-4c32-991f-c0fea2ce2306_대파1.jpg',
+'/upload/2024\\06\\14/d2847d0c-d2d1-4c32-991f-c0fea2ce2306_th_대파1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (41,
+             '흙대파',
+             2990,
+             0,
+             2990,
+             2,
+             '제철 맞은 대파의 싱싱함 가득',
+             100,
+             0,
+             '2024-06-14 10:32:31',
+'/upload/2024\\06\\14/4ff5bc11-2afd-4293-8a58-d99c01bd7d95_대파2.jpg',
+'/upload/2024\\06\\14/4ff5bc11-2afd-4293-8a58-d99c01bd7d95_th_대파2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (42,
+             '잎몸 대파',
+             3790,
+             0,
+             3790,
+             2,
+             '하얀 잎몸 부분만을 담아',
+             100,
+             0,
+             '2024-06-14 10:32:50',
+'/upload/2024\\06\\14/5c3cfe7b-a318-4cec-86bf-d2438e301977_대파3.jpg',
+'/upload/2024\\06\\14/5c3cfe7b-a318-4cec-86bf-d2438e301977_th_대파3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (43,
+             '한끼 대파',
+             2290,
+             0,
+             2290,
+             2,
+             '싱싱함을 담은 손질 대파',
+             100,
+             0,
+             '2024-06-14 10:33:06',
+'/upload/2024\\06\\14/e6aa9646-cd49-44f1-a08c-f2c6c8894c68_대파4.jpg',
+'/upload/2024\\06\\14/e6aa9646-cd49-44f1-a08c-f2c6c8894c68_th_대파4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (44,
+             '[DIMES] 석류 착즙주스 1L',
+             5990,
+             0,
+             5990,
+             29,
+             '붉은 석류의 맛과 영양을 그대로',
+             100,
+             0,
+             '2024-06-14 10:33:22',
+'/upload/2024\\06\\14/385f1ed1-fb6c-46da-8cd9-b5fb36f87ab9_main.jpg',
+'/upload/2024\\06\\14/385f1ed1-fb6c-46da-8cd9-b5fb36f87ab9_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (45,
+             '깐마늘',
+             2990,
+             0,
+             2990,
+             2,
+             '손쉽게 사용하는 식재료',
+             100,
+             0,
+             '2024-06-14 10:33:35',
+'/upload/2024\\06\\14/36f66450-dd0c-4243-91cf-47aef2fb7e2a_마늘1.jpg',
+'/upload/2024\\06\\14/36f66450-dd0c-4243-91cf-47aef2fb7e2a_th_마늘1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (46,
+             '[더오담] 고추장양념 오리불고기 200g',
+             5900,
+             0,
+             5900,
+             19,
+'합리적인 가격대의 무항생제 오리로 만든 쫄깃 불고기',
+100,
+0,
+'2024-06-14 10:33:52',
+'/upload/2024\\06\\14/1db82d50-373f-4a60-9ef8-3c009866f49c_main.jpg',
+'/upload/2024\\06\\14/1db82d50-373f-4a60-9ef8-3c009866f49c_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (47,
+             '다진마늘',
+             8990,
+             0,
+             8990,
+             2,
+             '넉넉하게 챙기는 요리 필수 재료',
+             100,
+             0,
+             '2024-06-14 10:33:54',
+'/upload/2024\\06\\14/30e91172-40d8-4dca-9730-ee4b3bcb9841_마늘2.jpg',
+'/upload/2024\\06\\14/30e91172-40d8-4dca-9730-ee4b3bcb9841_th_마늘2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (48,
+             '한끼 깐마늘',
+             1790,
+             0,
+             1790,
+             2,
+             '간편하게 사용하는 껍질 벗긴 마늘',
+             100,
+             0,
+             '2024-06-14 10:34:17',
+'/upload/2024\\06\\14/96d56039-6467-4299-bbaf-5bd64a291e1e_마늘3.jpg',
+'/upload/2024\\06\\14/96d56039-6467-4299-bbaf-5bd64a291e1e_th_마늘3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (49,
+             '친환경 꼭지제거한 마늘',
+             6990,
+             0,
+             6990,
+             2,
+             '조리에 간편함을 더한 깐마늘',
+             100,
+             0,
+             '2024-06-14 10:34:33',
+'/upload/2024\\06\\14/e482c967-9c35-4c84-a06f-7822ba0bed78_마늘4.jpg',
+'/upload/2024\\06\\14/e482c967-9c35-4c84-a06f-7822ba0bed78_th_마늘4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (50,
+             '손질 쌈배추',
+             2490,
+             0,
+             2490,
+             2,
+             '쌈으로 즐기는 달큼한 배춧잎',
+             100,
+             0,
+             '2024-06-14 10:34:57',
+'/upload/2024\\06\\14/b8d4e1a9-79cd-4260-ab17-cf112603c49b_배추1.jpg',
+'/upload/2024\\06\\14/b8d4e1a9-79cd-4260-ab17-cf112603c49b_th_배추1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (51,
+             '친환경 잎채소 쌈배추',
+             3490,
+             0,
+             3490,
+             2,
+             '고소함이 겹겹이 쌓인 미니배추',
+             100,
+             0,
+             '2024-06-14 10:35:32',
+'/upload/2024\\06\\14/8b4328cc-2552-41c1-9fef-c339ec9af757_배추2.jpg',
+'/upload/2024\\06\\14/8b4328cc-2552-41c1-9fef-c339ec9af757_th_배추2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (52,
+             '알배기 배추',
+             5490,
+             0,
+             5490,
+             2,
+             '초록빛이어도 달큰한',
+             100,
+             0,
+             '2024-06-14 10:35:49',
+'/upload/2024\\06\\14/14599230-7138-4129-a79e-af84962d9c0d_배추3.jpg',
+'/upload/2024\\06\\14/14599230-7138-4129-a79e-af84962d9c0d_th_배추3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (53,
+             '친환경 손질 쌈배추',
+             3490,
+             0,
+             3490,
+             2,
+             '간편하게 사용하는 노란빛 배춧잎',
+             100,
+             0,
+             '2024-06-14 10:36:08',
+'/upload/2024\\06\\14/d1d9d984-17bc-4617-9b3c-0c0f48917567_배추4.jpg',
+'/upload/2024\\06\\14/d1d9d984-17bc-4617-9b3c-0c0f48917567_th_배추4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (54,
+             '밀양 깻잎',
+             1390,
+             0,
+             1390,
+             3,
+             '향긋하게 즐기는 잎채소',
+             100,
+             0,
+             '2024-06-14 10:37:43',
+'/upload/2024\\06\\14/6d77d7e7-5c48-4b88-9384-e52b875bb7e9_쌈채소1.jpg',
+'/upload/2024\\06\\14/6d77d7e7-5c48-4b88-9384-e52b875bb7e9_th_쌈채소1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (55,
+             '청상추',
+             1990,
+             0,
+             1990,
+             3,
+             '아삭아삭 싱그러운 잎채소',
+             100,
+             0,
+             '2024-06-14 10:38:01',
+'/upload/2024\\06\\14/07ae2a4f-2f63-41c3-87ff-6874b3e80843_쌈채소2.jpg',
+'/upload/2024\\06\\14/07ae2a4f-2f63-41c3-87ff-6874b3e80843_th_쌈채소2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (56,
+'[우리땅오리] 무항생제 오리 가슴살 슬라이스 350g (냉장)',
+9990,
+0,
+9990,
+19,
+'간편하게 구워먹는 오리 슬라이스',
+100,
+0,
+'2024-06-14 10:38:22',
+'/upload/2024\\06\\14/fd32ec63-9199-4672-9683-21f094ee3e20_main.jpg',
+'/upload/2024\\06\\14/fd32ec63-9199-4672-9683-21f094ee3e20_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (57,
+             '상추&깻잎 간편쌈',
+             2990,
+             0,
+             2990,
+             3,
+             '실패 없는 쌈 채소 조합',
+             100,
+             0,
+             '2024-06-14 10:38:23',
+'/upload/2024\\06\\14/cb48faf2-4dfb-4e8a-931c-062c50f2bb5c_쌈채소3.jpg',
+'/upload/2024\\06\\14/cb48faf2-4dfb-4e8a-931c-062c50f2bb5c_th_쌈채소3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (58,
+             '한끼 모듬쌈',
+             2990,
+             0,
+             2990,
+             3,
+             '부담 없이 즐기는 다양한 쌈 채소',
+             100,
+             0,
+             '2024-06-14 10:38:41',
+'/upload/2024\\06\\14/f5e6c0d2-4af5-41d1-8a88-f6594844dfcb_쌈채소4.jpg',
+'/upload/2024\\06\\14/f5e6c0d2-4af5-41d1-8a88-f6594844dfcb_th_쌈채소4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (59,
+             '[정다운] 느린농장 오리 가슴살 500g',
+             13490,
+             0,
+             13490,
+             19,
+             '부드럽게 즐기는 무항생제 오리',
+             100,
+             0,
+             '2024-06-14 10:39:03',
+'/upload/2024\\06\\14/85dc6bd2-f535-4798-a789-928d97ef86fe_main.jpg',
+'/upload/2024\\06\\14/85dc6bd2-f535-4798-a789-928d97ef86fe_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (60,
+             '경기 시금치',
+             2290,
+             0,
+             2290,
+             3,
+             '영양만점 만능 채소',
+             100,
+             0,
+             '2024-06-14 10:39:21',
+'/upload/2024\\06\\14/d04c6ea8-2613-4739-9c4a-22837e098c9c_나물1.jpg',
+'/upload/2024\\06\\14/d04c6ea8-2613-4739-9c4a-22837e098c9c_th_나물1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (61,
+             '미나리',
+             3390,
+             0,
+             3390,
+             3,
+             '독특한 향미로 입맛을 깨우는',
+             100,
+             0,
+             '2024-06-14 10:39:38',
+'/upload/2024\\06\\14/0aca282a-af1b-4030-85f7-c3ecf347259c_나물2.jpg',
+'/upload/2024\\06\\14/0aca282a-af1b-4030-85f7-c3ecf347259c_th_나물2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (62,
+             '[도드람한돈] 항정살 구이용 500g (냉장)',
+             28500,
+             0,
+             28500,
+             20,
+             '살코기와 지방의 완벽한 조화',
+             100,
+             0,
+             '2024-06-14 10:39:40',
+'/upload/2024\\06\\14/ec8500cc-c82a-4d24-ac9f-e3f263ffe9c4_main.jpeg',
+'/upload/2024\\06\\14/ec8500cc-c82a-4d24-ac9f-e3f263ffe9c4_th_main.jpeg',
+'nara@naver.com',
+'N',
+0),
+            (63,
+             '마늘종',
+             4990,
+             0,
+             4990,
+             3,
+             '아삭한 식감과 알싸한 내음',
+             100,
+             0,
+             '2024-06-14 10:39:59',
+'/upload/2024\\06\\14/8ac200e3-5bc4-49e5-9264-089399f1ef88_나물3.jpg',
+'/upload/2024\\06\\14/8ac200e3-5bc4-49e5-9264-089399f1ef88_th_나물3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (64,
+             '[제주도니] 제주 1등급 암퇘지 삼겹살 300g (냉장)',
+             15800,
+             0,
+             15800,
+             20,
+             '안전하게 즐기는 구이용 삼겹살',
+             100,
+             0,
+             '2024-06-14 10:40:14',
+'/upload/2024\\06\\14/5467e70e-f73d-4bca-9f32-b5f8565fc38f_main.jpg',
+'/upload/2024\\06\\14/5467e70e-f73d-4bca-9f32-b5f8565fc38f_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (65,
+             '친환경 데친 고사리',
+             5990,
+             0,
+             5990,
+             3,
+             '바로 요리하는 통통한 고사리',
+             100,
+             0,
+             '2024-06-14 10:40:15',
+'/upload/2024\\06\\14/4c11bd71-3cb2-429a-86fa-aca3c4209ab1_나물4.jpg',
+'/upload/2024\\06\\14/4c11bd71-3cb2-429a-86fa-aca3c4209ab1_th_나물4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (66,
+             '무농약 국산콩 콩나물',
+             1490,
+             0,
+             1490,
+             4,
+             '믿고 먹는 깨끗한 콩나물',
+             100,
+             0,
+             '2024-06-14 10:40:49',
+'/upload/2024\\06\\14/1889ef26-bb1f-43ad-9254-e6fb86d77ad1_콩나물1.jpg',
+'/upload/2024\\06\\14/1889ef26-bb1f-43ad-9254-e6fb86d77ad1_th_콩나물1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (67,
+             '제주콩 콩나물',
+             1690,
+             0,
+             1690,
+             4,
+             '1등급 제주콩으로 기른',
+             100,
+             0,
+             '2024-06-14 10:41:08',
+'/upload/2024\\06\\14/3244d1f7-da47-4302-8006-fec7715454e0_콩나물2.jpg',
+'/upload/2024\\06\\14/3244d1f7-da47-4302-8006-fec7715454e0_th_콩나물2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (68,
+             '[가야농장] 토마토 주스 1.5L',
+             2400,
+             0,
+             2400,
+             29,
+             '묵직하고 깊은 토마토의 풍미',
+             100,
+             0,
+             '2024-06-14 10:41:25',
+'/upload/2024\\06\\14/66881679-379f-485e-bb42-758e0d526cb3_main.jpg',
+'/upload/2024\\06\\14/66881679-379f-485e-bb42-758e0d526cb3_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (69,
+             '장수 찜용 콩나물',
+             1590,
+             0,
+             1590,
+             4,
+             '굵은 줄기에 아삭한 식감',
+             100,
+             0,
+             '2024-06-14 10:41:27',
+'/upload/2024\\06\\14/e86b6a81-fac0-44eb-865a-e6f8e1381c75_콩나물3.jpg',
+'/upload/2024\\06\\14/e86b6a81-fac0-44eb-865a-e6f8e1381c75_th_콩나물3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (70,
+             '[포크밸리] 한돈 대패 삼겹살 300g (냉동)',
+             9390,
+             0,
+             9390,
+             20,
+             '빠르게 익혀 먹는 대패 삼겹',
+             100,
+             0,
+             '2024-06-14 10:41:42',
+'/upload/2024\\06\\14/95697f17-17d5-4b43-83a7-e25e50d73bc3_main.jpg',
+'/upload/2024\\06\\14/95697f17-17d5-4b43-83a7-e25e50d73bc3_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (71,
+             '특등급 국산콩 무농약 콩나물',
+             2590,
+             0,
+             2590,
+             4,
+             '품질 좋은 콩으로 깨끗하게 기른',
+             100,
+             0,
+             '2024-06-14 10:41:47',
+'/upload/2024\\06\\14/47f7ff5d-6e8d-4c5a-8170-53cf61998bd1_콩나물4.jpg',
+'/upload/2024\\06\\14/47f7ff5d-6e8d-4c5a-8170-53cf61998bd1_th_콩나물4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (72,
+             '[건어물상회] 볶음용멸치 500g',
+             15200,
+             0,
+             15200,
+             16,
+             '든든히 담은 고소한 잔멸치',
+             100,
+             0,
+             '2024-06-14 10:42:27',
+'/upload/2024\\06\\14/e4f67d80-421d-4978-b945-ce5c1e361653_main.jpg',
+'/upload/2024\\06\\14/e4f67d80-421d-4978-b945-ce5c1e361653_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (73,
+             '팽이버섯',
+             1250,
+             0,
+             1250,
+             4,
+             '친근하고 부담없는 만능 버섯',
+             100,
+             0,
+             '2024-06-14 10:42:29',
+'/upload/2024\\06\\14/0b16ad09-9bdd-4e52-8f08-241af496a0af_버섯1.jpg',
+'/upload/2024\\06\\14/0b16ad09-9bdd-4e52-8f08-241af496a0af_th_버섯1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (74,
+             '참타리버섯',
+             1290,
+             0,
+             1290,
+             4,
+             '맛과 식감, 영양마저 뛰어난',
+             100,
+             0,
+             '2024-06-14 10:42:43',
+'/upload/2024\\06\\14/bb153958-1168-4af3-9f7d-44cdfe5a5f23_버섯2.jpg',
+'/upload/2024\\06\\14/bb153958-1168-4af3-9f7d-44cdfe5a5f23_th_버섯2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (75,
+             '새송이버섯',
+             2090,
+             0,
+             2090,
+             4,
+             '탄탄하고 쫄깃한 식감',
+             100,
+             0,
+             '2024-06-14 10:42:59',
+'/upload/2024\\06\\14/4a3a8fc7-a2f2-432d-9f7f-47e6d714cb4a_버섯3.jpg',
+'/upload/2024\\06\\14/4a3a8fc7-a2f2-432d-9f7f-47e6d714cb4a_th_버섯3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (76,
+             '[건어물상회] 통영 국물용멸치 300g',
+             7200,
+             0,
+             7200,
+             16,
+             '맑고 깔끔한 육수의 필수 재료',
+             100,
+             0,
+             '2024-06-14 10:43:04',
+'/upload/2024\\06\\14/88f4d1eb-5229-4fb7-94e0-874388051d8c_main.jpg',
+'/upload/2024\\06\\14/88f4d1eb-5229-4fb7-94e0-874388051d8c_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (77,
+             '표고버섯',
+             2690,
+             0,
+             2690,
+             4,
+             '감칠맛을 내는 필수 버섯',
+             100,
+             0,
+             '2024-06-14 10:43:13',
+'/upload/2024\\06\\14/823a3fda-704d-42b4-8879-9fc9c414bbfb_버섯4.jpg',
+'/upload/2024\\06\\14/823a3fda-704d-42b4-8879-9fc9c414bbfb_th_버섯4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (78,
+             '브로콜리',
+             1990,
+             0,
+             1990,
+             5,
+             '영양 만점 초록 꽃봉오리',
+             100,
+             0,
+             '2024-06-14 10:43:43',
+'/upload/2024\\06\\14/7341c676-9243-45e4-8fec-1ee13b2e6ecb_브로콜리1.jpg',
+'/upload/2024\\06\\14/7341c676-9243-45e4-8fec-1ee13b2e6ecb_th_브로콜리1.jpg'
+             ,
+'ehdwo@test.com',
+'N',
+0),
+            (79,
+             '[이어수산] 8단계 선별한 어린이 멸치 300g',
+             10990,
+             0,
+             10990,
+             16,
+             '아이들도 먹기 좋은 멸치',
+             100,
+             0,
+             '2024-06-14 10:43:47',
+'/upload/2024\\06\\14/e557e98e-8aa4-4c3f-9316-5ce6885db304_main.jpg',
+'/upload/2024\\06\\14/e557e98e-8aa4-4c3f-9316-5ce6885db304_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (80,
+             '친환경 조각 브로콜리',
+             4490,
+             0,
+             4490,
+             5,
+             '간편하게 즐기는 초록 꽃송이',
+             100,
+             0,
+             '2024-06-14 10:43:58',
+'/upload/2024\\06\\14/aacfd6cb-46cd-411f-bd41-c41693881884_브로콜리2.jpg',
+'/upload/2024\\06\\14/aacfd6cb-46cd-411f-bd41-c41693881884_th_브로콜리2.jpg'
+             ,
+'ehdwo@test.com',
+'N',
+0),
+            (81,
+             '냉동 브로콜리',
+             3890,
+             0,
+             3890,
+             5,
+             '먹기 좋은 부분만 담은',
+             100,
+             0,
+             '2024-06-14 10:44:18',
+'/upload/2024\\06\\14/39d40a9e-dd75-488f-a7d0-6c4749610a62_브로콜리3.jpg',
+'/upload/2024\\06\\14/39d40a9e-dd75-488f-a7d0-6c4749610a62_th_브로콜리3.jpg'
+             ,
+'ehdwo@test.com',
+'N',
+0),
+            (82,
+             '[강릉상회] 속살담은 손질 황태채 200g',
+             13300,
+             0,
+             13300,
+             16,
+             '가늘게 찢어 담은 황태',
+             100,
+             0,
+             '2024-06-14 10:44:33',
+'/upload/2024\\06\\14/f5a40b07-43c6-430f-af74-b2ddb95f0fcc_main.jpg',
+'/upload/2024\\06\\14/f5a40b07-43c6-430f-af74-b2ddb95f0fcc_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (83,
+             '유기농 다진 브로콜리',
+             2960,
+             0,
+             2960,
+             5,
+             '비타민 가득한 이유식 필수 재료',
+             100,
+             0,
+             '2024-06-14 10:44:37',
+'/upload/2024\\06\\14/77045b7a-3217-4f51-af57-fa6a79d94c81_브로콜리4.jpg',
+'/upload/2024\\06\\14/77045b7a-3217-4f51-af57-fa6a79d94c81_th_브로콜리4.jpg'
+             ,
+'ehdwo@test.com',
+'N',
+0),
+            (84,
+             '[말리] 코코넛 워터 100%',
+             4590,
+             0,
+             4590,
+             29,
+             '100% 착즙한 열대의 신선함',
+             100,
+             0,
+             '2024-06-14 10:44:48',
+'/upload/2024\\06\\14/b8adc816-320e-4825-b57e-50349e2b56f4_main.jpg',
+'/upload/2024\\06\\14/b8adc816-320e-4825-b57e-50349e2b56f4_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (85,
+             '양상추',
+             2690,
+             0,
+             2690,
+             5,
+             '청량감을 주는 아삭한 채소',
+             100,
+             0,
+             '2024-06-14 10:45:01',
+'/upload/2024\\06\\14/03c7fd6f-bb9d-4f88-967d-2330cb5dc506_양상추1.jpg',
+'/upload/2024\\06\\14/03c7fd6f-bb9d-4f88-967d-2330cb5dc506_th_양상추1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (86,
+             '[건어물상회] 황태채 300g',
+             14900,
+             0,
+             14900,
+             16,
+             '쫄깃한 식감이 매력적인 황태채',
+             100,
+             0,
+             '2024-06-14 10:45:07',
+'/upload/2024\\06\\14/f8337af2-185f-4ac4-974b-1c61fbe1f599_main.jpg',
+'/upload/2024\\06\\14/f8337af2-185f-4ac4-974b-1c61fbe1f599_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (87,
+             '친환경 양상추',
+             3490,
+             0,
+             3490,
+             5,
+             '샐러드와 샌드위치의 필수',
+             100,
+             0,
+             '2024-06-14 10:45:21',
+'/upload/2024\\06\\14/37fe6ca7-4ab6-44d1-9f56-094b507f5e7f_양상추2.jpg',
+'/upload/2024\\06\\14/37fe6ca7-4ab6-44d1-9f56-094b507f5e7f_th_양상추2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (88,
+             '[우주] 강원도 건조 부드러운 황태채 100g',
+             7990,
+             0,
+             7990,
+             16,
+             '손질하지 않고 간편하게 사용하는',
+             100,
+             0,
+             '2024-06-14 10:45:39',
+'/upload/2024\\06\\14/0ca19aa5-f02a-425e-a707-c80bff1a9a23_main.jpg',
+'/upload/2024\\06\\14/0ca19aa5-f02a-425e-a707-c80bff1a9a23_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (89,
+             '친환경 간편 양상추',
+             2230,
+             0,
+             2230,
+             5,
+             '손쉽게 즐기는 아삭함',
+             100,
+             0,
+             '2024-06-14 10:45:41',
+'/upload/2024\\06\\14/c78a01ea-88af-4473-aba7-5090ca9552b0_양상추3.jpg',
+'/upload/2024\\06\\14/c78a01ea-88af-4473-aba7-5090ca9552b0_th_양상추3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (90,
+             '양상추 2입',
+             4990,
+             0,
+             4990,
+             5,
+             '싱그러움이 느껴지는 채소',
+             100,
+             0,
+             '2024-06-14 10:45:57',
+'/upload/2024\\06\\14/9e1e8b14-cc11-4dc3-a00c-2b70061e8fb6_양상추4.jpg',
+'/upload/2024\\06\\14/9e1e8b14-cc11-4dc3-a00c-2b70061e8fb6_th_양상추4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (91,
+             '오이',
+             3490,
+             0,
+             3490,
+             6,
+             '싱그러움 가득한 수분 가득 채소',
+             100,
+             0,
+             '2024-06-14 10:46:28',
+'/upload/2024\\06\\14/adb3911a-515b-4082-bd35-f3efc6542210_오이1.jpg',
+'/upload/2024\\06\\14/adb3911a-515b-4082-bd35-f3efc6542210_th_오이1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (92,
+             '[감자밭] 감자빵 오리지널',
+             16500,
+             0,
+             16500,
+             26,
+             '춘천 감자밭 카페의 원조 감자빵(5개입)',
+             100,
+             0,
+             '2024-06-14 10:46:29',
+'/upload/2024\\06\\14/d169075e-ad9c-4a08-9c4a-82938f89a703_main.jpg',
+'/upload/2024\\06\\14/d169075e-ad9c-4a08-9c4a-82938f89a703_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (93,
+             '다다기오이',
+             4490,
+             0,
+             4490,
+             6,
+             '휘어진 모습이 개성 있는',
+             100,
+             0,
+             '2024-06-14 10:47:05',
+'/upload/2024\\06\\14/4a77ea4e-f089-40c0-96e6-b89c2c839a53_오이2.jpg',
+'/upload/2024\\06\\14/4a77ea4e-f089-40c0-96e6-b89c2c839a53_th_오이2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (94,
+             '가시오이',
+             2990,
+             0,
+             2990,
+             6,
+             '단단한 과육 속 단맛 가득',
+             100,
+             0,
+             '2024-06-14 10:47:22',
+'/upload/2024\\06\\14/0920bab8-93f9-42a4-a2d0-65ffeabec504_오이3.jpg',
+'/upload/2024\\06\\14/0920bab8-93f9-42a4-a2d0-65ffeabec504_th_오이3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (95,
+             '[올드페리도넛] 시그니처 4종세트',
+             19000,
+             0,
+             19000,
+             26,
+             '프리미엄 도넛 열풍의 주역',
+             100,
+             0,
+             '2024-06-14 10:47:25',
+'/upload/2024\\06\\14/f9efa9d7-b3ef-4585-98c3-b0a454b01412_main.jpg',
+'/upload/2024\\06\\14/f9efa9d7-b3ef-4585-98c3-b0a454b01412_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (96,
+             '취청오이',
+             2190,
+             0,
+             2190,
+             6,
+             '반찬으로 좋은 연한 과육',
+             100,
+             0,
+             '2024-06-14 10:47:38',
+'/upload/2024\\06\\14/f4ee91b8-a83c-46d7-9990-38f79bc1d661_오이4.jpg',
+'/upload/2024\\06\\14/f4ee91b8-a83c-46d7-9990-38f79bc1d661_th_오이4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (97,
+             '애호박',
+             1490,
+             0,
+             1490,
+             6,
+             '냉장고 속 단골 식재료',
+             100,
+             0,
+             '2024-06-14 10:48:49',
+'/upload/2024\\06\\14/d58dd9c9-ee2c-4f06-9c2b-5972c1636c17_호박1.jpg',
+'/upload/2024\\06\\14/d58dd9c9-ee2c-4f06-9c2b-5972c1636c17_th_호박1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (98,
+             '뉴질랜드 단호박',
+             2990,
+             0,
+             2990,
+             6,
+             '폭실폭실 은은한 단맛 뉴질랜드 단호박',
+             100,
+             0,
+             '2024-06-14 10:49:03',
+'/upload/2024\\06\\14/2ac28d63-a6fb-4991-8e08-8cf702188fec_호박2.jpg',
+'/upload/2024\\06\\14/2ac28d63-a6fb-4991-8e08-8cf702188fec_th_호박2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (99,
+             '냉동 바밤 단호박',
+             4690,
+             0,
+             4690,
+             6,
+             '손질 없이 즐기는 간편 단호박',
+             100,
+             0,
+             '2024-06-14 10:49:19',
+'/upload/2024\\06\\14/c6f99dca-88bf-4bed-8f2d-75bee81896b8_호박3.jpg',
+'/upload/2024\\06\\14/c6f99dca-88bf-4bed-8f2d-75bee81896b8_th_호박3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (100,
+             '[크리스피크림도넛] 오리지널 글레이즈드 (9개입)'
+             ,
+             13200,
+             0,
+             13200,
+             26,
+             '온 가족이 함께 즐기는 시그니처 도넛',
+             100,
+             0,
+             '2024-06-14 10:49:25',
+'/upload/2024\\06\\14/0efdafef-a78f-436c-9173-eb2a094826c1_main.jpg',
+'/upload/2024\\06\\14/0efdafef-a78f-436c-9173-eb2a094826c1_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (101,
+             '유기농 다진 단호박',
+             2690,
+             0,
+             2690,
+             6,
+             '손쉽게 꺼내 쓰는 노란 영양',
+             100,
+             0,
+             '2024-06-14 10:49:37',
+'/upload/2024\\06\\14/71f29c61-34c4-4737-ab48-dbf938293bc0_호박4.jpg',
+'/upload/2024\\06\\14/71f29c61-34c4-4737-ab48-dbf938293bc0_th_호박4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (102,
+             '청양고추',
+             1690,
+             0,
+             1690,
+             6,
+             '야물게 익은 매콤한 맛',
+             100,
+             0,
+             '2024-06-14 10:50:05',
+'/upload/2024\\06\\14/900c8c0f-a060-41a5-a99c-1971be76dfcf_고추1.jpg',
+'/upload/2024\\06\\14/900c8c0f-a060-41a5-a99c-1971be76dfcf_th_고추1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (103,
+             '[이호] 연평도 알찬 꽃게 2종 (냉동)',
+             18900,
+             0,
+             18900,
+             14,
+             '손쉽게 사용하는 가을의 감칠맛',
+             100,
+             0,
+             '2024-06-14 10:50:17',
+'/upload/2024\\06\\14/cddc4829-07a2-40c5-913a-34070e7d9c02_main.jpg',
+'/upload/2024\\06\\14/cddc4829-07a2-40c5-913a-34070e7d9c02_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (104,
+             '홍고추',
+             2190,
+             0,
+             2190,
+             6,
+             '빨간맛! 궁금한 요리를 위한 홍고추',
+             100,
+             0,
+             '2024-06-14 10:50:19',
+'/upload/2024\\06\\14/ab96548d-8c10-4e9b-96ab-863ab6d8a2cf_고추2.jpg',
+'/upload/2024\\06\\14/ab96548d-8c10-4e9b-96ab-863ab6d8a2cf_th_고추2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (105,
+             '꽈리고추',
+             2290,
+             0,
+             2290,
+             6,
+             '야들야들 맛있게 요리하는 꽈리고추',
+             100,
+             0,
+             '2024-06-14 10:50:37',
+'/upload/2024\\06\\14/3c16fe82-c57c-480a-bff3-ff6e5dbf590f_고추3.jpg',
+'/upload/2024\\06\\14/3c16fe82-c57c-480a-bff3-ff6e5dbf590f_th_고추3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (106,
+             '[포트럭] 알품은 손질 암꽃게 900g',
+             25900,
+             0,
+             25900,
+             14,
+             '끝까지 꽉 찬 고소한 알',
+             100,
+             0,
+             '2024-06-14 10:50:51',
+'/upload/2024\\06\\14/191eed5c-fea3-40e0-b220-14e8f66f0f6c_main.jpg',
+'/upload/2024\\06\\14/191eed5c-fea3-40e0-b220-14e8f66f0f6c_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (107,
+             '오이맛고추',
+             1990,
+             0,
+             1990,
+             6,
+             '생으로 아삭하게 먹는 오이맛 고추',
+             100,
+             0,
+             '2024-06-14 10:50:56',
+'/upload/2024\\06\\14/d97808d2-26c1-49ad-bb83-8a49dd8cde74_고추4.jpg',
+'/upload/2024\\06\\14/d97808d2-26c1-49ad-bb83-8a49dd8cde74_th_고추4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (108,
+             '신진도 가을 알품은 꽃게 2절 1kg (냉동)',
+             34900,
+             0,
+             34900,
+             14,
+             '속이 꽉 찬 제철 별미',
+             100,
+             0,
+             '2024-06-14 10:51:30',
+'/upload/2024\\06\\14/76b3b64b-d384-4ff4-a545-d9f1b886733d_main.jpg',
+'/upload/2024\\06\\14/76b3b64b-d384-4ff4-a545-d9f1b886733d_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (109,
+             '성주 참외',
+             9990,
+             0,
+             9990,
+             7,
+             '뽀얀 과육에 담긴 시원한 단맛',
+             100,
+             0,
+             '2024-06-14 10:51:42',
+'/upload/2024\\06\\14/05a0e03b-7192-40d3-9b82-df42a65f855d_국산과일1.jpg',
+'/upload/2024\\06\\14/05a0e03b-7192-40d3-9b82-df42a65f855d_th_국산과일1.jpg'
+             ,
+'ehdwo@test.com',
+'N',
+0),
+            (110,
+             '대추방울토마토',
+             6400,
+             0,
+             6400,
+             7,
+             '톡톡 씹히는 한 입 토마토',
+             100,
+             0,
+             '2024-06-14 10:52:06',
+'/upload/2024\\06\\14/8499fde1-765c-4b05-b6a3-ac1f4ad8343d_국산과일2.jpg',
+'/upload/2024\\06\\14/8499fde1-765c-4b05-b6a3-ac1f4ad8343d_th_국산과일2.jpg'
+             ,
+'ehdwo@test.com',
+'N',
+0),
+            (111,
+'[우주] 킹점보 칵테일새우살 200g (냉동) (21/25 사이즈)',
+9900,
+0,
+9900,
+14,
+'큼직한 사이즈의 자숙 새우',
+100,
+0,
+'2024-06-14 10:52:20',
+'/upload/2024\\06\\14/3ae0fb57-fece-43c1-983d-c7da692e8614_main.jpg',
+'/upload/2024\\06\\14/3ae0fb57-fece-43c1-983d-c7da692e8614_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (112,
+             '고랭지 부사 사과',
+             22900,
+             0,
+             22900,
+             7,
+             '달콤하게 만나는 부사',
+             100,
+             0,
+             '2024-06-14 10:52:23',
+'/upload/2024\\06\\14/9fb37e50-23af-4c9c-8a27-02c2a4796391_국산과일3.jpg',
+'/upload/2024\\06\\14/9fb37e50-23af-4c9c-8a27-02c2a4796391_th_국산과일3.jpg'
+             ,
+'ehdwo@test.com',
+'N',
+0),
+            (113,
+             '[르갈] 브르타뉴 버터 2종',
+             7600,
+             0,
+             7600,
+             34,
+'프랑스 브르타뉴 지역에서 탄생한 풍미가 깊은 버터',
+100,
+0,
+'2024-06-14 10:52:39',
+'/upload/2024\\06\\14/159a1f36-e2d9-4020-baa9-5b029a7bc200_main.jpg',
+'/upload/2024\\06\\14/159a1f36-e2d9-4020-baa9-5b029a7bc200_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (114,
+             '수박',
+             22900,
+             0,
+             22900,
+             7,
+             '언제 구입해도 맛있는 수박',
+             100,
+             0,
+             '2024-06-14 10:52:39',
+'/upload/2024\\06\\14/51bc8528-84ea-4fae-8f12-904d82d8aef8_국산과일4.jpg',
+'/upload/2024\\06\\14/51bc8528-84ea-4fae-8f12-904d82d8aef8_th_국산과일4.jpg'
+             ,
+'ehdwo@test.com',
+'N',
+0),
+            (115,
+'[우주] 프리미엄 손질 생새우살 200g (냉동)(26/30사이즈)',
+8400,
+0,
+8400,
+14,
+'두루 사용하기 좋은 간편 새우',
+100,
+0,
+'2024-06-14 10:52:58',
+'/upload/2024\\06\\14/665b9b32-73c3-47ab-91f6-1d25e672f944_main.jpg',
+'/upload/2024\\06\\14/665b9b32-73c3-47ab-91f6-1d25e672f944_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (116,
+             '뉴질랜드 골드키위',
+             14900,
+             0,
+             14900,
+             8,
+             '뉴질랜드에서 온 촉촉한 달콤함',
+             100,
+             0,
+             '2024-06-14 10:53:02',
+'/upload/2024\\06\\14/62e55c73-914b-49aa-b5e3-c429a1c8cd24_수입과일1.jpg',
+'/upload/2024\\06\\14/62e55c73-914b-49aa-b5e3-c429a1c8cd24_th_수입과일1.jpg'
+             ,
+'ehdwo@test.com',
+'N',
+0),
+            (117,
+             '캘리포니아 생체리',
+             13900,
+             0,
+             13900,
+             8,
+             '빛나는 붉은 껍질과 풍성한 과즙',
+             100,
+             0,
+             '2024-06-14 10:53:21',
+'/upload/2024\\06\\14/46540d74-8186-4905-b112-7ffcdbd660cd_수입과일2.jpg',
+'/upload/2024\\06\\14/46540d74-8186-4905-b112-7ffcdbd660cd_th_수입과일2.jpg'
+             ,
+'ehdwo@test.com',
+'N',
+0),
+            (118,
+             '[서울우유] 국산우유로 만든 버터 240g',
+             6540,
+             0,
+             6540,
+             34,
+             '국산 유크림으로 만든 서울우유 버터',
+             100,
+             0,
+             '2024-06-14 10:53:25',
+'/upload/2024\\06\\14/bec771e0-447a-4003-9ac0-c61aad98ac41_main.jpg',
+'/upload/2024\\06\\14/bec771e0-447a-4003-9ac0-c61aad98ac41_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (119,
+             '[피쉬쉘] 국산 흰다리새우',
+             13900,
+             0,
+             13900,
+             14,
+             '안심하고 즐기는 새우',
+             100,
+             0,
+             '2024-06-14 10:53:30',
+'/upload/2024\\06\\14/b98423dc-e5d3-466d-8ec5-d0aa26977b27_main.jpg',
+'/upload/2024\\06\\14/b98423dc-e5d3-466d-8ec5-d0aa26977b27_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (120,
+             '스위티오 바나나',
+             5190,
+             0,
+             5190,
+             8,
+             '고랭지 재배로 더 달고 쫀득한',
+             100,
+             0,
+             '2024-06-14 10:53:46',
+'/upload/2024\\06\\14/b9192e5d-c46d-4456-8831-6f084e4f3f02_수입과일3.jpg',
+'/upload/2024\\06\\14/b9192e5d-c46d-4456-8831-6f084e4f3f02_th_수입과일3.jpg'
+             ,
+'ehdwo@test.com',
+'N',
+0),
+            (121,
+             '[앵커] 무염 버터 227g',
+             5600,
+             0,
+             5600,
+             34,
+             '뉴질랜드 초원의 신선한 버터',
+             100,
+             0,
+             '2024-06-14 10:53:59',
+'/upload/2024\\06\\14/e7ba47ac-5d76-4680-88df-9c494cb77479_main.jpg',
+'/upload/2024\\06\\14/e7ba47ac-5d76-4680-88df-9c494cb77479_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (122,
+             '아보카도',
+             10900,
+             0,
+             10900,
+             8,
+             '싱그러운 숲속의 버터',
+             100,
+             0,
+             '2024-06-14 10:54:06',
+'/upload/2024\\06\\14/2d443567-a9b5-405d-bcc9-0ecb731ccffe_수입과일4.jpg',
+'/upload/2024\\06\\14/2d443567-a9b5-405d-bcc9-0ecb731ccffe_th_수입과일4.jpg'
+             ,
+'ehdwo@test.com',
+'N',
+0),
+            (123,
+             '[1등급 한우] 채끝 구이용 200g (냉장)',
+             32700,
+             0,
+             32700,
+             21,
+             '그대로 구워 제대로 즐기는 채끝',
+             100,
+             0,
+             '2024-06-14 10:54:26',
+'/upload/2024\\06\\14/6428f84e-9759-4aa1-a0c8-b456e0fb6d31_main.jpg',
+'/upload/2024\\06\\14/6428f84e-9759-4aa1-a0c8-b456e0fb6d31_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (124,
+             '칠레산 블루베리',
+             10900,
+             0,
+             10900,
+             9,
+             '보라빛 새콤달콤한 맛',
+             100,
+             0,
+             '2024-06-14 10:54:33',
+'/upload/2024\\06\\14/4e386c8c-fee2-4c9e-ab67-5bce83b8c27b_냉동1.jpg',
+'/upload/2024\\06\\14/4e386c8c-fee2-4c9e-ab67-5bce83b8c27b_th_냉동1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (125,
+             '[이즈니] 포션 버터 가염',
+             12580,
+             0,
+             12580,
+             34,
+             '노르망디의 풍미를 전하는',
+             100,
+             0,
+             '2024-06-14 10:54:38',
+'/upload/2024\\06\\14/efd5fcab-cb8c-4877-bcdb-d72f668cae89_main.jpg',
+'/upload/2024\\06\\14/efd5fcab-cb8c-4877-bcdb-d72f668cae89_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (126,
+             '골드 망고',
+             9900,
+             0,
+             9900,
+             9,
+             '사시사철 즐기는 열대과일의 왕',
+             100,
+             0,
+             '2024-06-14 10:54:54',
+'/upload/2024\\06\\14/6fa3df80-0993-4373-8f3e-98e4ff8cf14a_냉동2.jpg',
+'/upload/2024\\06\\14/6fa3df80-0993-4373-8f3e-98e4ff8cf14a_th_냉동2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (127,
+             '딸기',
+             9900,
+             0,
+             9900,
+             9,
+             '언제든 신선하게 맛보는 달콤함',
+             100,
+             0,
+             '2024-06-14 10:55:11',
+'/upload/2024\\06\\14/24a30db1-ec63-47b7-a1bd-68fd1b7662b7_냉동3.jpg',
+'/upload/2024\\06\\14/24a30db1-ec63-47b7-a1bd-68fd1b7662b7_th_냉동3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (128,
+             '[Kim\'s Butcher] 미국산 우삼겹 돌돌말이 1kg (냉동)',
+             23900,
+             0,
+             23900,
+             21,
+             '고소함이 풍부한 우삼겹',
+             100,
+             0,
+             '2024-06-14 10:55:18',
+'/upload/2024\\06\\14/eab3cb7b-d8d3-4c40-9786-c769cf859fcc_main.jpeg',
+'/upload/2024\\06\\14/eab3cb7b-d8d3-4c40-9786-c769cf859fcc_th_main.jpeg',
+'nara@naver.com',
+'N',
+0),
+            (129,
+             '[MEGGLE] 스프레이 휘핑크림 250g',
+             5500,
+             0,
+             5500,
+             34,
+             '완벽한 홈카페를 위한 필수품',
+             100,
+             0,
+             '2024-06-14 10:55:22',
+'/upload/2024\\06\\14/e61682f4-796b-4cc1-8704-d540cd80ba25_main.jpg',
+'/upload/2024\\06\\14/e61682f4-796b-4cc1-8704-d540cd80ba25_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (130,
+             '[아이시스8.0] 생수 (200mL X 20개)',
+             6460,
+             0,
+             6460,
+             27,
+             '휴대가 간편한 약알칼리성 생수',
+             100,
+             0,
+             '2024-06-14 10:55:25',
+'/upload/2024\\06\\14/6e4acbc7-a4d6-4e9a-a768-00802abc3871_main.jpg',
+'/upload/2024\\06\\14/6e4acbc7-a4d6-4e9a-a768-00802abc3871_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (131,
+             '냉동 과일 미니팩',
+             8900,
+             0,
+             8900,
+             9,
+             '인기 냉동 과일을 한번에',
+             100,
+             0,
+             '2024-06-14 10:55:33',
+'/upload/2024\\06\\14/86ea21a5-261e-4276-b3aa-65a3830a4f9d_냉동4.jpg',
+'/upload/2024\\06\\14/86ea21a5-261e-4276-b3aa-65a3830a4f9d_th_냉동4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (132,
+             '[이목] 무항생제 소고기 우둔 이유식용 200g (냉장)'
+             ,
+             11500,
+             0,
+             11500,
+             21,
+             '이유식에 쓰기 좋은',
+             100,
+             0,
+             '2024-06-14 10:55:50',
+'/upload/2024\\06\\14/7050a7ff-794c-4772-a56a-ce3ae47fec2b_main.jpg',
+'/upload/2024\\06\\14/7050a7ff-794c-4772-a56a-ce3ae47fec2b_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (133,
+             '건대추',
+             9900,
+             0,
+             9900,
+             9,
+             '유명산지에서 온 달콤한 대추',
+             100,
+             0,
+             '2024-06-14 10:56:02',
+'/upload/2024\\06\\14/781e1927-d6eb-4d6f-b41e-32b2e8322d91_건과일1.jpg',
+'/upload/2024\\06\\14/781e1927-d6eb-4d6f-b41e-32b2e8322d91_th_건과일1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (134,
+             '건복숭아 슬라이스',
+             5980,
+             0,
+             5980,
+             9,
+             '말랑하고 쫀득하게 즐기는',
+             100,
+             0,
+             '2024-06-14 10:56:17',
+'/upload/2024\\06\\14/f214d4d3-3752-4c4b-b4ff-8f6ebd82bcee_건과일2.jpg',
+'/upload/2024\\06\\14/f214d4d3-3752-4c4b-b4ff-8f6ebd82bcee_th_건과일2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (135,
+             '[덴마크] 사워 크림 450g',
+             6480,
+             0,
+             6480,
+             34,
+             '새큼한 감칠맛을 자아내는 크림',
+             100,
+             0,
+             '2024-06-14 10:56:27',
+'/upload/2024\\06\\14/75b0da6f-294b-417e-bb78-a953558859bf_main.jpg',
+'/upload/2024\\06\\14/75b0da6f-294b-417e-bb78-a953558859bf_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (136,
+             '태국 건망고',
+             4900,
+             0,
+             4900,
+             9,
+             '쫀득한 망고 본연의 맛',
+             100,
+             0,
+             '2024-06-14 10:56:31',
+'/upload/2024\\06\\14/aaad4d4c-3ec2-49e5-b8e4-d5a1e6cb9124_건과일3.jpg',
+'/upload/2024\\06\\14/aaad4d4c-3ec2-49e5-b8e4-d5a1e6cb9124_th_건과일3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (137,
+             '[더건강한] 샌드위치 햄',
+             2380,
+             0,
+             2380,
+             22,
+             '그대로 먹어도 맛있는 햄',
+             100,
+             0,
+             '2024-06-14 10:56:41',
+'/upload/2024\\06\\14/946868f7-5917-4a60-aee6-dce9465bac5a_mian.jpg',
+'/upload/2024\\06\\14/946868f7-5917-4a60-aee6-dce9465bac5a_th_mian.jpg',
+'nara@naver.com',
+'N',
+0),
+            (138,
+             '건크랜베리',
+             3990,
+             0,
+             3990,
+             9,
+             '쫀득함이 배가된 붉은 열매',
+             100,
+             0,
+             '2024-06-14 10:56:48',
+'/upload/2024\\06\\14/02aadd7e-9cb1-4db9-97ca-ef2134f6954b_건과일4.jpg',
+'/upload/2024\\06\\14/02aadd7e-9cb1-4db9-97ca-ef2134f6954b_th_건과일4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (139,
+             '[알라] 포션 크림치즈 6개입',
+             3490,
+             0,
+             3490,
+             34,
+             '소량 포장하여 깔끔하게 즐기는 크림치즈',
+             100,
+             0,
+             '2024-06-14 10:57:00',
+'/upload/2024\\06\\14/f639099e-190d-4ce3-aae1-5184da81d355_main.jpg',
+'/upload/2024\\06\\14/f639099e-190d-4ce3-aae1-5184da81d355_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (140,
+             '[지리산물하나] ECO 무라벨 생수 (2LX6개)',
+             2990,
+             0,
+             2990,
+             27,
+             '가성비 좋은 지리산에서 온 깨끗한 물',
+             100,
+             0,
+             '2024-06-14 10:57:05',
+'/upload/2024\\06\\14/291562ee-c0d5-4f8a-96fc-ab24b0618c0f_main.jpg',
+'/upload/2024\\06\\14/291562ee-c0d5-4f8a-96fc-ab24b0618c0f_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (141,
+             '구운 아몬드',
+             9900,
+             0,
+             9900,
+             10,
+             '한 알에 담긴 영양과 풍미',
+             100,
+             0,
+             '2024-06-14 10:57:15',
+'/upload/2024\\06\\14/9890806c-c9e3-44ff-8f9d-8af74955578f_견과류1.jpg',
+'/upload/2024\\06\\14/9890806c-c9e3-44ff-8f9d-8af74955578f_th_견과류1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (142,
+'[오뗄블랙라벨] 제주돼지로 만든 비엔나 소시지 250g',
+4690,
+0,
+4690,
+22,
+'제주돼지로 만든 비엔나 소시지',
+100,
+0,
+'2024-06-14 10:57:17',
+'/upload/2024\\06\\14/6473ca62-eda3-4c4e-89be-7397f1d39d08_main.jpeg',
+'/upload/2024\\06\\14/6473ca62-eda3-4c4e-89be-7397f1d39d08_th_main.jpeg',
+'nara@naver.com',
+'N',
+0),
+            (143,
+             '호두',
+             10900,
+             0,
+             10900,
+             10,
+             '손쉽게 즐기는 고소함',
+             100,
+             0,
+             '2024-06-14 10:57:29',
+'/upload/2024\\06\\14/dc7512d7-482b-4a24-b75a-dc0b763626fc_견과류2.jpg',
+'/upload/2024\\06\\14/dc7512d7-482b-4a24-b75a-dc0b763626fc_th_견과류2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (144,
+             '[폴스] 휘핑크림 250mL',
+             3700,
+             0,
+             3700,
+             34,
+'호주산 방목 우유로 만든 신선한 크림! 조지방 함유량 ',
+100,
+0,
+'2024-06-14 10:57:41',
+'/upload/2024\\06\\14/4f450e9d-7509-4f12-8a41-df33fc6c0161_main.jpg',
+'/upload/2024\\06\\14/4f450e9d-7509-4f12-8a41-df33fc6c0161_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (145,
+             '유기농 깐밤',
+             13900,
+             0,
+             13900,
+             10,
+             '깨끗하게 담은 간편 생밤',
+             100,
+             0,
+             '2024-06-14 10:57:45',
+'/upload/2024\\06\\14/051ba96f-5ce4-494d-bb51-19fae5196558_견과류3.jpg',
+'/upload/2024\\06\\14/051ba96f-5ce4-494d-bb51-19fae5196558_th_견과류3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (146,
+             '[조선호텔] 떡갈비 345g',
+             9900,
+             0,
+             9900,
+             22,
+'특제 소스를 곁들여 남녀노소 모두가 좋아하는 떡갈비',
+100,
+0,
+'2024-06-14 10:57:48',
+'/upload/2024\\06\\14/7a42c1cd-6957-4908-ada2-027d3b64bae6_main.jpg',
+'/upload/2024\\06\\14/7a42c1cd-6957-4908-ada2-027d3b64bae6_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (147,
+             '호두',
+             16900,
+             0,
+             16900,
+             10,
+             '오독한 식감과 고소한 맛',
+             100,
+             0,
+             '2024-06-14 10:58:02',
+'/upload/2024\\06\\14/301b43b7-3869-4b16-aa9d-2ec07fa5b802_견과류4.jpg',
+'/upload/2024\\06\\14/301b43b7-3869-4b16-aa9d-2ec07fa5b802_th_견과류4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (148,
+             '[미트클레버] 춘천 닭갈비',
+             12990,
+             0,
+             12990,
+             22,
+             '집에서 즐기는 춘천의 맛!',
+             100,
+             0,
+             '2024-06-14 10:58:25',
+'/upload/2024\\06\\14/65e1b0d5-c447-40d6-a3c5-b3d79923e25c_main.jpeg',
+'/upload/2024\\06\\14/65e1b0d5-c447-40d6-a3c5-b3d79923e25c_th_main.jpeg',
+'nara@naver.com',
+'N',
+0),
+            (149,
+             '땅끝 해남 쌀',
+             34900,
+             0,
+             34900,
+             11,
+             '해남에서 온 건강한 밥맛',
+             100,
+             0,
+             '2024-06-14 10:58:31',
+'/upload/2024\\06\\14/5e1b5efe-3bf9-418e-ace9-30cd524089bb_쌀1.jpg',
+'/upload/2024\\06\\14/5e1b5efe-3bf9-418e-ace9-30cd524089bb_th_쌀1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (150,
+             '[삼립] 연유버터 스프레드 500g',
+             6980,
+             0,
+             6980,
+             34,
+             '고소하고 달콤한 풍미',
+             100,
+             0,
+             '2024-06-14 10:58:42',
+'/upload/2024\\06\\14/f00a454f-a6a2-460c-b103-8315464e99cd_main.jpg',
+'/upload/2024\\06\\14/f00a454f-a6a2-460c-b103-8315464e99cd_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (151,
+             '임금님표 이천쌀 알찬미',
+             44900,
+             0,
+             44900,
+             11,
+             '임금님이 선택한 품격있는 밥맛',
+             100,
+             0,
+             '2024-06-14 10:58:48',
+'/upload/2024\\06\\14/ea593f36-f097-4a7c-bb82-9246cf2b8076_쌀2.jpg',
+'/upload/2024\\06\\14/ea593f36-f097-4a7c-bb82-9246cf2b8076_th_쌀2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (152,
+             '[숭의가든] 옛날 소 불고기',
+             14990,
+             0,
+             14990,
+             22,
+             '달큰한 매력의 서울식 불고기',
+             100,
+             0,
+             '2024-06-14 10:58:58',
+'/upload/2024\\06\\14/a1681b34-97d3-4dcb-b714-5e23018c9a21_main.jpeg',
+'/upload/2024\\06\\14/a1681b34-97d3-4dcb-b714-5e23018c9a21_th_main.jpeg',
+'nara@naver.com',
+'N',
+0),
+            (153,
+             '씻어나온 고시히카리',
+             19900,
+             0,
+             19900,
+             11,
+             '간편하게 만나는 쫀득한 밥맛',
+             100,
+             0,
+             '2024-06-14 10:59:04',
+'/upload/2024\\06\\14/b70e3760-d37b-41b3-b457-c80baa295d66_쌀3.jpg',
+'/upload/2024\\06\\14/b70e3760-d37b-41b3-b457-c80baa295d66_th_쌀3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (154,
+             '[서울우유] 국산우유로 만든 연유 500g',
+             5400,
+             0,
+             5400,
+             34,
+             '팥빙수와 프렌치 토스트에 뿌려먹는 국산연유',
+             100,
+             0,
+             '2024-06-14 10:59:16',
+'/upload/2024\\06\\14/b182a875-256a-468b-860e-11852c7ddc10_main.jpg',
+'/upload/2024\\06\\14/b182a875-256a-468b-860e-11852c7ddc10_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (155,
+             '조선향미',
+             8490,
+             0,
+             8490,
+             11,
+             '남다른 품격의 명품 쌀',
+             100,
+             0,
+             '2024-06-14 10:59:18',
+'/upload/2024\\06\\14/6b70fcb1-4c8c-48d2-aa48-6cae0aac6d4a_쌀4.jpg',
+'/upload/2024\\06\\14/6b70fcb1-4c8c-48d2-aa48-6cae0aac6d4a_th_쌀4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (156,
+             '[한일관 X 백년가게] 순살갈비',
+             32500,
+             0,
+             32500,
+             22,
+             '육즙이 풍부한 달콤 양념갈비',
+             100,
+             0,
+             '2024-06-14 10:59:27',
+'/upload/2024\\06\\14/d9a1bb37-a0b5-4714-b91a-a86738b62ae9_main.jpeg',
+'/upload/2024\\06\\14/d9a1bb37-a0b5-4714-b91a-a86738b62ae9_th_main.jpeg',
+'nara@naver.com',
+'N',
+0),
+            (157,
+             '[설빙] 순연유 소스',
+             5000,
+             0,
+             5000,
+             34,
+             '한 포씩 깔끔하게 활용',
+             100,
+             0,
+             '2024-06-14 11:00:11',
+'/upload/2024\\06\\14/fe1de037-f3e3-4640-96f4-5ec381c18b2f_main.jpg',
+'/upload/2024\\06\\14/fe1de037-f3e3-4640-96f4-5ec381c18b2f_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (158,
+             '[바다원] 뱅어포 70g',
+             12990,
+             0,
+             12990,
+             17,
+             '얇은 포에 담긴 감칠맛',
+             100,
+             0,
+             '2024-06-14 11:00:16',
+'/upload/2024\\06\\14/9ac75e0c-75d3-4bbc-97b3-00c37034e609_main.jpg',
+'/upload/2024\\06\\14/9ac75e0c-75d3-4bbc-97b3-00c37034e609_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (159,
+             '유기농 혼합 9곡',
+             9000,
+             0,
+             9000,
+             11,
+             '다채로운 곡물의 영양 가득',
+             100,
+             0,
+             '2024-06-14 11:00:19',
+'/upload/2024\\06\\14/5057569f-374f-4991-9bc1-b034634f649c_잡곡1.jpg',
+'/upload/2024\\06\\14/5057569f-374f-4991-9bc1-b034634f649c_th_잡곡1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (160,
+             '유기농 귀리',
+             5990,
+             0,
+             5990,
+             11,
+             '우리 땅에서 자라난 슈퍼푸드',
+             100,
+             0,
+             '2024-06-14 11:00:34',
+'/upload/2024\\06\\14/3dbf9eb5-dad6-4a03-b22b-9388f15d98aa_잡곡2.jpg',
+'/upload/2024\\06\\14/3dbf9eb5-dad6-4a03-b22b-9388f15d98aa_th_잡곡2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (161,
+             '[수산곳간] 그시절 빠삭어포튀김 200g',
+             6990,
+             0,
+             6990,
+             17,
+             '바삭하게 즐기는 어포 스낵',
+             100,
+             0,
+             '2024-06-14 11:00:49',
+'/upload/2024\\06\\14/472f4169-fb8b-4f43-b38a-0ab32fe55c57_main.jpeg',
+'/upload/2024\\06\\14/472f4169-fb8b-4f43-b38a-0ab32fe55c57_th_main.jpeg',
+'nara@naver.com',
+'N',
+0),
+            (162,
+             '혼합 15곡',
+             3690,
+             0,
+             3690,
+             11,
+             '다채롭게 구성한 간편잡곡',
+             100,
+             0,
+             '2024-06-14 11:00:52',
+'/upload/2024\\06\\14/ff9e8a1a-5267-45b5-8319-741de25db85a_잡곡3.jpg',
+'/upload/2024\\06\\14/ff9e8a1a-5267-45b5-8319-741de25db85a_th_잡곡3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (163,
+             '[캘리포니아 팜즈] 스위트 연유',
+             8800,
+             0,
+             8800,
+             34,
+             '디저트부터 베이킹까지,활용도 만점!',
+             100,
+             0,
+             '2024-06-14 11:00:56',
+'/upload/2024\\06\\14/2f5b3f9e-8ed0-464f-ba06-4ffae8631b52_main.jpg',
+'/upload/2024\\06\\14/2f5b3f9e-8ed0-464f-ba06-4ffae8631b52_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (164,
+             '유기농 수수',
+             9900,
+             0,
+             9900,
+             11,
+             '매일 먹어도 질리지 않는 매력',
+             100,
+             0,
+             '2024-06-14 11:01:09',
+'/upload/2024\\06\\14/97fbd4fb-42e4-47bc-b7e6-c3c10a0933f8_잡곡4.jpg',
+'/upload/2024\\06\\14/97fbd4fb-42e4-47bc-b7e6-c3c10a0933f8_th_잡곡4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (165,
+             '[수산곳간X성경김] 김어포 튀각칩스',
+             4900,
+             0,
+             4900,
+             17,
+             '김의 감칠맛을 담은 튀각',
+             100,
+             0,
+             '2024-06-14 11:01:17',
+'/upload/2024\\06\\14/a8b0eae8-4688-466b-8910-a4a4705f55ef_main.jpg',
+'/upload/2024\\06\\14/a8b0eae8-4688-466b-8910-a4a4705f55ef_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (166,
+             '노르웨이 고등어',
+             9700,
+             0,
+             9700,
+             12,
+             '두고 먹기 좋은 기획 세트',
+             100,
+             0,
+             '2024-06-14 11:01:37',
+'/upload/2024\\06\\14/a13e62ff-4d95-416f-9b89-b70eb136746a_생선류1.jpg',
+'/upload/2024\\06\\14/a13e62ff-4d95-416f-9b89-b70eb136746a_th_생선류1.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (167,
+             '[마이셰프] 묵은지 김치찌개 밀키트',
+             15500,
+             0,
+             15500,
+             42,
+             '김치 명가 종가집 김치로 만든',
+             100,
+             0,
+             '2024-06-14 11:01:41',
+'/upload/2024\\06\\14/853a1e86-8717-4c34-8ecc-2b7bca4da88e_main.jpg',
+'/upload/2024\\06\\14/853a1e86-8717-4c34-8ecc-2b7bca4da88e_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (168,
+             '프리미엄 영광굴비',
+             10100,
+             0,
+             10100,
+             12,
+             '고소하고 부드러운 굴비의 참맛',
+             100,
+             0,
+             '2024-06-14 11:01:54',
+'/upload/2024\\06\\14/0392380f-99a2-4ed5-8f30-c0304b895e5e_생선류2.jpg',
+'/upload/2024\\06\\14/0392380f-99a2-4ed5-8f30-c0304b895e5e_th_생선류2.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (169,
+             '[바다원] 조미 쥐치포 400g',
+             12200,
+             0,
+             12200,
+             17,
+             '씹을수록 쫀득하고 고소한 쥐포',
+             100,
+             0,
+             '2024-06-14 11:01:55',
+'/upload/2024\\06\\14/d296f658-96fd-40ca-9b27-ea5dcccfba2a_main.jpg',
+'/upload/2024\\06\\14/d296f658-96fd-40ca-9b27-ea5dcccfba2a_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (170,
+             '제주토막갈치',
+             13350,
+             0,
+             13350,
+             12,
+             '간편하게 활용하는 손질 갈치',
+             100,
+             0,
+             '2024-06-14 11:02:08',
+'/upload/2024\\06\\14/8c222174-0792-4cf9-a539-f80df141979b_생선류3.jpg',
+'/upload/2024\\06\\14/8c222174-0792-4cf9-a539-f80df141979b_th_생선류3.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (171,
+             '[투다리] 시그니처 김치우동 (2인분)',
+             13400,
+             0,
+             13400,
+             42,
+             '집에서 맛보는 인기 메뉴',
+             100,
+             0,
+             '2024-06-14 11:02:11',
+'/upload/2024\\06\\14/af1bf653-330b-4ad7-b3e0-4eadf92b40b8_main.jpg',
+'/upload/2024\\06\\14/af1bf653-330b-4ad7-b3e0-4eadf92b40b8_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (172,
+             '장문볼락살',
+             11900,
+             0,
+             11900,
+             12,
+             '넉넉하게 즐기는 담백한 맛',
+             100,
+             0,
+             '2024-06-14 11:02:24',
+'/upload/2024\\06\\14/dc74f7ee-7598-4788-a9af-57c0044f48df_생선류4.jpg',
+'/upload/2024\\06\\14/dc74f7ee-7598-4788-a9af-57c0044f48df_th_생선류4.jpg',
+'ehdwo@test.com',
+'N',
+0),
+            (173,
+             '[주전부리마켓] 한입 쏙 꼬마쥐포 200g',
+             10900,
+             0,
+             10900,
+             17,
+             '달달한 감칠맛과 쫀득한 식감',
+             100,
+             0,
+             '2024-06-14 11:02:39',
+'/upload/2024\\06\\14/8e99fa1f-dad8-4d46-bfe8-240d40b761f4_main.jpg',
+'/upload/2024\\06\\14/8e99fa1f-dad8-4d46-bfe8-240d40b761f4_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (174,
+             '[하림] 춘천식 닭갈비 밀키트',
+             15900,
+             0,
+             15900,
+             42,
+             '간편하게 볶아먹는 매콤 닭갈비',
+             100,
+             0,
+             '2024-06-14 11:02:39',
+'/upload/2024\\06\\14/8470179f-1c05-43c8-83b9-9085da9847d3_main.jpg',
+'/upload/2024\\06\\14/8470179f-1c05-43c8-83b9-9085da9847d3_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (175,
+             '[한진] 철판에 메메 잘 구운 쥐포 2봉',
+             4990,
+             0,
+             4990,
+             17,
+             '그대로 즐기는 한 입 간식',
+             100,
+             0,
+             '2024-06-14 11:03:04',
+'/upload/2024\\06\\14/7cda94e2-be80-48ad-99f0-23f781addff2_main.jpg',
+'/upload/2024\\06\\14/7cda94e2-be80-48ad-99f0-23f781addff2_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (176,
+             '풀무원 샘물 3종',
+             5290,
+             0,
+             5290,
+             27,
+             '매일 마시고 싶은 화강암반수',
+             100,
+             0,
+             '2024-06-14 11:03:34',
+'/upload/2024\\06\\14/319fb1e9-0679-45d9-841f-1cd31b8c96af_main.jpg',
+'/upload/2024\\06\\14/319fb1e9-0679-45d9-841f-1cd31b8c96af_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (177,
+             '[바른생선] 절단 낙지 400g (냉동)',
+             9900,
+             0,
+             9900,
+             13,
+             '오동통한 부위만 모아 냉동',
+             100,
+             0,
+             '2024-06-14 11:03:52',
+'/upload/2024\\06\\14/49109f08-8b4b-4eb3-8760-04f5d0aecb68_main.jpg',
+'/upload/2024\\06\\14/49109f08-8b4b-4eb3-8760-04f5d0aecb68_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (178,
+             '[한팟] 치즈 부대찌개 1858g(냉장)',
+             14300,
+             0,
+             14300,
+             42,
+             '콩나물, 치즈와 2인용으로 돌아온',
+             100,
+             0,
+             '2024-06-14 11:04:27',
+'/upload/2024\\06\\14/498646a3-dc27-4d9b-8ea0-3ad72ce2b49b_main.jpg',
+'/upload/2024\\06\\14/498646a3-dc27-4d9b-8ea0-3ad72ce2b49b_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (179,
+             '[아라찬] 국산 제철 낙지 350g',
+             18900,
+             0,
+             18900,
+             13,
+             '신선함을 간직한 손질 낙지',
+             100,
+             0,
+             '2024-06-14 11:04:30',
+'/upload/2024\\06\\14/3b920198-e331-43c2-aa4f-bd1239a3f5a8_main.jpg',
+'/upload/2024\\06\\14/3b920198-e331-43c2-aa4f-bd1239a3f5a8_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (180,
+             '[The미식] 장인라면 얼큰한맛 4입',
+             8800,
+             0,
+             8800,
+             36,
+             '얼큰하고 깊은 맛의 국물',
+             100,
+             0,
+             '2024-06-14 11:05:01',
+'/upload/2024\\06\\14/06742dc6-a46c-4399-b0f4-b4d2ee0b4423_main.jpeg',
+'/upload/2024\\06\\14/06742dc6-a46c-4399-b0f4-b4d2ee0b4423_th_main.jpeg',
+'yoon@naver.com',
+'N',
+0),
+            (181,
+             '[한국야쿠르트] 쉼 (230ml x 4입)',
+             8800,
+             0,
+             8800,
+             30,
+             '편안하게 마시는 유산균 음료',
+             100,
+             0,
+             '2024-06-14 11:05:08',
+'/upload/2024\\06\\14/a3ae2152-eab4-4c7c-b957-1f436cbff59a_main.jpg',
+'/upload/2024\\06\\14/a3ae2152-eab4-4c7c-b957-1f436cbff59a_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (182,
+             '[청산바다] 국산 뻘낙지 120~150g (생물)',
+             11500,
+             0,
+             11500,
+             13,
+             '탕탕이로 딱 좋은 사이즈! 낙지1마리',
+             100,
+             0,
+             '2024-06-14 11:05:09',
+'/upload/2024\\06\\14/edadd8dc-5cc3-4b70-9c1f-19813a5bf193_main.jpg',
+'/upload/2024\\06\\14/edadd8dc-5cc3-4b70-9c1f-19813a5bf193_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (183,
+             '[농심] 안성탕면 5입',
+             3700,
+             0,
+             3700,
+             36,
+             '구수한 국물 맛이 일품',
+             100,
+             0,
+             '2024-06-14 11:05:55',
+'/upload/2024\\06\\14/5c8a054a-1f71-4499-a328-b65359bdadac_main.jpg',
+'/upload/2024\\06\\14/5c8a054a-1f71-4499-a328-b65359bdadac_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (184,
+             '[대흥] 간편하게 손질된 데친 참문어 400g (냉장)',
+             24900,
+             0,
+             24900,
+             13,
+             '손쉽게 활용하는 문어',
+             100,
+             0,
+             '2024-06-14 11:05:58',
+'/upload/2024\\06\\14/2f3e15c1-33c6-49bb-a5a0-f1a58036f35f_main.jpeg',
+'/upload/2024\\06\\14/2f3e15c1-33c6-49bb-a5a0-f1a58036f35f_th_main.jpeg',
+'nara@naver.com',
+'N',
+0),
+            (185,
+             '게토레이 레몬 1.5L',
+             2480,
+             0,
+             2480,
+             30,
+             '기분 좋은 레몬향 가득',
+             100,
+             0,
+             '2024-06-14 11:06:19',
+'/upload/2024\\06\\14/25433151-7777-4550-b4f0-3d8993376ad2_main.jpg',
+'/upload/2024\\06\\14/25433151-7777-4550-b4f0-3d8993376ad2_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (186,
+             '[농심] 얼큰한 너구리 5입',
+             4500,
+             0,
+             4500,
+             36,
+             '통통한 면발에 배어든 해물맛',
+             100,
+             0,
+             '2024-06-14 11:06:31',
+'/upload/2024\\06\\14/9b3db9db-ebfd-44d9-8088-c047abbbf5f6_main.jpg',
+'/upload/2024\\06\\14/9b3db9db-ebfd-44d9-8088-c047abbbf5f6_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (187,
+             '[만선] 완도산 자숙 돌문어 300g (냉장)',
+             19900,
+             0,
+             19900,
+             13,
+             '간편하게 삶아 즐기는 문어',
+             100,
+             0,
+             '2024-06-14 11:06:37',
+'/upload/2024\\06\\14/f410cb2c-e905-4e0e-98b6-b5d5a8880fb0_main.jpg',
+'/upload/2024\\06\\14/f410cb2c-e905-4e0e-98b6-b5d5a8880fb0_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (188,
+             '[오뚜기] 스낵면 5입',
+             3180,
+             0,
+             3180,
+             36,
+             '밥 말아먹을 때 더욱 맛있는',
+             100,
+             0,
+             '2024-06-14 11:06:55',
+'/upload/2024\\06\\14/d9d2c646-69ba-45f1-8e91-202ee1caa7e2_main.jpg',
+'/upload/2024\\06\\14/d9d2c646-69ba-45f1-8e91-202ee1caa7e2_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (189,
+             '[은하수산] 문어 슬라이스 120g (냉장)',
+             11500,
+             0,
+             11500,
+             13,
+             '쫄깃하게 즐기는 자숙 문어',
+             100,
+             0,
+             '2024-06-14 11:07:26',
+'/upload/2024\\06\\14/7863dd79-8b26-4060-b11c-9add79063934_main.jpg',
+'/upload/2024\\06\\14/7863dd79-8b26-4060-b11c-9add79063934_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (190,
+             '[바우어] 프리미엄 치킨 스톡 그래뉼',
+             14000,
+             0,
+             14000,
+             38,
+             '손 쉽게 완성하는 진한 육수',
+             100,
+             0,
+             '2024-06-14 11:07:27',
+'/upload/2024\\06\\14/33f9c4e3-bc31-4480-a8e9-95847c4e3250_main.jpg',
+'/upload/2024\\06\\14/33f9c4e3-bc31-4480-a8e9-95847c4e3250_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (191,
+             '[어보선] 두툼한 국산 손질오징어 1kg (냉동)',
+             21900,
+             0,
+             21900,
+             13,
+             '요리에 바로 쓰는 오징어',
+             100,
+             0,
+             '2024-06-14 11:07:59',
+'/upload/2024\\06\\14/d0b74cd4-9489-4e9e-b045-83e5e22f94df_main.jpg',
+'/upload/2024\\06\\14/d0b74cd4-9489-4e9e-b045-83e5e22f94df_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (192,
+             '[백설] 부침가루1kg',
+             3380,
+             0,
+             3380,
+             38,
+             '마지막 한 입까지 바삭하게',
+             100,
+             0,
+             '2024-06-14 11:08:05',
+'/upload/2024\\06\\14/1d6dcc16-4da2-4591-bf78-fe1cec9ae518_main.jpg',
+'/upload/2024\\06\\14/1d6dcc16-4da2-4591-bf78-fe1cec9ae518_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (193,
+             '몬스터 에너지 2종 (355mL X 6입)',
+             12600,
+             0,
+             12600,
+             30,
+             '든든하게 충전하는 에너지',
+             100,
+             0,
+             '2024-06-14 11:08:17',
+'/upload/2024\\06\\14/2e9df110-742a-43af-a48d-5765bfa9aa9d_main.jpg',
+'/upload/2024\\06\\14/2e9df110-742a-43af-a48d-5765bfa9aa9d_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (194,
+             '다짐 오징어',
+             6900,
+             0,
+             6900,
+             13,
+             '내 아이를 위한 새로운 시도',
+             100,
+             0,
+             '2024-06-14 11:08:33',
+'/upload/2024\\06\\14/f626a7dc-9a40-4c7f-8768-bee170467b84_main.jpg',
+'/upload/2024\\06\\14/f626a7dc-9a40-4c7f-8768-bee170467b84_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (195,
+             '[오뚜기] 베이킹 소다 400g',
+             2980,
+             0,
+             2980,
+             38,
+             '다양하게 사용하는 주방 살림',
+             100,
+             0,
+             '2024-06-14 11:08:43',
+'/upload/2024\\06\\14/94ca07bc-a717-4e6d-9b8b-7c7fc88e3fcf_main.jpg',
+'/upload/2024\\06\\14/94ca07bc-a717-4e6d-9b8b-7c7fc88e3fcf_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (196,
+             '[지리산처럼] 행복한 정은씨의 검은 볶음참깨 150g'
+             ,
+             15500,
+             0,
+             15500,
+             38,
+             '신선한 검정깨를 정성껏 볶아 완성한',
+             100,
+             0,
+             '2024-06-14 11:09:10',
+'/upload/2024\\06\\14/e9c889f3-0778-4cc4-99de-86aeb005cbd0_main.jpg',
+'/upload/2024\\06\\14/e9c889f3-0778-4cc4-99de-86aeb005cbd0_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (197,
+             '오징어 스테이크 350g',
+             7980,
+             0,
+             7980,
+             13,
+             '익숙한 오징어의 색다른 면모',
+             100,
+             0,
+             '2024-06-14 11:09:40',
+'/upload/2024\\06\\14/5b8e2933-b134-4835-a76f-ea4fb4060b11_main.jpg',
+'/upload/2024\\06\\14/5b8e2933-b134-4835-a76f-ea4fb4060b11_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (198,
+             '[광동] 돼지감자차 1.5L',
+             1800,
+             0,
+             1800,
+             31,
+             '돼지감자 이눌린이 혈당에 좋다던데',
+             100,
+             0,
+             '2024-06-14 11:09:43',
+'/upload/2024\\06\\14/f8fb5602-1439-4b6c-a918-05a7f191a474_main.jpg',
+'/upload/2024\\06\\14/f8fb5602-1439-4b6c-a918-05a7f191a474_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (199,
+             '[오뚜기] 찹쌀호떡믹스 400g',
+             3383,
+             0,
+             3383,
+             38,
+             '국산 찹쌀가루로 더욱 쫀득한',
+             100,
+             0,
+             '2024-06-14 11:10:03',
+'/upload/2024\\06\\14/a52f9649-b01c-437c-b00e-b019d8ffcd3e_main.jpg',
+'/upload/2024\\06\\14/a52f9649-b01c-437c-b00e-b019d8ffcd3e_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (200,
+             '[오뚜기] 핫케이크믹스 1kg',
+             5850,
+             0,
+             5850,
+             38,
+             '손쉽게 완성하는 핫케이크',
+             100,
+             0,
+             '2024-06-14 11:10:34',
+'/upload/2024\\06\\14/931778db-578d-4477-a1b9-09e2286a3ddb_main.jpg',
+'/upload/2024\\06\\14/931778db-578d-4477-a1b9-09e2286a3ddb_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (201,
+             '[만선] 대용량 완도 전복 7-9마리 500g 내외 (생물)',
+             23900,
+             0,
+             23900,
+             15,
+             '아쉬움 없이 맛보는 전복',
+             100,
+             0,
+             '2024-06-14 11:10:40',
+'/upload/2024\\06\\14/4241e619-10be-4d39-9ef4-6acd4982314d_main.jpg',
+'/upload/2024\\06\\14/4241e619-10be-4d39-9ef4-6acd4982314d_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (202,
+             '[매일식품관] 순살 전복장 200g (냉동)',
+             12900,
+             0,
+             12900,
+             15,
+             '국산 전복으로 만든 밥반찬',
+             100,
+             0,
+             '2024-06-14 11:11:20',
+'/upload/2024\\06\\14/3ae71bde-5234-40a8-a8ca-a647d17436ca_main.jpg',
+'/upload/2024\\06\\14/3ae71bde-5234-40a8-a8ca-a647d17436ca_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (203,
+             '[오뚜기X프릳츠] 스콘믹스 300g',
+             4980,
+             0,
+             4980,
+             38,
+             '직접 만드는 프릳츠 베이커리',
+             100,
+             0,
+             '2024-06-14 11:11:21',
+'/upload/2024\\06\\14/6d81c809-ac3c-4e7a-9acf-0f2796aaaee9_main.jpg',
+'/upload/2024\\06\\14/6d81c809-ac3c-4e7a-9acf-0f2796aaaee9_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (204,
+             '[키알라] 유기농 팬케익 믹스',
+             10550,
+             0,
+             10550,
+             38,
+             '손쉽게 만드는 팬케이크 레시피',
+             100,
+             0,
+             '2024-06-14 11:12:03',
+'/upload/2024\\06\\14/345b4ca6-c7a4-4064-b3dd-056676169b0e_main.jpg',
+'/upload/2024\\06\\14/345b4ca6-c7a4-4064-b3dd-056676169b0e_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (205,
+             '[광동] 옥수수 수염차',
+             2220,
+             0,
+             2220,
+             31,
+             '구수한 옥수수의 맛과 향을 담은 차 음료',
+             100,
+             0,
+             '2024-06-14 11:12:25',
+'/upload/2024\\06\\14/886110c1-dd9f-4907-a2fd-647cd159ee67_main.jpg',
+'/upload/2024\\06\\14/886110c1-dd9f-4907-a2fd-647cd159ee67_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (206,
+             '[청산바다] 완도 전복 250g(2마리) (생물)',
+             31000,
+             0,
+             31000,
+             15,
+             '완도에서 찾은 진미',
+             100,
+             0,
+             '2024-06-14 11:12:36',
+'/upload/2024\\06\\14/215197c0-e0af-4897-a7b6-12b5760cfb0b_main.jpg',
+'/upload/2024\\06\\14/215197c0-e0af-4897-a7b6-12b5760cfb0b_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (207,
+             '[백설] 박력밀가루 2.5kg',
+             5650,
+             0,
+             5650,
+             38,
+             '우리밀의 구수함을 그대로',
+             100,
+             0,
+             '2024-06-14 11:12:48',
+'/upload/2024\\06\\14/98d6cf32-99d6-4b7a-a308-d09d792c2aff_main.jpg',
+'/upload/2024\\06\\14/98d6cf32-99d6-4b7a-a308-d09d792c2aff_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (208,
+             '[기순도] 생강식혜 1L',
+             9000,
+             0,
+             9000,
+             31,
+             '깊은 맛으로 피워낸 명인의 음료',
+             100,
+             0,
+             '2024-06-14 11:13:10',
+'/upload/2024\\06\\14/f0d69978-59af-4b2e-b93c-b97a1754a92e_main.jpg',
+'/upload/2024\\06\\14/f0d69978-59af-4b2e-b93c-b97a1754a92e_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (209,
+             '[백설] 통밀밀가루 1kg',
+             2550,
+             0,
+             2550,
+             38,
+             '통밀의 구수한 풍미 가득',
+             100,
+             0,
+             '2024-06-14 11:13:16',
+'/upload/2024\\06\\14/24e69e22-b108-4c7b-a2d0-5b9ac631dac8_main.jpg',
+'/upload/2024\\06\\14/24e69e22-b108-4c7b-a2d0-5b9ac631dac8_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (210,
+             '[노량진28번중도매인] 태안 동죽조개 600g (생물)',
+             6900,
+             0,
+             6900,
+             15,
+             '담백하고 시원한 국물맛',
+             100,
+             0,
+             '2024-06-14 11:13:27',
+'/upload/2024\\06\\14/367289b8-bafe-4645-b7ba-a43dab6d0f1a_main.jpg',
+'/upload/2024\\06\\14/367289b8-bafe-4645-b7ba-a43dab6d0f1a_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (211,
+             '[우리농] 30주년 우리밀 백 밀가루 800g',
+             2650,
+             0,
+             2650,
+             38,
+             '우리밀의 구수함을 그대로',
+             100,
+             0,
+             '2024-06-14 11:13:51',
+'/upload/2024\\06\\14/e2835190-9f7d-4419-861e-1bdea2ccfb84_main.jpg',
+'/upload/2024\\06\\14/e2835190-9f7d-4419-861e-1bdea2ccfb84_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (212,
+             '[하림사] 스펠트 통밀가루 500g',
+             3800,
+             0,
+             3800,
+             38,
+             '스펠트 통밀을 곱게 갈아 만든',
+             100,
+             0,
+             '2024-06-14 11:14:14',
+'/upload/2024\\06\\14/55613675-0ded-42f6-b7c4-c5643f60f263_main.jpg',
+'/upload/2024\\06\\14/55613675-0ded-42f6-b7c4-c5643f60f263_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (213,
+             '[만선] 남해안 왕바지락 500g (생물)',
+             9990,
+             0,
+             9990,
+             15,
+             '통통한 속살을 품은 바지락',
+             100,
+             0,
+             '2024-06-14 11:14:20',
+'/upload/2024\\06\\14/7d3abdc1-8f1b-4d51-b238-2fb96352d2c3_main.jpg',
+'/upload/2024\\06\\14/7d3abdc1-8f1b-4d51-b238-2fb96352d2c3_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (214,
+             '뉴질랜드 그린홍합 500g',
+             15900,
+             0,
+             15900,
+             15,
+             '간편하게 즐기는 통통한 살점',
+             100,
+             0,
+             '2024-06-14 11:14:55',
+'/upload/2024\\06\\14/d3cae06d-16f3-4386-ad73-157e37673a99_main.jpg',
+'/upload/2024\\06\\14/d3cae06d-16f3-4386-ad73-157e37673a99_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (215,
+             '[꽃젓갈] 멸치 무침수',
+             7980,
+             0,
+             7980,
+             40,
+             '저온 숙성으로 깊어진 풍미',
+             100,
+             0,
+             '2024-06-14 11:14:56',
+'/upload/2024\\06\\14/0d39502c-543e-40a8-8d47-95a222a21cbd_main.jpg',
+'/upload/2024\\06\\14/0d39502c-543e-40a8-8d47-95a222a21cbd_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (216,
+             '[백설] 참치액 순 더 깔끔한 맛 900g',
+             12980,
+             0,
+             12980,
+             40,
+             '깨끗하고 깊은 감칠맛',
+             100,
+             0,
+             '2024-06-14 11:15:29',
+'/upload/2024\\06\\14/9459f9ab-1107-46e3-a61f-a7990566c59b_main.jpg',
+'/upload/2024\\06\\14/9459f9ab-1107-46e3-a61f-a7990566c59b_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (217,
+             '[만선] 국산 미더덕 200g (생물)',
+             8600,
+             0,
+             8600,
+             15,
+             '오도독 독특한 식감',
+             100,
+             0,
+             '2024-06-14 11:15:41',
+'/upload/2024\\06\\14/175c0324-1494-44e7-a89d-377ed77dade4_main.jpg',
+'/upload/2024\\06\\14/175c0324-1494-44e7-a89d-377ed77dade4_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (218,
+             '[롯데칠성] 칠성사이다 제로 (210mL X 30캔)',
+             15800,
+             0,
+             15800,
+             28,
+             '오리지널 맛 그대로 제로칼로리',
+             100,
+             0,
+             '2024-06-14 11:16:06',
+'/upload/2024\\06\\14/30a1f01c-bdc5-44cc-88dd-65c81e3b9ecf_main.jpg',
+'/upload/2024\\06\\14/30a1f01c-bdc5-44cc-88dd-65c81e3b9ecf_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (219,
+             '[삼삼물산] 녹차로 씻어낸 멍게 120g (냉장)',
+             6500,
+             0,
+             6500,
+             15,
+             '바다향 물씬 풍기는',
+             100,
+             0,
+             '2024-06-14 11:16:08',
+'/upload/2024\\06\\14/97067d12-d544-45e7-aa02-5c3d39c4ebe6_main.jpg',
+'/upload/2024\\06\\14/97067d12-d544-45e7-aa02-5c3d39c4ebe6_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (220,
+             '[하선정] 까나리 액젓 800g',
+             5280,
+             0,
+             5280,
+             40,
+             '국산 까나리로 더하는 깊은 맛',
+             100,
+             0,
+             '2024-06-14 11:16:14',
+'/upload/2024\\06\\14/d5fd4da0-46e2-4f12-9f70-7f86a39fd112_main.jpg',
+'/upload/2024\\06\\14/d5fd4da0-46e2-4f12-9f70-7f86a39fd112_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (221,
+             '[하선정] 멸치 액젓 800g',
+             5280,
+             0,
+             5280,
+             40,
+             '국산 멸치로 완성한 감칠맛',
+             100,
+             0,
+             '2024-06-14 11:16:38',
+'/upload/2024\\06\\14/7a349340-e141-4860-b736-9d68f79bb7f3_main.jpg',
+'/upload/2024\\06\\14/7a349340-e141-4860-b736-9d68f79bb7f3_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (222,
+'[스시코우지] 소금에 숙성한 연어회 (시오즈메) 120g (냉장)',
+16900,
+0,
+16900,
+15,
+'숙성된 연어의 깊은 감칠맛',
+100,
+0,
+'2024-06-14 11:16:46',
+'/upload/2024\\06\\14/8aaeecaf-9fcb-47cd-bc40-0f9864fcd1a1_main.jpg',
+'/upload/2024\\06\\14/8aaeecaf-9fcb-47cd-bc40-0f9864fcd1a1_th_main.jpg',
+'nara@naver.com',
+'N',
+0),
+            (223,
+             '[일화] 맥콜 제로 (250mL X 6캔)',
+             3380,
+             0,
+             3380,
+             28,
+             '맥콜도 0칼로리로 가볍게',
+             100,
+             0,
+             '2024-06-14 11:17:30',
+'/upload/2024\\06\\14/8dfcfc0e-fa24-4258-bb25-dc7c3368dc5e_main.jpg',
+'/upload/2024\\06\\14/8dfcfc0e-fa24-4258-bb25-dc7c3368dc5e_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (224,
+             ' [백설] 돼지갈비양념 500g',
+             4480,
+             0,
+             4480,
+             40,
+             '고기에 감칠맛을 더하는 비법',
+             100,
+             0,
+             '2024-06-14 11:18:13',
+'/upload/2024\\06\\14/2cc81201-8d12-4f8f-974d-ab57de9144aa_main.jpg',
+'/upload/2024\\06\\14/2cc81201-8d12-4f8f-974d-ab57de9144aa_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (225,
+             '[펩시] 제로 콜라 라임향 (210mL X 30캔)',
+             15800,
+             0,
+             15800,
+             28,
+             '라임향으로 청량함을 더한',
+             100,
+             0,
+             '2024-06-14 11:18:45',
+'/upload/2024\\06\\14/84448c13-2a57-4f48-8dfe-3a912fef57e8_main.jpg',
+'/upload/2024\\06\\14/84448c13-2a57-4f48-8dfe-3a912fef57e8_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (226,
+             '[오뚜기] 양념치킨소스 490g',
+             3280,
+             0,
+             3280,
+             40,
+             '치킨부터 떡꼬치까지 활용도 만점!(490g/1병)',
+             100,
+             0,
+             '2024-06-14 11:18:46',
+'/upload/2024\\06\\14/d15996c7-30f0-47dc-a207-9a42ee89799e_main.jpg',
+'/upload/2024\\06\\14/d15996c7-30f0-47dc-a207-9a42ee89799e_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (227,
+             '[청정원] 소불고기양념장 500g',
+             3980,
+             0,
+             3980,
+             40,
+             '넉넉한 대용량 소스로 푸짐하게 조리',
+             100,
+             0,
+             '2024-06-14 11:19:19',
+'/upload/2024\\06\\14/b6111615-4d36-43db-a1c4-a8f228588907_main.jpg',
+'/upload/2024\\06\\14/b6111615-4d36-43db-a1c4-a8f228588907_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (228,
+             '[서울우유] 쭈욱 늘어나는 체다치즈',
+             4720,
+             0,
+             4720,
+             35,
+             '체다와 모차렐라 치즈와의 만남',
+             100,
+             0,
+             '2024-06-14 11:20:01',
+'/upload/2024\\06\\14/ef474ba1-84c5-47cf-8d10-caf12e2cd848_main.jpg',
+'/upload/2024\\06\\14/ef474ba1-84c5-47cf-8d10-caf12e2cd848_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (229,
+             '[풀무원] 정통순두부찌개양념 140g * 4개입',
+             5980,
+             0,
+             5980,
+             40,
+             '시원하고 얼큰한 국물 맛',
+             100,
+             0,
+             '2024-06-14 11:20:07',
+'/upload/2024\\06\\14/00c8cf3f-8697-47ee-ab46-9c631f7329d5_main.jpg',
+'/upload/2024\\06\\14/00c8cf3f-8697-47ee-ab46-9c631f7329d5_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (230,
+             '[기꼬만] 혼쯔유 (코이다시) 500ml',
+             7280,
+             0,
+             7280,
+             40,
+             '손쉽게 더하는 진한 감칠맛 ',
+             100,
+             0,
+             '2024-06-14 11:20:53',
+'/upload/2024\\06\\14/52f93ae6-b913-45fe-aa9c-148ba3b77a71_main.jpg',
+'/upload/2024\\06\\14/52f93ae6-b913-45fe-aa9c-148ba3b77a71_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (231,
+             '[미자언니네] 프리미엄 맛간장',
+             12500,
+             0,
+             12500,
+             40,
+             '요리의 감칠맛을 좌우하는 만능 간장',
+             100,
+             0,
+             '2024-06-14 11:21:23',
+'/upload/2024\\06\\14/c4fa6a8c-daa4-44ab-85a7-1f1005b8e3dd_main.jpg',
+'/upload/2024\\06\\14/c4fa6a8c-daa4-44ab-85a7-1f1005b8e3dd_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (232,
+             '[연세우유] 100% 자연 치즈 스트링',
+             7980,
+             0,
+             7980,
+             35,
+             '간편하게 즐기는 순수한 자연치즈',
+             100,
+             0,
+             '2024-06-14 11:21:44',
+'/upload/2024\\06\\14/0cb0bb7d-2a7f-47e2-9f4f-b03cecd22e4f_main.jpg',
+'/upload/2024\\06\\14/0cb0bb7d-2a7f-47e2-9f4f-b03cecd22e4f_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (233,
+             '[한국맥꾸룸] 청국장 160g',
+             5280,
+             0,
+             5280,
+             40,
+             '푸근하고 따뜻한 한 입',
+             100,
+             0,
+             '2024-06-14 11:22:10',
+'/upload/2024\\06\\14/6758298b-aa7d-47ba-915c-514062cbd5fc_main.jpg',
+'/upload/2024\\06\\14/6758298b-aa7d-47ba-915c-514062cbd5fc_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (234,
+             '[해찬들] 궁중식쇠고기볶음고추장 500g',
+             13580,
+             0,
+             13580,
+             40,
+             '맛깔나는 궁중식 약고추장',
+             100,
+             0,
+             '2024-06-14 11:22:32',
+'/upload/2024\\06\\14/377cf165-49cb-4833-94f2-a38085067008_main.jpg',
+'/upload/2024\\06\\14/377cf165-49cb-4833-94f2-a38085067008_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (235,
+             '치즈온] 스페인 크림치즈 3종',
+             3510,
+             0,
+             3510,
+             35,
+             '원유 본연의 풍미를 가득 담은',
+             100,
+             0,
+             '2024-06-14 11:22:47',
+'/upload/2024\\06\\14/f22e2acf-8135-4d22-b7ef-e6474d471ec3_main.jpg',
+'/upload/2024\\06\\14/f22e2acf-8135-4d22-b7ef-e6474d471ec3_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (236,
+             '[ardo] 유기농 수프채소믹스 600g (냉동)',
+             5490,
+             0,
+             5490,
+             39,
+             '수프와 스튜에 어울리는 유기농 종합 채소 믹스',
+             100,
+             0,
+             '2024-06-14 11:23:20',
+'/upload/2024\\06\\14/4200e406-c752-4827-93d0-f2bad555ddbe_main.jpg',
+'/upload/2024\\06\\14/4200e406-c752-4827-93d0-f2bad555ddbe_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (237,
+             '[바하버] 클램차우더 스프 425g (조개감자스프)',
+             7900,
+             0,
+             7900,
+             39,
+             '뉴잉글랜드식으로 만든 클램차우더',
+             100,
+             0,
+             '2024-06-14 11:24:02',
+'/upload/2024\\06\\14/5be3f365-271c-4b76-a746-189e89e3170f_main.jpg',
+'/upload/2024\\06\\14/5be3f365-271c-4b76-a746-189e89e3170f_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (238,
+             '[나뚜루] 아이스바 4종',
+             15360,
+             0,
+             15360,
+             25,
+             '도톰한 초콜릿 코팅 속 진한 아이스크림',
+             100,
+             0,
+             '2024-06-14 11:24:32',
+'/upload/2024\\06\\14/e120489c-e8c8-45d7-98d1-44eaf9687848_main.jpg',
+'/upload/2024\\06\\14/e120489c-e8c8-45d7-98d1-44eaf9687848_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (239,
+             '[베키아에누보] 단호박 크림 스프 180g',
+             3980,
+             0,
+             3980,
+             39,
+             '달달하고 부드러운 풍미',
+             100,
+             0,
+             '2024-06-14 11:24:33',
+'/upload/2024\\06\\14/eb459921-58c9-4b20-bf3d-e01ff9159145_main.jpg',
+'/upload/2024\\06\\14/eb459921-58c9-4b20-bf3d-e01ff9159145_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (240,
+             '[상하목장] 아이스크림 밀크 474ml',
+             13500,
+             0,
+             13500,
+             25,
+             '진하게 배어든 우유 풍미',
+             100,
+             0,
+             '2024-06-14 11:25:14',
+'/upload/2024\\06\\14/96b530fc-a6c1-4d0a-89c7-c458b2512bb4_main.jpeg',
+'/upload/2024\\06\\14/96b530fc-a6c1-4d0a-89c7-c458b2512bb4_th_main.jpeg',
+'lhj6399@naver.com',
+'N',
+0),
+            (241,
+             '[청정원] 우리쌀콘크림컵수프 60g',
+             2800,
+             0,
+             2800,
+             39,
+             '한 포에 담긴 고소한 풍미',
+             100,
+             0,
+             '2024-06-14 11:25:32',
+'/upload/2024\\06\\14/b2ae58a6-df11-4b23-a9b9-63225550e4f2_main.jpg',
+'/upload/2024\\06\\14/b2ae58a6-df11-4b23-a9b9-63225550e4f2_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (242,
+             '[미자언니네] 영양닭죽 (냉동)',
+             8800,
+             0,
+             8800,
+             39,
+             '보다 가볍게 즐길 수 있는 영양 죽',
+             100,
+             0,
+             '2024-06-14 11:26:39',
+'/upload/2024\\06\\14/738b9424-cf43-4d07-b129-9eba5ba8be34_main.jpg',
+'/upload/2024\\06\\14/738b9424-cf43-4d07-b129-9eba5ba8be34_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (243,
+             '[미자언니네] 팥죽 (냉동)',
+             8800,
+             0,
+             8800,
+             39,
+             '부드럽고 고소한 홈메이드 죽',
+             100,
+             0,
+             '2024-06-14 11:27:04',
+'/upload/2024\\06\\14/5f58eec2-55c0-40cc-bf1e-b4a53f93c879_main.jpg',
+'/upload/2024\\06\\14/5f58eec2-55c0-40cc-bf1e-b4a53f93c879_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (244,
+'[하겐다즈]리치 카라멜 크리스피 샌드위치 아이스크림',
+15500,
+0,
+15500,
+25,
+'바삭하고도 부드러운',
+100,
+0,
+'2024-06-14 11:27:05',
+'/upload/2024\\06\\14/3157077e-f4e2-455b-96e4-12b44c5ebaf3_main.jpg',
+'/upload/2024\\06\\14/3157077e-f4e2-455b-96e4-12b44c5ebaf3_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (245,
+             '[아침엔본죽] 누룽지 닭죽',
+             4500,
+             0,
+             4500,
+             39,
+             '고소함 가득한 간편 보양죽',
+             100,
+             0,
+             '2024-06-14 11:27:43',
+'/upload/2024\\06\\14/a340ae2d-11bf-4aa1-966c-34464feddcd4_main.jpg',
+'/upload/2024\\06\\14/a340ae2d-11bf-4aa1-966c-34464feddcd4_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (246,
+             '[빙그레] 바나나맛 우유 (240mL X 4개)',
+             5800,
+             0,
+             5800,
+             32,
+             '자꾸만 생각나는 단지 우유',
+             100,
+             0,
+             '2024-06-14 11:27:58',
+'/upload/2024\\06\\14/8087fa2b-32d1-41bc-b9f1-4cd4bb353c28_main.jpeg',
+'/upload/2024\\06\\14/8087fa2b-32d1-41bc-b9f1-4cd4bb353c28_th_main.jpeg',
+'lhj6399@naver.com',
+'N',
+0),
+            (247,
+'[어보그로서리] 기장 연화리 가마솥 전복죽 230g (냉동)',
+10990,
+0,
+10990,
+39,
+'녹진하고 고소한 죽',
+100,
+0,
+'2024-06-14 11:28:22',
+'/upload/2024\\06\\14/e688561f-e767-48a0-8dce-a5614dfb5b6b_main.jpg',
+'/upload/2024\\06\\14/e688561f-e767-48a0-8dce-a5614dfb5b6b_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (248,
+             '[서울우유] 나 100% 저지방 우유 1.8L',
+             5980,
+             0,
+             5980,
+             32,
+'서울우유의 믿을 수 있는 품질! 신선한 1등급 저지방 우유',
+100,
+0,
+'2024-06-14 11:28:34',
+'/upload/2024\\06\\14/71e87788-ccfa-4693-b27f-201100654768_main.jpg',
+'/upload/2024\\06\\14/71e87788-ccfa-4693-b27f-201100654768_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (249,
+             '[KART] 버섯 비프 카레',
+             4380,
+             0,
+             4380,
+             39,
+             '버섯과 소고기 토핑이 듬뿍',
+             100,
+             0,
+             '2024-06-14 11:29:03',
+'/upload/2024\\06\\14/14f6602e-98e9-4b83-b136-8b3631c24f49_main.jpg',
+'/upload/2024\\06\\14/14f6602e-98e9-4b83-b136-8b3631c24f49_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (250,
+             '[갤러리아 고메이494] 아카마루 비프 카레',
+             5780,
+             0,
+             5780,
+             39,
+             '일본 본토 레시피 그대로 만든 한 끼',
+             100,
+             0,
+             '2024-06-14 11:29:25',
+'/upload/2024\\06\\14/618b3518-760a-4d8d-822d-fe722c1c20a4_main.jpg',
+'/upload/2024\\06\\14/618b3518-760a-4d8d-822d-fe722c1c20a4_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (251,
+             '[뉴델리 진한 인도 커리의 맛] 치킨 마크니 커리',
+             8180,
+             0,
+             8180,
+             39,
+             '부드러운 풍미가 매력적인 커리',
+             100,
+             0,
+             '2024-06-14 11:29:48',
+'/upload/2024\\06\\14/3d4cafde-da92-4ad6-ab45-528ceca84ebf_main.jpg',
+'/upload/2024\\06\\14/3d4cafde-da92-4ad6-ab45-528ceca84ebf_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (252,
+             '[황성주두유] 국산콩 검은콩 두유 (190mL X 16팩)',
+             8900,
+             0,
+             8900,
+             32,
+             '콩의 영양을 그대로 담은 전두유',
+             100,
+             0,
+             '2024-06-14 11:29:50',
+'/upload/2024\\06\\14/d9a86a0f-05e6-4fcd-a070-b60c7f1f18c5_main.jpg',
+'/upload/2024\\06\\14/d9a86a0f-05e6-4fcd-a070-b60c7f1f18c5_th_main.jpg',
+'lhj6399@naver.com',
+'N',
+0),
+            (253,
+             '[소중한식사] 소고기 유니카레',
+             6200,
+             0,
+             6200,
+             39,
+             '소고기가 듬뿍 들어간',
+             100,
+             0,
+             '2024-06-14 11:30:09',
+'/upload/2024\\06\\14/b660f6d0-ad99-42c3-9dc9-0ea76cef4ca4_main.jpg',
+'/upload/2024\\06\\14/b660f6d0-ad99-42c3-9dc9-0ea76cef4ca4_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (254,
+             '[마포식품] 生냉사리',
+             3300,
+             0,
+             3300,
+             37,
+             '두께가 얇고 쫄깃한 생면',
+             100,
+             0,
+             '2024-06-14 11:30:57',
+'/upload/2024\\06\\14/0ffe0542-da0a-41b4-93fc-ab619b36ed53_main.jpg',
+'/upload/2024\\06\\14/0ffe0542-da0a-41b4-93fc-ab619b36ed53_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (255,
+             '[면사랑] 생중화면 500G',
+             3500,
+             0,
+             3500,
+             37,
+             '탱글함이 살아있는 생면',
+             100,
+             0,
+             '2024-06-14 11:31:21',
+'/upload/2024\\06\\14/672567c5-dc47-4ad7-9caf-1d7b19ddde2d_main.jpg',
+'/upload/2024\\06\\14/672567c5-dc47-4ad7-9caf-1d7b19ddde2d_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (256,
+             '[풀무원] 생칼국수',
+             2980,
+             0,
+             2980,
+             37,
+             '간편하게 사용하는 생면',
+             100,
+             0,
+             '2024-06-14 11:31:40',
+'/upload/2024\\06\\14/73c39d7b-5cea-4e1c-be89-d828db660f5e_main.jpg',
+'/upload/2024\\06\\14/73c39d7b-5cea-4e1c-be89-d828db660f5e_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (257,
+             '[풀무원] 육개장 칼국수 2인분',
+             7480,
+             0,
+             7480,
+             37,
+'매콤한 육개장 국물에 수타식 공법으로 쫄깃한 칼국수',
+100,
+0,
+'2024-06-14 11:32:21',
+'/upload/2024\\06\\14/6dd13c63-c9e7-4f28-b246-80720640e6b5_main.jpg',
+'/upload/2024\\06\\14/6dd13c63-c9e7-4f28-b246-80720640e6b5_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (258,
+             '[데체코] 쿠스쿠스 500g',
+             5680,
+             0,
+             5680,
+             37,
+             '이국적인 매력을 지닌 파스타',
+             100,
+             0,
+             '2024-06-14 11:33:03',
+'/upload/2024\\06\\14/98d3afe0-ca25-4d4b-986d-3cd21dc7f5ee_main.jpg',
+'/upload/2024\\06\\14/98d3afe0-ca25-4d4b-986d-3cd21dc7f5ee_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (259,
+             '[데체코] 마팔디네 면 500g',
+             6500,
+             0,
+             6500,
+             37,
+             '공주의 머리카락처럼 구불구불한',
+             100,
+             0,
+             '2024-06-14 11:33:25',
+'/upload/2024\\06\\14/2be30d0f-edc1-49d9-968e-6ca3e3867c30_main.jpg',
+'/upload/2024\\06\\14/2be30d0f-edc1-49d9-968e-6ca3e3867c30_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (260,
+             '[오뚜기] 프레스코_퀵스파게티 500G',
+             3280,
+             0,
+             3280,
+             37,
+             '빠르게 조리하는 스파게티',
+             100,
+             0,
+             '2024-06-14 11:34:17',
+'/upload/2024\\06\\14/3bdff9b5-d8fc-40bb-aab3-b29441345eeb_main.jpg',
+'/upload/2024\\06\\14/3bdff9b5-d8fc-40bb-aab3-b29441345eeb_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (261,
+             '[폰타나] 이탈리아 캄파니아 스파게티',
+             3240,
+             0,
+             3240,
+             37,
+'[테프론 파스타] 이탈리아에서 만든 기본 파스타면',
+100,
+0,
+'2024-06-14 11:34:38',
+'/upload/2024\\06\\14/3b00ca56-d28a-48be-85f6-a7b8e4cda9f0_main.jpg',
+'/upload/2024\\06\\14/3b00ca56-d28a-48be-85f6-a7b8e4cda9f0_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (262,
+             '[그라나타] 카스텔베트라노 그린 올리브 (유리병)'
+             ,
+             8780,
+             0,
+             8780,
+             41,
+             '부담 없이 즐기는 풍미',
+             100,
+             0,
+             '2024-06-14 11:35:14',
+'/upload/2024\\06\\14/d98f1e3e-5ffe-4457-9940-178d81145058_main.jpg',
+'/upload/2024\\06\\14/d98f1e3e-5ffe-4457-9940-178d81145058_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (263,
+             '[더오담] 바로담은 달콤황도 복숭아 450g(국내산) ',
+             15300,
+             0,
+             15300,
+             41,
+             '(저탄소인증) 식감이 살아 있는 달콤한 병조림',
+             100,
+             0,
+             '2024-06-14 11:35:54',
+'/upload/2024\\06\\14/f94dfa12-539d-4f86-bdc4-c095aa4017c1_main.jpg',
+'/upload/2024\\06\\14/f94dfa12-539d-4f86-bdc4-c095aa4017c1_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (264,
+             '[로레토] 블랙 홀 올리브',
+             3880,
+             0,
+             3880,
+             41,
+             '어디에나 어울리는 진한 고소함',
+             100,
+             0,
+             '2024-06-14 11:36:28',
+'/upload/2024\\06\\14/5fb2fe1f-d654-428e-87d9-45a102c29922_main.jpg',
+'/upload/2024\\06\\14/5fb2fe1f-d654-428e-87d9-45a102c29922_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (265,
+             '[발투센] 유기농 콩 병조림 2종',
+             9000,
+             0,
+             9000,
+             41,
+             '간편하게 즐기는 콩 고유의 담백하고 고소한 맛',
+             100,
+             0,
+             '2024-06-14 11:37:03',
+'/upload/2024\\06\\14/22a41498-3ea3-476d-bf85-cc61ceb0387f_main.jpg',
+'/upload/2024\\06\\14/22a41498-3ea3-476d-bf85-cc61ceb0387f_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (266,
+             '[그린자이언트] 스위트콘 340g',
+             2580,
+             0,
+             2580,
+             41,
+             '아삭 탱글탱한 옥수수',
+             100,
+             0,
+             '2024-06-14 11:37:33',
+'/upload/2024\\06\\14/c8371311-daed-4701-ac1d-1dfe9579fda3_main.jpg',
+'/upload/2024\\06\\14/c8371311-daed-4701-ac1d-1dfe9579fda3_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (267,
+             '[동원] 자연산 꽁치 통조림',
+             4480,
+             0,
+             4480,
+             41,
+             '제철 꽁치를 깨끗하게 담아낸',
+             100,
+             0,
+             '2024-06-14 11:38:13',
+'/upload/2024\\06\\14/c897f34b-a997-482a-b847-962f5044df8d_main.jpg',
+'/upload/2024\\06\\14/c897f34b-a997-482a-b847-962f5044df8d_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (268,
+             '[동원참치] 살코기 참치 85g X 6캔',
+             9980,
+             0,
+             9980,
+             41,
+             '담백한 풍미가 매력적인 참치',
+             100,
+             0,
+             '2024-06-14 11:38:45',
+'/upload/2024\\06\\14/23a2d7a3-1421-4507-b04e-34215700d4a2_main.jpg',
+'/upload/2024\\06\\14/23a2d7a3-1421-4507-b04e-34215700d4a2_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (269,
+             '[사조] 고추참치 85g*4캔 (안심따개)',
+             7980,
+             0,
+             7980,
+             41,
+             '고추장 양념으로 감칠맛을 더한',
+             100,
+             0,
+             '2024-06-14 11:44:08',
+'/upload/2024\\06\\14/fb18f7f3-bb82-4cf7-b9ef-029dc0114ffa_main.jpg',
+'/upload/2024\\06\\14/fb18f7f3-bb82-4cf7-b9ef-029dc0114ffa_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (270,
+             '[더건강한] 샌드위치 햄',
+             2200,
+             0,
+             2200,
+             41,
+             '그대로 먹어도 맛있는',
+             100,
+             0,
+             '2024-06-14 11:44:56',
+'/upload/2024\\06\\14/31cf324e-1e1d-4660-960b-e0db44262ab7_main.jpg',
+'/upload/2024\\06\\14/31cf324e-1e1d-4660-960b-e0db44262ab7_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (271,
+             '[목우촌] 프라임 살코기햄 300g',
+             5680,
+             0,
+             5680,
+             41,
+             '입안 가득 만족스러운 통 햄',
+             100,
+             0,
+             '2024-06-14 11:45:26',
+'/upload/2024\\06\\14/00268885-26af-4f0f-a66c-09a3b090032b_main.jpg',
+'/upload/2024\\06\\14/00268885-26af-4f0f-a66c-09a3b090032b_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (272,
+             '[선농육공방] 등심햄',
+             6100,
+             0,
+             6100,
+             41,
+             '담백하게 즐기는 통햄',
+             100,
+             0,
+             '2024-06-14 11:46:11',
+'/upload/2024\\06\\14/deba536d-db42-41f0-b340-ced3a60f2ff8_main.jpg',
+'/upload/2024\\06\\14/deba536d-db42-41f0-b340-ced3a60f2ff8_th_main.jpg',
+'yoon@naver.com',
+'N',
+0),
+            (273,
+             '[하림] 닭가슴살 햄 챔 할라피뇨 200g',
+             4480,
+             0,
+             4480,
+             41,
+             '알싸한 킥을 더한 색다른 햄',
+             100,
+             0,
+             '2024-06-14 11:46:46',
+'/upload/2024\\06\\14/8563e179-ae9f-47f9-a4d4-9dcc06760051_main.jpg',
+'/upload/2024\\06\\14/8563e179-ae9f-47f9-a4d4-9dcc06760051_th_main.jpg',
+'yoon@naver.com',
+'N',
+0);
+
+INSERT INTO `product_detail_image`
+VALUES      (
+'/upload/2024\\06\\14/c7947029-4aa3-4101-b264-affa4a9e08ef_감자1.png',
+1,
+1),
+            (
+'/upload/2024\\06\\14/7c4931df-60e3-4e80-b242-eb653ef442a2_desc.png',
+0,
+2),
+            (
+'/upload/2024\\06\\14/1f427b68-dfc7-4ab8-9c8b-a3cb20ce8388_desc.png',
+0,
+3),
+            (
+'/upload/2024\\06\\14/a9590e00-af88-4168-b2c6-c5a5bb57dd1d_감자2.png',
+2,
+4),
+            (
+'/upload/2024\\06\\14/1c621470-06bb-4cc6-b721-79317163ff95_desc.png',
+0,
+5),
+            (
+'/upload/2024\\06\\14/c4f290e5-dcca-44fb-aba3-5aa532ee6ffe_감자3.png',
+3,
+6),
+            (
+'/upload/2024\\06\\14/cfbda8e4-d690-4875-932e-80b6dca4ee48_감자4.png',
+4,
+7),
+            (
+'/upload/2024\\06\\14/c24cfa9e-7355-4ab8-bc77-046e090c77a4_desc.png',
+0,
+8),
+            (
+'/upload/2024\\06\\14/a8afee01-313a-4672-98eb-1949b5c82c88_desc.png',
+0,
+9),
+            (
+'/upload/2024\\06\\14/dc65391f-6a9c-4062-9f75-eb3df6cd70b5_desc.png',
+0,
+10),
+            (
+'/upload/2024\\06\\14/89c8cc99-6282-4b0d-abd2-0ebf5aa9aa52_고구마1.png',
+1,
+11),
+            (
+'/upload/2024\\06\\14/fd16bb9c-03ac-47d1-8a4e-4503d7ff3cc9_고구마2.png',
+2,
+12),
+            (
+'/upload/2024\\06\\14/f79b5721-f1ba-4064-a57d-0c8e6a43c738_desc.png',
+0,
+13),
+            (
+'/upload/2024\\06\\14/cfa25541-980e-4b62-baff-1abe820b8ccb_desc.png',
+0,
+14),
+            (
+'/upload/2024\\06\\14/8a1b2ee2-cd61-4611-ac9a-6c920eb73d42_고구마3.png',
+3,
+15),
+            (
+'/upload/2024\\06\\14/7074eb5e-95c0-407f-a4f6-9bb7eaf57f10_고구마4.png',
+4,
+16),
+            (
+'/upload/2024\\06\\14/df2e1aa7-a9a2-4228-9c22-a22938678e8b_desc.png',
+0,
+17),
+            (
+'/upload/2024\\06\\14/897df778-d310-4b6e-9b57-2d99e2b59aee_desc.png',
+0,
+18),
+            (
+'/upload/2024\\06\\14/18d45ae3-3bf6-40a4-aeac-16ae59b1fbb0_당근1.png',
+1,
+19),
+            (
+'/upload/2024\\06\\14/7e9796fb-28c6-4679-9885-473a20cca7c3_desc.png',
+0,
+20),
+            (
+'/upload/2024\\06\\14/15e04f95-dfca-446d-a21f-4be6f2fe7fe4_당근2.png',
+2,
+21),
+            (
+'/upload/2024\\06\\14/7d25ddec-56b9-4356-8d9b-22045fba4e19_desc.png',
+0,
+22),
+            (
+'/upload/2024\\06\\14/4f9784b7-9368-4edc-9357-937216467217_desc.png',
+0,
+23),
+            (
+'/upload/2024\\06\\14/effd6040-26a2-4854-82d1-ef9e1d23b871_desc.png',
+0,
+24),
+            (
+'/upload/2024\\06\\14/0b3a5511-d3a7-4e73-85ef-98b18dbd8ff0_당근3.png',
+3,
+25),
+            (
+'/upload/2024\\06\\14/f65decb3-5125-4153-aa5a-d894b15aee9f_당근4.png',
+4,
+26),
+            (
+'/upload/2024\\06\\14/15c52aff-f238-4bfe-b1f9-a96d037300bc_desc.png',
+0,
+27),
+            (
+'/upload/2024\\06\\14/1ae5fd0a-d0b9-410b-b6f4-db81b4438570_desc.png',
+0,
+28),
+            (
+'/upload/2024\\06\\14/bd3d9aa9-029c-4374-9d78-75dd4a486d14_desc.png',
+0,
+29),
+            (
+'/upload/2024\\06\\14/243f2bc9-f79b-44d3-8f33-93d336385ca9_desc.png',
+0,
+30),
+            (
+'/upload/2024\\06\\14/ed2b66a6-2f90-4624-8b8f-bae96426d556_양파1.png',
+1,
+31),
+            (
+'/upload/2024\\06\\14/051c05ec-0f6e-4fab-9625-8075219f0106_desc.png',
+0,
+32),
+            (
+'/upload/2024\\06\\14/ae61e840-3d0c-4570-aa4c-6a35d497ab5d_양파2.png',
+2,
+33),
+            (
+'/upload/2024\\06\\14/2b05e2a3-60f8-4571-b103-61cab87c0280_desc.png',
+0,
+34),
+            (
+'/upload/2024\\06\\14/21f0e651-e74a-4cb6-876e-f822c260348f_desc.png',
+0,
+35),
+            (
+'/upload/2024\\06\\14/4d38c41f-0b80-46b4-a530-452cbce8665a_desc.png',
+0,
+36),
+            (
+'/upload/2024\\06\\14/f23f811a-4ed0-4845-8185-b4ff318daa37_양파3.png',
+3,
+37),
+            (
+'/upload/2024\\06\\14/5b7782c4-6ab8-4323-8972-cf0d22052346_양파4.png',
+4,
+38),
+            (
+'/upload/2024\\06\\14/ee15132c-dc6a-4fee-b405-1785b7ce627e_desc.png',
+0,
+39),
+            (
+'/upload/2024\\06\\14/d6aa531d-f686-47d5-b53d-3db75ac0f63c_대파1.png',
+1,
+40),
+            (
+'/upload/2024\\06\\14/526ffb08-d6a3-41a4-8ab7-8d03dd444e19_대파2.png',
+2,
+41),
+            (
+'/upload/2024\\06\\14/ed94ae1c-2bb9-40d3-8ffc-d6562315acb9_대파3.png',
+3,
+42),
+            (
+'/upload/2024\\06\\14/e71ec8e1-7ff9-41c0-bc91-78618d2ffdd0_대파4.png',
+4,
+43),
+            (
+'/upload/2024\\06\\14/a7b560d6-69e0-4e05-a86d-ad86ad3783af_desc.png',
+0,
+44),
+            (
+'/upload/2024\\06\\14/e5893d40-7578-4017-9408-eb18227d3a27_마늘1.png',
+1,
+45),
+            (
+'/upload/2024\\06\\14/605ed731-407b-47f7-bb75-c90b10fbbf41_desc.png',
+0,
+46),
+            (
+'/upload/2024\\06\\14/8f28da58-11fe-44bd-8917-d5a0d95ee38e_마늘2.png',
+2,
+47),
+            (
+'/upload/2024\\06\\14/c8e94b70-c40e-4a10-9743-948a4d98be01_마늘3.png',
+3,
+48),
+            (
+'/upload/2024\\06\\14/bd3b6a63-a6fd-42e1-9d82-87eef258efee_마늘4.png',
+4,
+49),
+            (
+'/upload/2024\\06\\14/7ced02a2-b40d-411b-aef7-161470a02d6b_배추1.png',
+1,
+50),
+            (
+'/upload/2024\\06\\14/a54207d5-b462-4655-a7ff-2e80564f86b0_배추2.png',
+2,
+51),
+            (
+'/upload/2024\\06\\14/dffa78ec-5777-4015-86e6-051620ed6cfa_배추3.png',
+3,
+52),
+            (
+'/upload/2024\\06\\14/ca8893e8-ef77-488a-983b-21687d884578_배추4.png',
+4,
+53),
+            (
+'/upload/2024\\06\\14/199ab3db-eb06-4909-b6bc-3738af2df738_쌈채소1.png',
+1,
+54),
+            (
+'/upload/2024\\06\\14/b03c26b2-6986-4d41-9328-eda8c072eb08_쌈채소2.png',
+2,
+55),
+            (
+'/upload/2024\\06\\14/1e1fba0b-0a60-44e3-85fe-839fa75b8a17_desc.png',
+0,
+56),
+            (
+'/upload/2024\\06\\14/b32d69f8-a7cb-4d0b-b923-95ff1579288b_쌈채소3.png',
+3,
+57),
+            (
+'/upload/2024\\06\\14/794cf9ef-4e5c-49d1-b081-fc17e6d843ed_쌈채소4.png',
+4,
+58),
+            (
+'/upload/2024\\06\\14/c0298fd5-aaef-47c8-a9d3-934ce4d803e3_desc.png',
+0,
+59),
+            (
+'/upload/2024\\06\\14/a75eb82d-a29c-414e-b0d9-6602dd2f7750_나물1.png',
+1,
+60),
+            (
+'/upload/2024\\06\\14/e234959f-f456-4ba0-8797-2beef835b697_나물2.png',
+2,
+61),
+            (
+'/upload/2024\\06\\14/0033b47a-c244-424e-a5bf-580b3c9b9564_desc.png',
+0,
+62),
+            (
+'/upload/2024\\06\\14/eb22b550-be36-45e7-ba0f-50f23c00164d_나물3.png',
+3,
+63),
+            (
+'/upload/2024\\06\\14/dbf852a6-9b67-4fcf-af0a-59da52cf3400_desc.png',
+0,
+64),
+            (
+'/upload/2024\\06\\14/14536a10-d798-4d22-a890-7edd803d65d1_나물4.png',
+4,
+65),
+            (
+'/upload/2024\\06\\14/0382c4d2-fa0d-4e66-8d4f-4c83afb411fc_콩나물1.png',
+1,
+66),
+            (
+'/upload/2024\\06\\14/f661a0a8-d010-4663-bff2-f64893d934bf_콩나물2.png',
+2,
+67),
+            (
+'/upload/2024\\06\\14/2fd93682-5477-4881-b14a-610badae95f8_desc.png',
+0,
+68),
+            (
+'/upload/2024\\06\\14/c9c1ef01-de47-47d9-bf98-f7b87e5ec99b_콩나물3.png',
+3,
+69),
+            (
+'/upload/2024\\06\\14/49a113aa-2995-47ce-aac0-2c90a74f3a68_desc.png',
+0,
+70),
+            (
+'/upload/2024\\06\\14/5ba2f829-85b7-4217-864c-9e77802d1791_콩나물4.png',
+4,
+71),
+            (
+'/upload/2024\\06\\14/55c7207d-9fd4-4a94-a61b-55eecfca8fc3_desc.png',
+0,
+72),
+            (
+'/upload/2024\\06\\14/a411031a-3d80-4e34-adb6-c628b50f2fe5_버섯1.png',
+1,
+73),
+            (
+'/upload/2024\\06\\14/395217e4-7e57-486b-a7a1-98fb37a1087c_버섯2.png',
+2,
+74),
+            (
+'/upload/2024\\06\\14/4404c979-4f02-4262-ae14-416ed6112ac6_버섯3.png',
+3,
+75),
+            (
+'/upload/2024\\06\\14/a4cb6bb2-dad6-43db-9ea2-819a330a1803_desc.png',
+0,
+76),
+            (
+'/upload/2024\\06\\14/5943d935-d6ca-475a-8837-f0d1a18bebc6_버섯4.png',
+4,
+77),
+            (
+'/upload/2024\\06\\14/95403051-c09c-4259-905d-1d90d469c52f_브로콜리1.png',
+1,
+78),
+            (
+'/upload/2024\\06\\14/50fcba89-e501-46c3-a6c5-58fa2067ea58_desc.png',
+0,
+79),
+            (
+'/upload/2024\\06\\14/7152bc15-d984-4ea5-a90b-7b52a1193522_브로콜리2.png',
+2,
+80),
+            (
+'/upload/2024\\06\\14/42fa29bf-c6f3-4ad0-b587-38d73b1665ee_브로콜리3.png',
+3,
+81),
+            (
+'/upload/2024\\06\\14/7cecdc0d-c3cb-4fa8-9c77-8fbc0f2171e6_desc.png',
+0,
+82),
+            (
+'/upload/2024\\06\\14/fdc0520d-ed02-4bb5-b3a7-ce8481e09d17_브로콜리4.png',
+4,
+83),
+            (
+'/upload/2024\\06\\14/65cf72a3-40ff-45cd-9135-9e8a9369365e_desc.png',
+0,
+84),
+            (
+'/upload/2024\\06\\14/f3841ed0-48d1-4f3e-81fe-eebcef3580f5_양상추1.png',
+1,
+85),
+            (
+'/upload/2024\\06\\14/eb625d64-b4ba-42ce-91db-26e07e7b5b47_desc.png',
+0,
+86),
+            (
+'/upload/2024\\06\\14/1b26481c-3e96-4261-a581-fe6a60672eab_양상추2.png',
+2,
+87),
+            (
+'/upload/2024\\06\\14/42d6d8e8-58ec-4c16-9255-dfce7aaaef9d_desc.png',
+0,
+88),
+            (
+'/upload/2024\\06\\14/2c31e0e6-aac0-4cb6-bf64-b01629ae5da4_양상추3.png',
+3,
+89),
+            (
+'/upload/2024\\06\\14/fb3fb34a-ab71-4f31-a6c0-50eed6dae210_양상추4.png',
+4,
+90),
+            (
+'/upload/2024\\06\\14/0e4922e8-4ee7-4b4c-a49d-caf21adfd21d_오이1.png',
+1,
+91),
+            (
+'/upload/2024\\06\\14/01ec7b9d-afa0-499f-b53f-959cf79b7439_desc.png',
+0,
+92),
+            (
+'/upload/2024\\06\\14/bec65312-a0a4-4868-9999-c6750f3ec146_오이2.png',
+2,
+93),
+            (
+'/upload/2024\\06\\14/f79410b9-ceea-4e24-9b66-b154a26c6ba0_오이3.png',
+3,
+94),
+            (
+'/upload/2024\\06\\14/1621100b-dd29-4ab8-a752-6a830010be96_desc.png',
+0,
+95),
+            (
+'/upload/2024\\06\\14/a87727bd-80aa-48d8-b5fd-4499840ba169_오이4.png',
+4,
+96),
+            (
+'/upload/2024\\06\\14/977d2675-0af0-4396-bb22-681bdf9b2848_호박1.png',
+1,
+97),
+            (
+'/upload/2024\\06\\14/94acf974-061f-44c1-9cf9-1b1cc18f2e2a_호박2.png',
+2,
+98),
+            (
+'/upload/2024\\06\\14/afd48285-5cd4-4017-92bc-159a8bb2ddc0_호박3.png',
+3,
+99),
+            (
+'/upload/2024\\06\\14/3fe96670-226f-498f-bebe-410f4a3f89b0_desc.png',
+0,
+100),
+            (
+'/upload/2024\\06\\14/5716168d-fbc0-44cf-a49a-c5652c51f359_호박4.png',
+4,
+101),
+            (
+'/upload/2024\\06\\14/7375b281-f970-4181-afb6-f45e4656d7bf_고추1.png',
+1,
+102),
+            (
+'/upload/2024\\06\\14/b2ff164a-ff1a-4e18-831d-ea6e0247ab77_desc.png',
+0,
+103),
+            (
+'/upload/2024\\06\\14/71fbc6e7-91a9-418d-a95c-4fe6c7154774_고추2.png',
+2,
+104),
+            (
+'/upload/2024\\06\\14/3049d728-1d65-4179-bf57-b876682e4f68_고추3.png',
+3,
+105),
+            (
+'/upload/2024\\06\\14/6c1a895f-2a00-4763-af70-be8a1ef177f2_desc.png',
+0,
+106),
+            (
+'/upload/2024\\06\\14/204de7c9-6ffc-4732-8393-72d8ad73873c_고추4.png',
+4,
+107),
+            (
+'/upload/2024\\06\\14/01fbd845-7a05-47a3-b893-7143016bdcde_desc.png',
+0,
+108),
+            (
+'/upload/2024\\06\\14/0b22731b-8235-4ed9-83ef-6303c88544d7_국산과일1.png',
+1,
+109),
+            (
+'/upload/2024\\06\\14/962c9eed-8981-4068-90b7-819bd430c819_국산과일2.png',
+2,
+110),
+            (
+'/upload/2024\\06\\14/d03aa6ac-cfca-456f-b7a3-6e218a184c15_desc.png',
+0,
+111),
+            (
+'/upload/2024\\06\\14/7e01ee83-f29d-47d7-a069-5c0f34dada1c_국산과일3.png',
+3,
+112),
+            (
+'/upload/2024\\06\\14/b6263c34-aa0c-4cf0-a406-99882effecf0_desc.png',
+0,
+113),
+            (
+'/upload/2024\\06\\14/4d40bd1d-6d4e-4537-b096-33962043c440_국산과일4.png',
+4,
+114),
+            (
+'/upload/2024\\06\\14/0623248a-b7b5-4eac-bca2-97d4cf47d71d_desc.png',
+0,
+115),
+            (
+'/upload/2024\\06\\14/b1c807a5-7a33-4d0e-a544-52826b209bed_수입과일1.png',
+1,
+116),
+            (
+'/upload/2024\\06\\14/442b5d36-14f1-4e27-a64f-2d5d9731d7ec_수입과일2.png',
+2,
+117),
+            (
+'/upload/2024\\06\\14/ac7e2768-826d-404e-ad1a-d1cc6034adf4_desc.png',
+0,
+118),
+            (
+'/upload/2024\\06\\14/a9c8d7cb-56b0-4781-a004-3c5b51eb3a43_desc.png',
+0,
+119),
+            (
+'/upload/2024\\06\\14/2f2aa491-1eb1-482c-8ea3-4d6823dea3f5_수입과일3.png',
+3,
+120),
+            (
+'/upload/2024\\06\\14/53a7cd78-8255-4588-b4f5-b95e7e9ebd92_desc.png',
+0,
+121),
+            (
+'/upload/2024\\06\\14/dd9b1c77-0ade-415c-80eb-274940e02cf4_수입과일4.png',
+4,
+122),
+            (
+'/upload/2024\\06\\14/b47237ff-3a91-4405-be98-f6843b866d37_desc.png',
+0,
+123),
+            (
+'/upload/2024\\06\\14/c6d85381-381c-4aea-9559-8ab3e03c91af_냉동1.png',
+1,
+124),
+            (
+'/upload/2024\\06\\14/8513b9ca-6f83-46ad-91f1-c3a61ac18307_desc.png',
+0,
+125),
+            (
+'/upload/2024\\06\\14/5f35f3bf-c0d6-412a-be3a-af328e3533d6_냉동2.png',
+2,
+126),
+            (
+'/upload/2024\\06\\14/f5d3c685-90d9-4246-8c19-676eaba122c4_냉동3.png',
+3,
+127),
+            (
+'/upload/2024\\06\\14/31b234b0-07ee-42a2-8bf8-f58e20529831_desc.png',
+0,
+128),
+            (
+'/upload/2024\\06\\14/1d0d454b-c71a-4334-b790-2ba1df6cd550_desc.png',
+0,
+129),
+            (
+'/upload/2024\\06\\14/77248411-6402-4316-9a2b-b7439f8c2039_desc.png',
+0,
+130),
+            (
+'/upload/2024\\06\\14/b73de6ec-08fd-484a-9013-84e9bfdcb33e_냉동4.png',
+4,
+131),
+            (
+'/upload/2024\\06\\14/82b165d4-bb47-4c26-97f4-d355f2ab0111_desc.png',
+0,
+132),
+            (
+'/upload/2024\\06\\14/7fe2453d-f319-4fc0-84fb-cae0c216daee_건과일1.png',
+1,
+133),
+            (
+'/upload/2024\\06\\14/11f5ac96-fd41-4414-8ad9-f0895fb75c60_건과일2.png',
+2,
+134),
+            (
+'/upload/2024\\06\\14/b5afdec7-4c51-43d8-a028-b6397f8ec902_desc.png',
+0,
+135),
+            (
+'/upload/2024\\06\\14/d1d0ea25-31c6-41ce-be47-da25a7c06f45_건과일3.png',
+3,
+136),
+            (
+'/upload/2024\\06\\14/88c911e7-e8b8-4a3b-9d5e-681c11046e9a_desc.png',
+0,
+137),
+            (
+'/upload/2024\\06\\14/4a18938a-c526-44fc-9aed-ee7d0ce84915_건과일4.png',
+4,
+138),
+            (
+'/upload/2024\\06\\14/3cc6eff0-bd8f-41cd-99d4-4f021c00a2a2_desc.png',
+0,
+139),
+            (
+'/upload/2024\\06\\14/b7d9e951-ffe6-4875-b68c-08d1a5124b55_desc.png',
+0,
+140),
+            (
+'/upload/2024\\06\\14/8ec11c49-82e7-4278-9422-6bc79ccbae51_견과류1.png',
+1,
+141),
+            (
+'/upload/2024\\06\\14/7552263e-bda8-457d-9958-bc2556684165_desc.png',
+0,
+142),
+            (
+'/upload/2024\\06\\14/6efc44ac-04c2-473a-bc2f-0cd90692e442_견과류2.png',
+2,
+143),
+            (
+'/upload/2024\\06\\14/f054956d-8dc5-4997-a08c-06c4060828ff_desc.png',
+0,
+144),
+            (
+'/upload/2024\\06\\14/bdb931e4-5af6-48b9-87f6-98926ad2d20d_견과류3.png',
+3,
+145),
+            (
+'/upload/2024\\06\\14/55ba1d7b-603c-44ba-bdaf-a19b08edc53b_desc.png',
+0,
+146),
+            (
+'/upload/2024\\06\\14/b80a6a70-dced-40fe-87c7-e674b0cef8e5_견과류4.png',
+4,
+147),
+            (
+'/upload/2024\\06\\14/a54bfe6e-5aff-4330-89cd-b6bf159656bd_desc.png',
+0,
+148),
+            (
+'/upload/2024\\06\\14/df09a1a9-f54f-45af-b527-842babb710df_쌀1.png',
+1,
+149),
+            (
+'/upload/2024\\06\\14/ca410119-b72d-42bd-9133-b75b1ba381ae_desc.png',
+0,
+150),
+            (
+'/upload/2024\\06\\14/311b9412-182a-4e72-a791-75c67fd65cee_쌀2.png',
+2,
+151),
+            (
+'/upload/2024\\06\\14/57fe4816-9f64-449f-aca4-260f10370a83_desc.png',
+0,
+152),
+            (
+'/upload/2024\\06\\14/a0163e37-5e42-4902-8c9e-202585b58f15_쌀3.png',
+3,
+153),
+            (
+'/upload/2024\\06\\14/038e6aa4-779a-4293-8b57-3bc50cfea3e9_desc.png',
+0,
+154),
+            (
+'/upload/2024\\06\\14/cbecd87a-20b0-48b1-a1e6-5b059f4206c4_쌀4.png',
+4,
+155),
+            (
+'/upload/2024\\06\\14/528edb31-244b-4e08-a798-c0be4128868c_desc.png',
+0,
+156),
+            (
+'/upload/2024\\06\\14/fe3ee0ef-e10b-4488-9f42-ab33d9bd642b_desc.png',
+0,
+157),
+            (
+'/upload/2024\\06\\14/71a69e74-b727-4c50-9467-1b304816f1ab_desc.png',
+0,
+158),
+            (
+'/upload/2024\\06\\14/b3fc1356-a4d5-45b4-a3ca-b261ee4ca65e_잡곡1.png',
+1,
+159),
+            (
+'/upload/2024\\06\\14/353d8f73-bf66-43e7-a129-0541943e2330_잡곡2.png',
+2,
+160),
+            (
+'/upload/2024\\06\\14/c6049b06-23b0-4164-a91e-a42c1e160a3c_desc.png',
+0,
+161),
+            (
+'/upload/2024\\06\\14/799364d3-cbd4-4cc7-8ac8-d6b10fb66073_잡곡3.png',
+3,
+162),
+            (
+'/upload/2024\\06\\14/130bd432-498b-4ff7-b94d-6b717f010fde_desc.png',
+0,
+163),
+            (
+'/upload/2024\\06\\14/5eaddcf2-3791-4552-9778-9dbe88a026a2_잡곡4.png',
+4,
+164),
+            (
+'/upload/2024\\06\\14/c6646e0b-6c0b-4c43-aa8f-4d2614d8c0cf_desc.png',
+0,
+165),
+            (
+'/upload/2024\\06\\14/7954cc26-4509-47d7-8e83-b25a662d7b22_생선류1.png',
+1,
+166),
+            (
+'/upload/2024\\06\\14/bdd5becd-456c-443b-b95e-a7021ae8637e_desc.png',
+0,
+167),
+            (
+'/upload/2024\\06\\14/f0743a21-9d99-4544-b031-bd252a125203_생선류2.png',
+2,
+168),
+            (
+'/upload/2024\\06\\14/666f3f83-ae8a-4373-b64e-a114b20ffad3_desc.png',
+0,
+169),
+            (
+'/upload/2024\\06\\14/e5915563-73a2-4292-8d07-2d2fc457418a_생선류3.png',
+3,
+170),
+            (
+'/upload/2024\\06\\14/2a92aff2-b875-44f8-b423-1e126d2e4f4b_desc.png',
+0,
+171),
+            (
+'/upload/2024\\06\\14/5294da3c-db05-4ec7-bc06-47ad4b8977fe_생선류4.png',
+4,
+172),
+            (
+'/upload/2024\\06\\14/8cdad850-4cd3-4bb1-8e13-8ae58ce48ffb_desc.png',
+0,
+173),
+            (
+'/upload/2024\\06\\14/b49a097e-14b3-4d03-84b8-fa33e166cf71_desc.png',
+0,
+174),
+            (
+'/upload/2024\\06\\14/40c7fb51-e6d9-479b-813a-2a56154e3d7d_desc.png',
+0,
+175),
+            (
+'/upload/2024\\06\\14/17e0f11a-e4d0-489b-aefe-e30dba585cdb_desc.png',
+0,
+176),
+            (
+'/upload/2024\\06\\14/51866201-b387-4313-98af-163165922ba0_desc.png',
+0,
+177),
+            (
+'/upload/2024\\06\\14/a14d1cff-736d-41c4-a83b-5e5bb4d98563_desc.png',
+0,
+178),
+            (
+'/upload/2024\\06\\14/4bd0f1bc-7aa6-44e4-bd26-6fece90c4840_desc.png',
+0,
+179),
+            (
+'/upload/2024\\06\\14/d600f9b7-e0a2-425a-a659-6facf71b7e84_desc.png',
+0,
+180),
+            (
+'/upload/2024\\06\\14/dfd9ea7f-541d-4342-a8ed-f1b3ae3006a1_desc.png',
+0,
+181),
+            (
+'/upload/2024\\06\\14/604af6da-4256-449b-a8bd-80de85293436_desc.png',
+0,
+182),
+            (
+'/upload/2024\\06\\14/cc9566d6-16f0-41f9-8930-dafa941a2db9_desc.png',
+0,
+183),
+            (
+'/upload/2024\\06\\14/34d28906-05fe-4197-b8ba-e6908f3a3e73_desc.png',
+0,
+184),
+            (
+'/upload/2024\\06\\14/88e5e2b7-6e25-4f99-9c73-fdd3947b95a0_desc.png',
+0,
+185),
+            (
+'/upload/2024\\06\\14/ac9fd172-f4c8-42ba-88a5-6c8f36795624_desc.png',
+0,
+186),
+            (
+'/upload/2024\\06\\14/f43854be-9808-4f33-a700-8f6f85146003_desc.png',
+0,
+187),
+            (
+'/upload/2024\\06\\14/8012099c-c055-4dbc-9a13-488d8fa1f23a_desc.png',
+0,
+188),
+            (
+'/upload/2024\\06\\14/afe5b13d-e091-4572-8f18-8f09c03b6dbc_desc.png',
+0,
+189),
+            (
+'/upload/2024\\06\\14/c99653cb-f984-4131-b907-8a40b8549194_desc.png',
+0,
+190),
+            (
+'/upload/2024\\06\\14/68e51319-0104-4835-8312-2f8f6e69e49d_desc.png',
+0,
+191),
+            (
+'/upload/2024\\06\\14/b51ce4fb-4424-4b82-ac36-a14a33dd37b5_desc.png',
+0,
+192),
+            (
+'/upload/2024\\06\\14/97143cef-312d-4619-b65b-a37564c0531b_desc.png',
+0,
+193),
+            (
+'/upload/2024\\06\\14/66dca6cd-1c71-4ebd-a379-20d18fea0092_desc.png',
+0,
+194),
+            (
+'/upload/2024\\06\\14/192f2a78-433d-4a68-87ee-3f09e2bf31cb_desc.png',
+0,
+195),
+            (
+'/upload/2024\\06\\14/501c357b-bd72-4c29-ba9e-6f16c93e5fbe_desc.png',
+0,
+196),
+            (
+'/upload/2024\\06\\14/c9fe8fba-037c-40b5-ac06-c130f5badd46_desc.png',
+0,
+197),
+            (
+'/upload/2024\\06\\14/138d3964-b943-40d7-a9fb-d8e1df060cc4_desc.png',
+0,
+198),
+            (
+'/upload/2024\\06\\14/cd6d5b8c-e882-4558-98d9-c38954f7cd63_desc.png',
+0,
+199),
+            (
+'/upload/2024\\06\\14/8b096e6a-6da8-4f3c-a56d-f27730a936fa_desc.png',
+0,
+200),
+            (
+'/upload/2024\\06\\14/735fc93f-4440-4ee2-be7d-ef2980cea85e_desc.png',
+0,
+201),
+            (
+'/upload/2024\\06\\14/d38f2ead-503c-4d9d-91f4-1f74bae54ea8_desc.png',
+0,
+202),
+            (
+'/upload/2024\\06\\14/fdff55a4-a260-436e-b13a-a7c159e10b45_desc.png',
+0,
+203),
+            (
+'/upload/2024\\06\\14/a700d80f-63f8-46d8-b320-a60ed8e35dc4_desc.png',
+0,
+204),
+            (
+'/upload/2024\\06\\14/6ea1c668-2caa-4d8f-aca0-cd693d83f566_desc.png',
+0,
+205),
+            (
+'/upload/2024\\06\\14/b00b4f0a-d8a6-48ea-9eb7-348b5b04477a_desc.png',
+0,
+206),
+            (
+'/upload/2024\\06\\14/e2ef76c5-ec5f-4530-9e02-5dc2ec77bb0b_desc.png',
+0,
+207),
+            (
+'/upload/2024\\06\\14/ad1fb42a-9607-4e35-adb4-3429bb1048a9_desc.png',
+0,
+208),
+            (
+'/upload/2024\\06\\14/713441c8-ab3b-40ce-a49e-79e767684d62_desc.png',
+0,
+209),
+            (
+'/upload/2024\\06\\14/4d21210b-64d7-4cec-8f0d-5a9a0687cbb0_desc.png',
+0,
+210),
+            (
+'/upload/2024\\06\\14/b009c124-5fa9-4b33-81a9-5a2977d644e6_desc.png',
+0,
+211),
+            (
+'/upload/2024\\06\\14/ace4ebad-d450-44a9-ac8e-409e68a86742_desc.png',
+0,
+212),
+            (
+'/upload/2024\\06\\14/6e15a93b-9cd9-4b09-8aca-656248663059_desc.png',
+0,
+213),
+            (
+'/upload/2024\\06\\14/be2a92eb-aef7-4814-96b2-db432f5819fd_desc.png',
+0,
+214),
+            (
+'/upload/2024\\06\\14/d274b9d7-d4c0-4357-a749-4f7409eb2f11_desc.png',
+0,
+215),
+            (
+'/upload/2024\\06\\14/41b84d06-1a8a-4f58-b6d7-5691cad7bdf9_desc.png',
+0,
+216),
+            (
+'/upload/2024\\06\\14/8871a602-1c39-4978-98c2-8e3294bbf8cc_desc.png',
+0,
+217),
+            (
+'/upload/2024\\06\\14/6482bcf2-b9a5-402b-9369-ac2dfd14bbcd_desc.png',
+0,
+218),
+            (
+'/upload/2024\\06\\14/c6054904-68d4-410e-b61b-90f004908eef_desc.png',
+0,
+219),
+            (
+'/upload/2024\\06\\14/74bbc358-5bbf-49bd-afc2-1d9faf2ae7b0_desc.png',
+0,
+220),
+            (
+'/upload/2024\\06\\14/f8f7eac7-7b15-44af-ace5-1fb54029d41a_desc.png',
+0,
+221),
+            (
+'/upload/2024\\06\\14/6ff439db-2fe8-42ae-b06d-760e1985e978_desc.png',
+0,
+222),
+            (
+'/upload/2024\\06\\14/d106eb9c-5068-444b-ab5c-9f9246699b60_desc.png',
+0,
+223),
+            (
+'/upload/2024\\06\\14/165daa5e-9a86-4fce-9ac5-3ede0c8eeab4_desc.png',
+0,
+224),
+            (
+'/upload/2024\\06\\14/9e313d9c-29a7-4091-9319-52558766715b_desc.png',
+0,
+225),
+            (
+'/upload/2024\\06\\14/c3b99684-4f29-4249-b241-ac21dec56f90_desc.png',
+0,
+226),
+            (
+'/upload/2024\\06\\14/b31478db-be81-453a-aeb9-bc15eeba461e_desc.png',
+0,
+227),
+            (
+'/upload/2024\\06\\14/05b76d9c-aaae-477f-b5cb-5f674894d452_desc.png',
+0,
+228),
+            (
+'/upload/2024\\06\\14/c8dd9700-7c70-41e9-b478-7f130c008d4c_desc.png',
+0,
+229),
+            (
+'/upload/2024\\06\\14/4da04918-3ee5-49c6-9a4e-b5f1c487e597_desc.png',
+0,
+230),
+            (
+'/upload/2024\\06\\14/909528de-3632-4ff4-9c76-26ddb9d2f78a_desc.png',
+0,
+231),
+            (
+'/upload/2024\\06\\14/670739d7-7b89-4651-88cd-a8f5853e971e_desc.png',
+0,
+232),
+            (
+'/upload/2024\\06\\14/7b55f7ae-3229-4ddc-bbf9-c0e8987d0934_desc.png',
+0,
+233),
+            (
+'/upload/2024\\06\\14/6b47b5f7-fd26-4720-a8a6-7fe24285acc4_desc.png',
+0,
+234),
+            (
+'/upload/2024\\06\\14/66d0bd4f-df38-4069-8d2b-57ccabe4b001_desc.png',
+0,
+235),
+            (
+'/upload/2024\\06\\14/2140cf1a-fb66-41fa-81c6-756e2b7aebe8_desc.png',
+0,
+236),
+            (
+'/upload/2024\\06\\14/3436d4d0-ad20-4bf5-983b-2cc7d6181342_desc.png',
+0,
+237),
+            (
+'/upload/2024\\06\\14/2ac5733e-1c80-4d13-9bbc-bc6b7935a8a2_desc.png',
+0,
+238),
+            (
+'/upload/2024\\06\\14/dc806808-e45f-44a8-8454-a92ddc58d6a2_desc.png',
+0,
+239),
+            (
+'/upload/2024\\06\\14/5237ec0a-870e-4fe3-9957-6486e0520a65_desc.png',
+0,
+240),
+            (
+'/upload/2024\\06\\14/46eda079-cf38-4027-848f-9d1d94f2a26b_desc.png',
+0,
+241),
+            (
+'/upload/2024\\06\\14/0fccd57e-44fe-4f5d-8ba1-0a5f1c3ac1f1_desc.png',
+0,
+242),
+            (
+'/upload/2024\\06\\14/770f598a-2e01-4c25-b194-7d7a0f14d07c_desc.png',
+0,
+243),
+            (
+'/upload/2024\\06\\14/ff113ad7-4927-48ea-a11a-414cab46b446_desc.png',
+0,
+244),
+            (
+'/upload/2024\\06\\14/cbaf85c2-3759-4ae2-91a6-9cd8912c40d9_desc.png',
+0,
+245),
+            (
+'/upload/2024\\06\\14/19ff86c0-e459-4b78-bc14-7072b23f243e_desc.png',
+0,
+246),
+            (
+'/upload/2024\\06\\14/7571d93f-a0c0-458b-a6da-e3c080de1c83_desc.png',
+0,
+247),
+            (
+'/upload/2024\\06\\14/709ece0f-7e0f-48ef-8b6e-ecc27eff0485_desc.png',
+0,
+248),
+            (
+'/upload/2024\\06\\14/db9a33a4-e536-48f8-a6e8-f93ecf6c962c_desc.png',
+0,
+249),
+            (
+'/upload/2024\\06\\14/58650b58-6c69-46ab-83b9-9d91bb029686_desc.png',
+0,
+250),
+            (
+'/upload/2024\\06\\14/752d233b-abf8-4195-b54c-58b45bf0b0af_desc.png',
+0,
+251),
+            (
+'/upload/2024\\06\\14/5715c553-cebd-4f32-88b6-d5fb10c8d8f5_desc.png',
+0,
+252),
+            (
+'/upload/2024\\06\\14/296697f4-5a0d-4078-8bc1-81f34a57238c_desc.png',
+0,
+253),
+            (
+'/upload/2024\\06\\14/4c8b83bb-cee7-43eb-abfc-5b4c3f32ffb9_desc.png',
+0,
+254),
+            (
+'/upload/2024\\06\\14/e6c36297-eda7-4286-ac01-a984ef9d557e_desc.png',
+0,
+255),
+            (
+'/upload/2024\\06\\14/39aaba55-cbbf-4ea2-b984-37fb428f274d_desc.png',
+0,
+256),
+            (
+'/upload/2024\\06\\14/5f897f8e-fae5-490d-aa15-68ff1641d4b7_desc.png',
+0,
+257),
+            (
+'/upload/2024\\06\\14/5066e34a-8471-448f-af76-77c550ef3e56_desc.png',
+0,
+258),
+            (
+'/upload/2024\\06\\14/a03ff340-1e50-414e-8976-903f6463690a_desc.png',
+0,
+259),
+            (
+'/upload/2024\\06\\14/99879dfe-c7a5-43f1-8a36-561cfb31e1fe_desc.png',
+0,
+260),
+            (
+'/upload/2024\\06\\14/afbb8591-ee62-4bb4-89d8-49e00bf49734_desc.png',
+0,
+261),
+            (
+'/upload/2024\\06\\14/a788f3f1-ac48-4f97-b598-fddc5ad23633_desc.png',
+0,
+262),
+            (
+'/upload/2024\\06\\14/c2a983ff-773d-4973-808b-3acab5ee739a_desc.png',
+0,
+263),
+            (
+'/upload/2024\\06\\14/077cd002-45ce-40a1-ba90-7b56fd81a4e3_desc.png',
+0,
+264),
+            (
+'/upload/2024\\06\\14/671fc223-feb4-4df0-9973-7fc6f3d772b5_desc.png',
+0,
+265),
+            (
+'/upload/2024\\06\\14/48a25471-676d-4819-baff-62a77bc42544_desc.png',
+0,
+266),
+            (
+'/upload/2024\\06\\14/5cc1d028-4c06-42a1-9510-30240a2d0070_desc.png',
+0,
+267),
+            (
+'/upload/2024\\06\\14/02764f58-a38f-4d22-b154-b529cabcbd7c_desc.png',
+0,
+268),
+            (
+'/upload/2024\\06\\14/3898ca43-2d81-47da-acf4-cd8b3d953701_desc.png',
+0,
+269),
+            (
+'/upload/2024\\06\\14/bf599852-618d-4a2a-b3cc-c52c0b9ae809_desc.png',
+0,
+270),
+            (
+'/upload/2024\\06\\14/bc2c4613-ea82-4eb0-a8d8-a46bae4530f0_desc.png',
+0,
+271),
+            (
+'/upload/2024\\06\\14/03d22f83-586d-4b59-ae09-600ce44c64fa_desc.png',
+0,
+272),
+            (
+'/upload/2024\\06\\14/108dc869-6110-4e5e-bd07-654acb128ccc_desc.png',
+0,
+273);
+
+
+
+insert into notice(title, content) values ("[발표] 『A-LIVE 챔피온X탐스 빅스마일데이 특별 라이브 』 이벤트 당첨자",
+"안녕하세요. 미드나잇 마켓입니다.
+
+
+지난 24년 05월 12일 진행된 『A-LIVE 챔피온X탐스 빅스마일데이 특별 라이브 』 이벤트에 참여해 주신 여러분의 관심과 성원에 감사드리며,
+
+당첨자를 아래와 같이 안내드립니다.
+
+​​
+
+■ 이벤트명 : 『A-LIVE 챔피온X탐스 빅스마일데이 특별 라이브 』
+
+■ 당첨 대상 :   『A-LIVE 챔피온X탐스 빅스마일데이 특별 라이브 』 1시간 라이브 방송시간내 이벤트 참여자
+
+​
+
+■ 당첨 경품
+
+1) 라이브방송 중 구입 후 댓글 구매인증 : 스타벅스 E쿠폰(커피 2잔+조각케이크 SET)  (추첨 10명)
+
+2) 라이브방송 중 구매왕 : 배스킨라빈스 아이스크림 케이크 (상위 3명)
+
+3) 라이브방송 중 탐스 구매자 - 탐스 양말 당첨차 (추첨 50명)
+
+4) 라이브방송 중 챔피온 구매자 - 챔피온 비치볼 당첨차 (추첨 25명)
+
+​​
+
+■ 배송시기
+
+기프티콘 - 05월 28일부터 순차 문자전송
+
+상품발송 - 05월 28일부터 순차 발송
+
+​
+
+■ 이벤트기간 : 2024년 05월 12일(일) 12시~13시
+
+​
+
+■ 당첨자 명단 : 첨부파일 내 확인 가능합니다.
+
+​
+
+당첨을 진심으로 축하드립니다.
+
+감사합니다.
+");
+insert into notice(title, content) values ("[발표] 『CJ제일제당&테팔 A라이브』 이벤트 당첨자 추가 공지",
+"안녕하세요. 미드나잇 마켓입니다.
+
+​지난 2월 1일에 진행된 『CJ제일제당&테팔 라이브 방송』 이벤트에 참여해 주신 여러분의 관심과 성원에 감사드리며,
+추가 당첨자를 아래와 같이 안내드립니다.
+
+■ 이벤트 기간: 2/1일 CJ제일제당&테팔 라이브 방송 20시~21시 구매자 기준
+■ 당첨 대상: 총 1명
+​■ 당첨경품 : 소통왕(이마트 5만원 상품권)
+​■ 사은품 발송일자: 03/11(월) 부터 순차발송 예정입니다.
+​■ 당첨자 명단
+구매자명
+
+ID
+
+휴대폰 번호
+
+장*미
+
+em****
+
+010-****-0042
+
+
+
+​​​※ 사은품 중복 증정은 불가합니다.
+
+※ 구매 확정자 기준으로 증정됩니다.
+※ 안심번호 설정 시, 당첨 안내 및 경품 발송이 어려울 수 있으니 해제 후 주문 바랍니다.
+※ 당첨 후 고객정보 오기로 인한 경품 수령 불가 시 재발송은 불가합니다.
+​
+
+​당첨을 진심으로 축하드립니다.
+
+감사합니다.");
+insert into notice(title, content) values ("[발표] 『V4와 백종원의 기부&테이크』 이벤트 당첨자",
+"안녕하세요, 미드나잇 마켓입니다.
+
+
+지난 2019년 12월 4일부터 12월 17일까지 진행된 『V4와 백종원의 기부&테이크』 이벤트에 참여해주신
+
+회원 여러분들의 관심과 성원에 감사드리며 경품 당첨자를 아래와 같이 안내해 드립니다.
+
+
+
+■ 응모 기간 : 2019.12.04(수) ~ 2019.12.17(화)
+■ 응모 조건 : 이벤트 기간 중 100원 딜 기부 시 자동응모
+■ 당첨 경품 :
+
+
+
+| 백종원 소장 게이밍 마우스
+-  Madcats R.A.T 7 (1명)
+-  SteelSeries World of Warcraft: Cataclysm Gaming Mouse (1명)
+
+
+
+| 넥슨 이정헌 대표 소장 업무용 키보드
+-  Filco majestouch convertible2 (1명)
+
+
+
+■ 당첨자 명단 [총 3명]
+
+
+
+백종원 소장 게이밍 마우스
+(Madcats R.A.T)	King***e11	김*호
+백종원 소장 게이밍 마우스
+(SteelSeries World of Warcraft: Cataclysm Gaming Mouse)	Hgsn***230	홍*우
+넥슨 이정헌 대표 소장 업무용 키보드
+(Filco majestouch convertible2)	Adlq***a	이*람
+
+
+
+
+※ 당첨된 회원님께 12월 26일 이후 순차적으로 기본 회원정보를 활용하여 옥션에서 개별적으로 연락 드릴 예정입니다.
+※ 당첨자는 랜덤 추첨을 통해 선정하였으며, 고객님의 개인정보는 이벤트 종료 후 안전하게 파기됩니다.
+※ 당첨 고객의 회원정보가 상이하거나 경품 재판매 및 악용될 경우 경품이 취소될 수 있습니다.
+
+
+
+
+
+당첨되신 회원님께 축하의 말씀을 전해 드리며, 앞으로도 많은 관심과 사랑 부탁드립니다.
+감사합니다.");
+insert into notice(title, content) values ("[발표] 『최애의 최애템 더보이즈 100원 기부딜』 이벤트 당첨자",
+"안녕하세요. 미드나잇 마켓입니다.
+
+
+지난 2019년 10월 7일부터 2019년 10월 18일까지 진행된 『최애의 최애템 더보이즈 100원 기부딜』 이벤트에
+
+
+참여해주신 회원 여러분들의 관심과 성원에 감사드리며 경품 당첨자를 아래와 같이 안내해드립니다.
+
+
+
+■ 응모 기간 : 2019.10.07 (월) ~ 2019.10.18 (금)
+
+
+■ 당첨 경품 : - 더보이즈 애장품 패키지 (1명)
+
+
+		   - 더보이즈 멤버 전원의 사인 CD + 폴라로이드 사진 1장 (11명)
+
+
+
+
+
+※ 당첨 안내를 위해 옥션 이벤트 대행사 (주)클락워크에서 별도의 연락을 드릴 예정입니다.
+
+
+※ 당첨자는 랜덤 추첨을 통해 선정하였으며, 고객님의 개인정보는 이벤트 종료 후 안전하게 파기됩니다.
+
+
+
+
+
+■ 애장품 패키지 당첨자 명단 [1명]
+
+
+
+
+진*희	kea******
+
+
+
+
+
+■ 멤버 전원의 사인 CD + 폴라로이드 사진 당첨자 명단 [11명]
+
+
+
+
+
+조*경	pro***
+이*연	aaa*******
+최*정	dol*******
+조*서	jms****
+김*영	s13***
+지*수	lav*********
+김*선	tbz******
+임*진	sjy****
+임*인	oli*******
+유*람	har********
+이*원	sb9****
+
+
+
+
+당첨을 위해 결제하신 응모 금액 100원은 취소/환불 금액을 제외하고 전액 투병 소방관을 위해 기부됩니다.
+
+
+
+
+
+■ 총 기부액 : 1,086,000원
+
+
+
+
+
+감사합니다.");
+insert into notice(title, content) values ("[안내] BC 국민행복 카드 점검에 따른 결제 서비스 제한",
+"안녕하세요. 미드나잇 마켓입니다.
+
+BC 국민행복 카드의 안정적인 서비스를 위한 시스템 점검 진행 예정임을 안내드립니다.
+BC 국민행복 카드를 이용하실 고객님께서는 아래 일정에 유의하여 주시기 바랍니다.
+
+​
+
+1. 작업일시 : 2024년6월11일(화) 19:00 ~ 20:30 (1시간30분)
+
+2. 작업내용 : 한국사회보장정보원 네트워크 정비 작업
+
+3. 영향범위 : BC 국민행복 카드 서비스 간헐적 통신 장애 발생
+
+​
+
+감사합니다.");
+insert into notice(title, content) values ("[안내] 광주은행 비씨카드 점검에 따른 결제 중단",
+"안녕하세요.  미드나잇 마켓입니다.
+
+광주은행 주전산시스템 교체 작업에 따라 광주은행 비씨카드 서비스가 일시적으로 중단될 예정임을 안내드립니다.
+
+1. 작업일시 : 2024년5월12일(일) 02:00 ~ 14:00 (12시간)
+2. 작업내용 : 광주은행 주전산시스템 교체 작업
+3. 영향범위 : 작업시간 동안 광주은행 비씨카드 거래 승인 중단
+
+감사합니다. ");
+insert into notice(title, content) values ("[안내] 무통장 입금 환불 지원 은행 변경 안내 (일정 변경)",
+"안녕하세요. 미드나잇 마켓입니다.
+
+무통장 입금 환불 지원 은행이 변경됩니다.
+기존 HSBC, 도이치뱅크를 환불 계좌로 사용하셨던 고객님들께서는 계좌 변경을 부탁드리며 서비스 변경에 대해 양해를 부탁드립니다.
+아울러, 산림조합중앙회 및 키움증권 등 일부 증권사들이 신규로 지원될 예정입니다. 이용에 참고 부탁드립니다.
+
+■ 서비스 중단 은행 : HSBC, 도이치뱅크
+■ 변경 일자: 3/29(금) → 4/19(금)
+
+감사합니다.");
+insert into notice(title, content) values ("[이벤트] 글로벌 라이브 구매왕 이벤트 당첨자 안내",
+"녕하세요 고객님. 미드나잇 마켓입니다.
+
+
+지난번 진행하였던 글로벌 라이브 방송 구매왕 이벤트 당첨자 안내 드립니다.
+
+
+
+라이브에 많은 참여해주신 모든 고객분들께 감사드립니다.
+
+
+
+<1등>
+-사은품:28만원 상당의 중식도
+
+
+
+-당첨자:smn0***
+
+
+
+-주문번호: 2336020330024 / 2336021000260 / 2336021230205 / 2336021300092 / 2336021440349
+
+
+
+-주문 취소 시, 증정품은 지급되지 않습니다.
+
+
+
+
+<2등>
+
+-사은품: 13만원 상당의 g-97 브레드 나이프
+
+
+
+-당첨자: jjoo0***
+
+
+
+-주문번호: 22336020370084 / 2336020430211 / 2336020530346 / 2336021170286
+
+
+
+-주문 취소 시, 증정품은 지급되지 않습니다.
+
+
+
+
+재세공과금 22% 브랜드사 부담 예정으로, 필요한 고객 정보 취합을 위해 SNS 발송 예정입니다.
+
+
+
+감사합니다.
+");
+insert into notice(title, content) values ("[이벤트] 루메나 선풍기 라이브 경품 담첨자 안내",
+"안녕하세요 고객님, 미드나잇 마켓입니다.
+
+지난번 진행하였던 루메나 라이브 사은품 당첨자 공지 드립니다.
+
+사은품은 구매확정 후 개별 발송 예정이며 주문 취소 시에는 사은품과 함께 회수 요청 드리는 점 참고 부탁 드립니다.
+
+각 이벤트별 당첨 주문번호는 아래와 같습니다.
+
+다시 한 번 루메나 라이브를 통해 구매해주셔서 감사합니다.
+
+<CLASSIC 3 구매 시 선착순 FAN C2 증정>
+구매해주신 모든 분께 개별 발송 예정
+
+<구매인증 이벤트> 150명 - FAN C2
+2343720510231 hl*e****
+2343720430014 ha*****
+2343720430022 da*it****
+2343720430045 ja*****
+2343720430058 pi*****
+2343720430073 hy*****
+2343720430080 ri****
+2343720430083 cu*l****
+2343720430084 ki*s****
+2343720430096 ms****
+2343720450263 he*****
+2343720450277 Jo*****
+2343720450290 jj****
+2343720450322 fa*y*
+2343720450324 ka****
+2343720450337 ko*****
+2343720450344 mm*****
+2343720450360 ba****
+2343720460021 gn***
+2343720470301 in****
+2343720470311 se****
+2343720470319 ur*li****
+2343720470338 wo*ys****
+2343720470365 gk*m****
+2343720490066 lk***
+2343720270245 db*823
+2343720270262 de*eb
+2343720270263 bo*unni
+2343720270291 he*un514
+2343720270294 to*ze
+2343720270310 ch*ee1102
+2343720270312 to*ko99
+2343720280075 de*7696
+2343720280126 su*rtalent
+2343720280146 hl*g1
+2343720280147 sn*py9513
+2343720280172 br*2040
+2343720280244 rl*djs
+2343720290012 ee*reee
+2343720290033 an*h970
+2343720350232 go*ie
+2343720350250 yj*ye
+2343720350265 eu*in007
+2343720360018 an*82
+2343720360026 ha*y2200
+2343720360065 jn*22
+2343720360069 si*erbbong
+2343720360087 gh*su
+2343720360107 ru*o1012
+2343720360110 eh*000
+2343720500303 po*4483
+2343720500305 po*hh729
+2343720510003 kj*372
+2343720510015 yb*268
+2343720510066 lj*26
+2343720510077 kh*914
+2343720510081 fo*versmstj99
+2343720510117 su*27
+2343720510165 eu*in916
+2343720510175 bi*mom03
+2343720510197 go*d3104
+2343720510206 yn*aeng
+2343720510207 go*hope70
+2343720510231 hl*e2727
+2343720510259 jo*429
+2343720510261 ic*ose
+2343720510291 89*arry
+2343720510318 ny*i2308
+2343720510330 ok*37
+2343720480260 cs*544
+2343720480261 lu*2004
+2343720480267 au*999
+2343720480274 jh*43
+2343720480294 rn*kskbmn
+2343720480299 ol*oeun
+2343720480342 ce*lia1128
+2343720480346 wl*ud2811
+2343720480353 ol*i15
+2343720480357 pk*ar17
+2343720490059 ch*hm617
+2343720490063 su*o2
+2343720490064 il*ekjy
+2343720490066 lk*85
+2343720490073 ny*ndy79
+2343720120093 ki*anearl
+2343720490098 ki*ko07
+2343720490108 el*672
+2343720490115 du*1982
+2343720490121 je*ewmi
+2343720490140 ar*i9939
+2343720490148 ca*ise67
+2343720490153 mo*2u
+2343720490157 cu*ijh
+2343720490174 pl*you1202
+2343720490181 s0*549
+2343720490188 yu*144
+2343720490190 gr*nmyth
+2343720490194 me*ries
+2343720490213 jg*in15
+2343720490256 hj*153
+
+<퀴즈 이벤트> 40명
+1차 - 스타벅스 커피 기프티콘
+2343721120204 ki*jung222
+2343721120238 ji*ung82
+2343721120249 an*o13
+2343721120274 jr*06
+2343721120336 tj*92
+2343721120345 ry*y12
+2343721130009 am*liayn
+2343721130041 o1*588
+2343721130056 fo*une326
+2343721130062 kk*43
+2343721130318 sy*20
+2343721130327 mi*l122
+2343721130358 hw*gjy0606
+2343721130359 mi*8004
+2343721130368 be*tykkom
+2343721140017 ba*la1
+2343721140032 li*white0200
+2343721140035 so*78
+2343721140045 ks*815
+2343721140071 po*box
+
+2차 - 루메나 에코백
+2343720410098 pr*typark
+2343720410099 dl*thdgml
+2343720410152 ss*0109
+2343720410167 sa*ang27
+2343720410205 fa*ril1
+2343720410286 eu*5907
+2343720410300 na*830
+2343720410301 le*209
+2343720410331 an*0451
+2343720420022 pb*827
+2343720190015 sp*eae
+2343720190094 ch*b1
+2343720190246 ko*l01
+2343720200097 ph*be107
+2343720210020 mk*119
+2343720210215 wh*e7958
+2343720210238 ky*1
+2343720220106 da*ung80
+2343720220117 ca*bell76
+2343720220130 ta*iea");
+insert into notice(title, content) values ("[이벤트] 바오먼트 구매왕 이벤트 당첨자 공지",
+"안녕하세요 고객님. 미드나잇 마켓입니다.
+
+지난번 진행하였던 바오먼 라이브 방송 구매왕 이벤트 당첨자 안내 드립니다.
+라이브에 많은 참여해주신 모든 고객분들께 감사드립니다.
+
+-사은품:  25만원 상당의 바오먼트 나이프 3종 세트 + 가위 증정
+-당첨자:   durumi1** / makoto1*** / umtee0***
+-주문번호: 2340621070243 / 2340621490340 / 2340620360162
+
+
+
+재세공과금 브랜드사 부담 예정으로, 필요한 고객 정보 취합을 위해 SNS 발송 예정입니다.
+감사합니다.
+");
+insert into notice(title, content) values ("[주의] 국가기술표준원, 전기방석, 온열팩 등 57개 제품 리콜명령 안내",
+"안녕하세요. 미드나잇 마켓입니다.
+
+
+
+
+
+산업통상자원부 국가기술표준원은 겨울철 수요가 증가하는 겨울용품(난방용품, 겨울의류 등), 수도 동결 방지기(열선), 스노우 타이어 등 56개 품목 1,387개 제품에 대해 안전성조사를 실시한 결과, 온도상승, 유해물질 검출 등 안전기준을 위반한 57개 제품을 적발하였으며, 해당 사업자에 대해서는 「제품안전기본법」 제11조 및 「어린이제품 안전 특별법」 제10조에 따라 제품 수거등의 명령(리콜명령)을 내렸다고 밝혔습니다.
+
+
+
+
+
+당사는 해당 상품에 대해 판매중단 조치를 취하고 있사오니, 관련 제품을 판/구매하시는 분들은 지속적인 관심을 가져 주시기 바랍니다.
+
+
+
+
+
+미드나잇 마켓은 항상 건전한 인터넷 상거래 문화를 선도하기 위하여 노력하겠습니다.
+
+
+
+
+
+감사합니다.
+");
+insert into notice(title, content) values ("[주의] 국가기술표준원, 튜브·구명조끼·수영복 등 64개 제품 리콜명령 안내",
+"안녕하세요 미드나잇 마켓입니다.
+
+
+
+
+
+산업통상자원부 국가기술표준원은 4 ~ 6월간 여름철 수요 집중이 예상되는 어린이·생활용품(물놀이용품, 여름의류 등), 전기용품(전격살충기, 선풍기) 40개 품목, 1,001개 제품에 대한 안전성조사를 실시하였고,
+
+
+튜브 등 물놀이용품, 수영복 등 안전기준을 충족하지 못한 64개 제품에 대해 수거/교환 등 리콜명령 조치를 발표하였습니다.
+
+
+
+
+
+이번 리콜 처분된 기업들은 제품안전기본법 제11조 등에 따라 유통매장에서 해당 제품을 즉시 수거하고,
+
+
+소비자에게 이미 판매된 제품에 대해서는 교환 등을 해 주어야 하므로
+
+
+리콜제품을 구입한 소비자분들께서는 해당 제품의 제조.수입.판매사업자 측으로 연락하시어 교환 등의 안내를 받으시기 바랍니다.
+
+
+
+
+
+향후에도 관련 내용을 신속하게 공지할 예정이오니 관련 제품을 판/구매하시는 분들은 지속적인 관심을 가져 주시기 바랍니다.
+
+
+
+
+
+미드나잇 마켓은 항상 건전한 인터넷 상거래 문화를 선도하기 위하여 노력하겠습니다.
+
+
+
+
+
+감사합니다.");
+insert into notice(title, content) values ("[주의] 국표원, 물놀이기구, 어린이용 우산 등 56개 제품 리콜 안내",
+"안녕하세요. 미드나잇 마켓입니다.
+
+
+
+
+
+산업통상자원부 국가기술표준원은 하계 휴가철을 맞이하여 수요가 집중되는 여름용품인 물놀이기구, 여행용 가방 등 57개 품목, 964개 제품에 대해 5~6월간 안전성조사를 실시한 결과, 유해 화학물질, 제품 내구성 등 안전기준을 위반한 56개 제품을 적발하여 제품안전기본법 제11조 및 어린이제품 안전 특별법 제10조에 따라 해당 사업자에 대해 수거등의 명령(리콜 명령)을 내렸다고 밝혔습니다.
+
+
+
+
+
+당사는 해당 상품에 대해 판매중단 조치를 취하고 있사오니, 관련 제품을 판/구매하시는 분들은 지속적인 관심을 가져 주시기 바랍니다.
+
+
+
+
+
+미드나잇 마켓은 항상 건전한 인터넷 상거래 문화를 선도하기 위하여 노력하겠습니다.
+
+
+
+
+
+감사합니다.
+");
+insert into notice(title, content) values ("[주의] 국표원, 색종이, 찰흙, 팔찌, 슬라임 등 8개 제품 리콜 안내",
+"안녕하세요. 미드나잇 마켓입니다.
+
+
+
+
+
+산업통상자원부 국가기술표준원은 유치원, 초등학교 2학기 등교를 대비하여 최근 유행중인 푸시팝, 말랑이, 슬라임 등 장난감과 가정, 학교에서 많이 쓰이는 교육용 완구, 학용품 등 총 169개 어린이제품을 대상으로 6~8월간 안전성조사를 실시한 결과,
+
+
+색종이, 슬라임 등 적발된 63개 어린이제품의 제조. 수입업자 등에 대해 수거 등(리콜) 명령(8개) 또는 개선조치를 권고(55개)하였다고 밝혔습니다.
+
+
+
+
+
+향후에도 관련 내용을 신속하게 공지할 예정이오니 관련 제품을 판/구매하시는 분들은 지속적인 관심을 가져 주시기 바랍니다.
+
+
+
+
+
+미드나잇 마켓은 항상 건전한 인터넷 상거래 문화를 선도하기 위하여 노력하겠습니다.
+
+
+
+
+
+감사합니다.
+");
+insert into notice(title, content) values ("[주의] 식약처, '매스틱' 구매시 주의사항",
+"안녕하세요. 미드나잇 마켓입니다.
+
+
+
+
+
+식품의약품안전처에서 '매스틱'관련 협조 요청이 있어 안내드립니다.
+
+
+
+
+
+식품위생법 제7조 및 건강기능식품에 관한 법률 제14조에 의해
+
+
+[식품] 식품 원료 목록에 등재되어 있지 않으며 식품으로 안전성이 확인되지 않아 식품원료로 사용불가
+
+
+[식품첨가물] 천연향료 정의에 따라 추출, 증류 등에 의해 제조된 정유, 추출물, 올레오레진만 착향 목적으로 사용 가능
+
+
+* 단순 분쇄한 분말은 식품첨가물에 해당하지 않음
+
+
+[건강기능식품] '매스틱 나무(Pistacia lentiscus)의 검(gum)'이 개별인정받음
+
+
+* 기능성 내용 : 위 불편감 개선에 도움을 줄 수 있음(생리활성기능 2등급)
+
+
+* 일일섭취량 : 매스틱 검으로서 1,050mg/일
+
+
+
+
+
+해당 용도 이외로 '위장 장애, 소화불량, 복통 등에 효과' 등 질병을 예방한다는 내용으로 광고 판매하는건 소비자 오인 제품이니 제품 구매시 참고를 부탁드립니다
+
+
+
+
+
+미드나잇 마켓은 안전한 인터넷 상거래 문화를 선도하기 위하여 노력하겠습니다.
+
+
+감사합니다.");
+insert into notice(title, content) values ("[주의] 지프 땅콩버터 자발적 회수 안내",
+"안녕하세요. 미드나잇 마켓입니다.
+
+
+
+
+
+미국에서 판매되는 '지프(Jif) 땅콩버터'가 최근 발생한 식중독 환자와 연관성이 있는 것으로 본다는 FDA(미국 식품의약품)의 조사결과와 관련, 제조원인 스머커스사가 미국에서 자진 리콜을 결정했으며,
+
+
+해당 제품을 수입 판매하는 농심은 국내에 유통되는 제품에 대해서 자진 회수한다고 밝혔습니다.
+
+
+
+
+
+
+
+
+회수 대상 제품을 가지고 계신 소비자는 구입처 또는 농심 고객상담팀(080-023-5181)으로 문의해주시기 바랍니다.
+
+
+
+
+
+* 회수 대상 제품 정보
+
+
+
+
+
+○지프크리미땅콩버터
+
+
+- 유통기한 : 2023년 10월 1일까지
+
+
+- 유통기한 : 2023년 11월 21일까지
+
+
+
+
+
+○지프크런치땅콩버터
+
+
+- 유통기한 : 2023년 11월 30일까지
+
+
+- 유통기한 : 2024년 1월 18일까지
+
+
+
+
+
+
+
+
+미드나잇 마켓은 항상 안전한 인터넷 상거래 문화를 선도하기 위하여 노력하겠습니다.
+
+
+감사합니다.");
+insert into notice(title, content) values ("식품의약품안전처, 해외직구식품 통합정보 사이트 홍보 협조 요청
+",
+"안녕하세요. 미드나잇 마켓입니다.
+
+
+
+
+
+식품의약품안전처에서는 해외직구식품에 대한 위해정보 등을 확인하고 올바르게 구매하는 방법을 알리기 위하여 식품안전나라 누리집내 해외직구식품 통합정보 제공 사이트 ‘해외직구 식품 올(ALL)바로’를 신설하여 올바른 해외직구식품 구매와 분쟁해결에 필요한 정보등을 제공하고 있습니다.
+
+
+
+
+
+또한, 해외직구식품 제대로 알기 영상 공모전 수장작을 올 연말까지 순차적으로 유튜브에 게시 할 예정임을 협조 요청을 받아 안내드립니다.
+
+
+
+
+
+
+
+
+식품 구매시 해외직구식품 통합정보 제공 사이트 및 해외직구식품 제대로 알기 공모전을 참고하여 적극 활용하여 주시기 바랍니다.
+
+
+
+
+
+미드나잇 마켓은 안전한 인터넷 상거래 문화를 선도하기 위해 노력하겠습니다.
+
+
+감사합니다.");
+insert into notice(title, content) values ("직거래 피해 주의 안내",
+"안녕하세요. 미드나잇 마켓입니다.
+​
+
+​최근 타 사이트로의 직거래 유도 등을 통한 사기 피해가 빈번하게 발생하고 있어 주의 안내드립니다.
+
+​
+
+​당사 사이트가 아닌 타 사이트에서 현금거래 등의 직거래를 유도하는 경우 사기의 위험성이 높고, 소비자 피해가 발생해도 보상을 받으실 수 없으니 구매자님의 각별한 주의를 부탁드리겠습니다.
+
+​
+
+​[직거래 사기 대표 유형]
+
+​- 문자로 품절 또는 저가 구매를 안내하면서 당사 주문건 취소처리, 검증되지 않은 타사이트 URL 안내하며 계좌이체 등을 통한 결제 유도
+
+​- 상품 상세페이지를 통해 별도 카카오톡/유선 등으로 상품 문의를 유도한 뒤, 보다 저렴한 가격으로 추가결제를 하도록 유도
+
+​
+
+​[신고 방법]
+
+​판매자가 직거래를 유도하는 경우, 거래하지 마시고 아래 경로에 따라 신고해주시기 바랍니다.
+
+​- 미드나잇 마켓 PC 상품 상세페이지 하단의 신고센터 클릭 후 접수 (직거래/외부거래 유도)
+
+​
+
+​- 직거래를 유도하는 내용이 담긴 문자, 카카오톡 메시지, 입금증 등의 캡쳐본이 있다면 증빙자료로 첨부하여 주시기 바랍니다.
+
+​
+
+​[직거래 피해 고객이 수신한 문자 예시]
+
+​안녕하세요. 미드나잇 마켓 판매자입니다.
+
+​이벤트/할인행사 상품인데 재고량이 부족하다 보니 주문취소 하셔야 합니다.
+
+​다만 제품출고 사이트에서는 재고 남은걸로 확인되며
+
+​구매하시면 빠른 시일내에 물건 받아보실 수 있고 가격도 저렴합니다.
+
+​주소접속 홈페이지 : 검증되지 않은 URL 기재 (또는 제품 출고측 상담 카톡아이디 안내)
+
+​
+
+
+​미드나잇 마켓은 항상 안전한 인터넷 상거래 문화를 선도하기 위하여 노력하겠습니다.
+
+​
+
+​감사합니다. ");
+insert into notice(title, content) values ("[안내] 선불충전금 관리 현황 공시",
+"안녕하세요. 미드나잇 마켓입니다.
+
+항상 저희 서비스를 이용하시는 고객님들께 감사드립니다.
+
+당사는 금융감독원의 '전자금융업자 이용자 자금 보호 가이드라인'에 따라 고객의 선불충전금을 안전하게 보관하기 위하여 현재 지급보증보험에 가입하여 운영하고 있으며 이에 해당 내역을 아래와 같이 안내 드립니다.
+
+- 선불충전금 잔액 규모 : 32,477,394,352원
+- 보험금액 : 50,000,000,000원
+- 보험기간 : 2023년6월30일 ~ 2024년 6월29일 (365일간)
+- 보증내용 : 선불전자지급수단 상환채무보증
+- 상환채무보증보험계약자 : 주식회사 미드나잇 마켓
+
+감사합니다. ");
+insert into notice(title, content) values ("[이벤트] 발뮤다 라이브 경품 담첨자 안내",
+"안녕하세요 고객님, 미드나잇 마켓입니다.
+
+지난번진행하였던 발뮤다 라이브 사은품 당첨자 공지 드립니다.
+
+사은품은 구매확정 후 2주차부터 순차 수령 예정이며 주문 취소 시에는 사은품과 함께 회수 요청 드리는 점 참고 부탁 드립니다.
+
+각 이벤트별 당첨 주문번호는 아래와 같습니다.
+
+다시 한 번 발뮤다 라이브를 통해 구매해주셔서 감사합니다.
+
+1. 구매인증 (10명) - 그릴팬 세트
+2345520420038 qhfk6**
+2345520400143 popop***
+2345520280243 mingo****
+2345520420132 azime**
+2345520390153 pooh3***
+2345521410063 lhj71****
+2345521120219 lloll*******
+2345521410186 jumma****
+2345521080068 joann*****
+2345521350191 hair0*****
+
+2. 퀴즈 이벤트 (20명)
+1차 (스타벅스 커피 기프티콘)
+2345521080234 dbsc0***
+2345520550034 ju9***
+2345520340080 h2se***
+2345520420203 de0***
+2345521090076 wjdal*****
+2345520320248 sorac*****
+2345521200053 sookhe***
+2345520470128 inspr*****
+2345520520303 sieee****
+2345520520305 araiw****
+
+2차 (레이에집게 블랙)
+2345521180097 mimi1***
+2345521580148 sylvi***
+2345521410344 loss***
+2345521490154 maiso***
+2345521480015 zzi***
+2345521540329 gogom*****
+2345521570163 naya***
+2345520330056 kou***
+2345521430337 flyks***
+2345521430164 ryh2***");

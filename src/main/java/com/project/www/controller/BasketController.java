@@ -29,10 +29,9 @@ public class BasketController {
         //상품 잔여수량 검사
         ProductVO productVO = bsv.getProductDetail(basketVO.getProductId());
 
-
-
-        log.info("상품 중복 검사  : {}",productDuplicationVerifyVO);
-        log.info("장바구니 객체 확인>>>>{}",basketVO);
+        if(productVO.getTotalQty() == 0){
+            return "품절";
+        }
 
         int isOk = 0;
 
@@ -59,18 +58,21 @@ public class BasketController {
     @ResponseBody
     @GetMapping("/myBasketList")
     public List<BasketVO> myBasketList(@RequestParam("customerId") String customerId){
-        //log.info("바스켓객체 확인{}",customerId);
         return bsv.getMyBasket(customerId);
     }
 
     @ResponseBody
+    @PutMapping("/checkedUpdate")
+    public String checkedUpdate(@RequestBody BasketVO basketVO){
+        int isOk = bsv.myBasketCheckedUpdate(basketVO);
+        return "잘들어옴";
+    }
+
+
+    @ResponseBody
     @DeleteMapping("/delete")
     public String delete(@RequestBody List<BasketVO> basketList){
-
-        log.info("삭제할 바스켓 객체 확인>>{}",basketList);
-
         int isOk = bsv.delete(basketList);
-
         return isOk > 0 ? "success" : "fail";
 
     }
@@ -78,11 +80,14 @@ public class BasketController {
     @ResponseBody
     @PutMapping("/update")
     public String update(@RequestBody BasketVO basketVO){
-
         int isOk = bsv.update(basketVO);
-        log.info("업데이트할 바스켓 객체 확인 >> {} ",basketVO);
-
         return isOk > 0 ? "success" : "fail";
+    }
+
+    @GetMapping("/getBasketQuantity/{customerId}")
+    @ResponseBody
+    public String GetBasketQuantity(@PathVariable("customerId")String customerId){
+        return String.valueOf(bsv.getBasketTotalCount(customerId));
     }
 
 

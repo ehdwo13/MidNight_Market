@@ -9,6 +9,7 @@ import java.util.List;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ProductDTO {
 
     private ProductVO productVO;
@@ -18,5 +19,5 @@ public class ProductDTO {
     private List<ProductCategoryVO> pcList;
     private List<ProductCategoryDetailVO> pcdList;
     private SlangVO slangVO;
-
+    private String shopName;
 }

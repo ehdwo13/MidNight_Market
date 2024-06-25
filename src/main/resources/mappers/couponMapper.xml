@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.www.repository.CouponMapper">
+    <insert id="insert">
+        insert into coupon(name, discount_amount, end_date)
+        values(#{name}, #{discountAmount}, #{endDate})
+    </insert>
+    <select id="getList" resultType="com.project.www.domain.CouponVO">
+        select * from coupon
+    </select>
+    <select id="getName" resultType="String">
+        select name from coupon where id = ${couponId}
+    </select>
+    <select id="search" resultType="long">
+        select id from coupon where name = #{couponCode}
+    </select>
+    <select id="getCouponList" resultType="com.project.www.domain.CouponVO">
+        select * from coupon where id = #{tmpCouponId}
+    </select>
+    
+    <select id="getUsedCoupon" resultType="com.project.www.domain.CouponVO">
+        SELECT * FROM coupon
+        WHERE
+        id = #{couponId}
+    </select>
+</mapper>

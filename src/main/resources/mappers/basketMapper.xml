@@ -41,4 +41,58 @@
         WHERE
         customer_id = #{customerId} and product_id = #{productId};
     </update>
+
+    <select id="getBasketTotalCount" resultType="int">
+        select count(*)
+        from basket
+        where customer_id = #{username}
+    </select>
+
+    <select id="getReadyToCheckoutCartItems" resultType="com.project.www.domain.BasketVO">
+        SELECT * FROM basket
+        WHERE
+        customer_id = #{customerId} AND qty > 0 AND is_checked = 1
+    </select>
+    
+    <update id="myBasketCheckedUpdate">
+        UPDATE basket
+        SET
+        <include refid="basketChecked"/>
+    </update>
+
+    <delete id="clearBasketOnPaymentSuccess">
+        DELETE FROM basket
+        WHERE
+        qty > 0 AND is_checked = 1 AND customer_id = #{customerId}
+    </delete>
+
+    <sql id="basketChecked">
+        <if test="type != null">
+
+                <choose>
+                    <when test="type == '0'.toString()">
+                        is_checked = 0
+                        WHERE
+                        customer_id = #{customerId} AND product_id = #{productId}
+                    </when>
+                    <when test="type == '1'.toString()">
+                        is_checked = 1
+                        WHERE
+                        customer_id = #{customerId} AND product_id = #{productId}
+                    </when>
+                    <when test="type == 'all'.toString()">
+                        is_checked = 1
+                        WHERE
+                        customer_id = #{customerId}
+                    </when>
+                    <when test="type == 'no-all'.toString()">
+                        is_checked = 0
+                        WHERE
+                        customer_id = #{customerId}
+                    </when>
+                </choose>
+
+        </if>
+    </sql>
+
 </mapper>

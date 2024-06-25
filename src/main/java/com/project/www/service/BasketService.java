@@ -19,4 +19,8 @@ public interface BasketService {
     int delete(List<BasketVO> basketList);
 
     int update(BasketVO basketVO);
+
+    int getBasketTotalCount(String username);
+
+    int myBasketCheckedUpdate(BasketVO basketVO);
 }

@@ -2,28 +2,40 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="~{header :: header}"></th:block>
 <head>
-    <title>myPage</title>
+    <title>마이페이지</title>
     <style>
 
+        @font-face {
+            font-family: 'NotoSans KR';
+            src: url("/dist/font/Noto_Sans_KR/NotoSansKR-VariableFont_wght.ttf");
+        }
+
+        #myPageBody {
+            font-family: 'NotoSans KR', serif;
+            color: black;
+            background-color: rgb(247, 247, 247);
+            box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.5);
+        }
+
         .mypage0 {
-            width: 1050px;
-            margin: 100px auto;
+            width: 1500px;
+            margin: 50px auto;
             /*height: 800px;*/
             /*min-width: 1200px;*/
-            min-height: 800px;
+            min-height: 300px;
             display: flex;
-            justify-content: flex-start;
+            justify-content: center;
             /*background-color: rgba(128, 128, 128, 0.27);*/
         }
 
         .mypage1 {
-            width: 30%;
-            height: 800px;
+            width: 20%;
+            height: 850px;
             background-color: white;
             padding: 20px;
             margin-bottom: 30px;
             margin-right: 20px;
-            border: 2px solid gray;
+            /*border: 2px solid gray;*/
             border-radius: 5px;
         }
 
@@ -46,11 +58,10 @@
         }
 
         .mypage2 {
-            width: 70%;
-            min-height: 800px;
+            width: 65%;
+            min-height: 200px;
             padding: 20px;
-            background-color: rgba(255, 166, 0, 0.034);
-            border: 2px solid gray;
+            background-color: white;
             border-radius: 5px;
         }
 
@@ -61,18 +72,21 @@
         }
 
         .mypage3 {
+            margin-top: 27px;
             width: 100%;
-            height: 100px;
-            /* background-color: aqua; */
-            margin-top: 20px;
+            height: 60px;
             border: 1px solid lightgray;
-            border-radius: 10px;
+            border-radius: 4px;
             display: flex;
         }
 
         .mypage_box1 {
-            width: calc(100% / 2);
-            /* background-color: aqua; */
+            width: 40%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /*background-color: aqua;*/
         }
 
         .hr1 {
@@ -80,15 +94,14 @@
         }
 
         .mypage_box2 {
-            width: calc(100% / 2);
-            /* background-color: yellow; */
+            width: 40%;
+            height: 100%;
+            /*background-color: yellow;*/
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .mypage_box3 {
-            margin-left: 30px;
-            margin-top: 20px;
-            line-height: 30px;
-        }
 
         .mypage_box4 {
             margin-left: 30px;
@@ -102,6 +115,7 @@
 
         .mypage_text3 {
             color: gray;
+            display: block;
         }
 
         .mypage_box5 {
@@ -120,16 +134,17 @@
             color: gray;
             font-size: 15px;
             font-weight: 550;
+            margin-bottom: 14px;
         }
 
         .mypage_text8 {
-            font-size: 18px;
+            font-size: 19px;
+            font-weight: 500;
             color: black;
-            margin-bottom: 10px;
+            margin-bottom: 19px;
             cursor: pointer;
             background-color: white;
-            border-radius: 5px;
-            border: 1px solid lightgrey;
+            padding: 4px;
         }
 
         .mypage_text8:hover {
@@ -191,15 +206,11 @@
         }
 
         .mypage2_box2 {
+            width: 25%;
             margin: 30px 0 20px 10px;
             display: flex;
         }
 
-        li {
-            display: flex;
-            align-items: center;
-            position: relative;
-        }
 
         .mypage2_text4 {
             margin: 0 20px;
@@ -210,63 +221,76 @@
             border-radius: 15%;
         }
 
-        .mypage_text9 {
-            color: orange;
-            font-weight: 550;
-        }
-
         .mypage2_box2-1 {
             width: 100%;
             display: flex;
         }
 
-        .mypage2_box2-3 {
-            width: 30%;
-            height: 50px;
-            border: 1px solid black;
-            /* float: left; */
+        /*페이지 정보 박스 */
+        .page-info-box {
+            margin: 77px auto;
+            width: 90%;
+            min-height: 300px;
+            /*background-color: forestgreen;*/
+            z-index: 9999999999999999999;
         }
 
-        .mypage2_box2-4 {
-            width: 30%;
-            height: 50px;
-            border: 1px solid black;
-            /* float: right; */
+        .nodata-zone {
+            width: 100%;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            color: rgb(181, 181, 181);
         }
+
+        .mypage2_text3 {
+            cursor: pointer;
+        }
+
+        .mypage2_text3:hover {
+            text-decoration: underline;
+        }
+
+        .mypage3_text2 {
+            margin: 5px 0;
+        }
+
+        #address {
+            margin-left: 110px;
+        }
+
+        #addressContainer {
+            margin-bottom: 20px;
+        }
+
     </style>
     <link rel="stylesheet" th:href="@{/dist/css/myPage/slang.css}">
     <link rel="stylesheet" th:href="@{/dist/css/myPage/purchasedProduct.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/myPage/frequentPurchases.css}">
     <link rel="stylesheet" th:href="@{/dist/css/myPage/review.css}">
+    <link rel="stylesheet" th:href="@{/dist/css/myPage/coupon.css}">
 </head>
 
-<body>
+<body id="myPageBody">
 <div class="mypage0">
     <div id="mypage1" class="mypage1">
         <div class="mypage1-1">
             <div class="circle1">
-                <span class="circle1_text">등급</span>
+                <img src="/dist/icon/gangiMemberShip.png" alt="멤버쉽" th:if="${#authentication.principal.mStatus}"
+                     style="width: 100%" ; height="100%">
+                <span class="circle1_text" th:if="${not #authentication.principal.mStatus}" th:text="일반"></span>
             </div>
             <span class="mypage_text1">[[${session.name}]]님</span>
         </div>
         <div class="mypage3">
             <div class="mypage_box1">
-                <div class="mypage_box3">
-                    <span class="mypage_text3">적립금</span>
-                </div>
-                <div class="mypage_box4">
-                    <span class="mypage_text5">0</span>
-                    <span class="mypage_text6">원</span>
-                </div>
+                <span class="mypage_text3">포인트</span>
             </div>
-            <hr class="hr1">
             <div class="mypage_box2">
-                <div class="mypage_box3">
-                    <span class="mypage_text3">이젠 캐시</span>
-                </div>
-                <div class="mypage_box4">
-                    <span class="mypage_text5">0</span>
-                    <span class="mypage_text6">원</span>
-                </div>
+                <span class="mypage_text5" id="point"></span>
+                <span class="mypage_text6">p</span>
             </div>
         </div>
         <div class="mypage_box5">
@@ -288,7 +312,7 @@
                     쇼핑
                 </div>
                 <div class="mypage_text8" id="5">상품 후기</div>
-                <div class="mypage_text8" id="6">상품 문의</div>
+                <!--                <div class="mypage_text8" id="6">상품 문의</div>-->
             </div>
 
             <hr class="hr1">
@@ -298,7 +322,7 @@
                     내 정보 관리
                 </div>
                 <div class="mypage_text8" id="7">배송지 관리</div>
-                <div class="mypage_text8" id="8">개인 정보 수정</div>
+                <!--                <div class="mypage_text8" id="8">개인 정보 수정</div>-->
             </div>
 
         </div>
@@ -311,24 +335,19 @@
                 <span class="mypage2_text2">최대 지난 3년간의 주문내역까지 확인할 수 있어요.</span>
             </div>
             <hr class="hr2">
-            <div class="mypage2_box2" id="purchasedPage">
-                <!--    Purchased Product Line      -->
+            <div class="page-info-box" id="purchasedPage">
+                <!--  주문내역   -->
             </div>
         </div>
         <div id="d2" style="display: none;">
             <div class="mypage2_box1">
                 <span class="mypage2_text1">쿠폰</span>
-                <a href=""><span class="mypage2_text3">+ 쿠폰 등록</span></a>
+                <span class="mypage2_text3" id="addCoupon">+ 쿠폰 등록</span>
             </div>
             <hr class="hr2">
-            <div class="mypage2_box2">
-                <ul>
-                    <li>
-                        <div class="mypage2_box2-1">
-                            <span class="mypage2_text5">쿠폰 내역이 존재하지 않습니다.</span>
-                        </div>
-                    </li>
-                </ul>
+            <div class="page-info-box">
+                <!--  쿠폰   -->
+                <div id="coupon-list-box"></div>
             </div>
         </div>
         <div id="d3" style="display: none;">
@@ -337,7 +356,7 @@
                 <span class="mypage2_text2">찜한 상품은 최대 200개까지 저장됩니다.</span>
             </div>
             <hr class="hr2">
-            <div class="mypage2_box2" id="slangPage">
+            <div class="page-info-box" id="slangPage">
                 <div class="mypage2_box2-1">
                     <span class="mypage2_text5">찜한 상품이 없습니다.</span>
                 </div>
@@ -348,14 +367,8 @@
                 <span class="mypage2_text1">자주 구매한 상품</span>
             </div>
             <hr class="hr2">
-            <div class="mypage2_box2">
-                <ul>
-                    <li>
-                        <div class="mypage2_box2-1">
-                            <span class="mypage2_text5">구매한 상품이 없습니다.</span>
-                        </div>
-                    </li>
-                </ul>
+            <div class="page-info-box" id="frequentPurchases">
+
             </div>
         </div>
         <div id="d5" style="display: none;">
@@ -363,14 +376,23 @@
                 <span class="mypage2_text1">상품 후기</span>
             </div>
             <hr class="hr2">
-            <div class="mypage2_box2">
-                <ul>
-                    <li>
-                        <div class="mypage2_box2-1">
-                            <span class="mypage2_text5">작성한 후기가 없습니다.</span>
-                        </div>
-                    </li>
-                </ul>
+            <div class="page-info-box">
+                <div class="review-select-box">
+                    <button class="review-select-button" id="write-review-button">작성가능 후기</button>
+                    <button class="review-select-button" id="write-review-completed-button">작성완료 후기</button>
+                </div>
+                <div class="review-note-box">
+                    <p>사진후기 100원, 글후기 50원 포인트 적립 혜택이 있어요.</p>
+                    <ul>
+                        <li>후기 작성은 배송완료일로부터 30일 이내 가능합니다.</li>
+                        <li>작성하신 후기는 작성 후 바로 포인트가 지급됩니다.</li>
+                        <li>멤버쉽은 적립혜택이 2배로 적용됩니다.</li>
+                    </ul>
+                </div>
+
+                <div id="write-reviewPage">
+
+                </div>
             </div>
         </div>
         <div id="d6" style="display: none;">
@@ -378,40 +400,31 @@
                 <span class="mypage2_text1">상품 문의</span>
             </div>
             <hr class="hr2">
-            <div class="mypage2_box2">
-                <ul>
-                    <li>
-                        <div class="mypage2_box2-1">
-                            <span class="mypage2_text5">작성한 문의가 없습니다.</span>
-                        </div>
-                    </li>
-                </ul>
+            <div class="page-info-box">
+
             </div>
         </div>
         <div id="d7" style="display: none;">
             <div class="mypage2_box1">
                 <span class="mypage2_text1">배송지 관리</span>
                 <span class="mypage2_text2">배송지에 따라 상품 정보 및 배송 유형이 달라질 수 있습니다.</span>
-                <a href=""><span class="mypage2_text3">+ 배송지 추가</span></a>
+                <a><span class="mypage2_text3" id="addressAddBtn">+ 배송지 설정</span></a>
             </div>
             <hr class="hr2">
-            <div class="mypage2_box2">
-                <ul>
-                    <li>
-                        <a href="">
-                            <label class="checkbox_label">
-                                <input type="checkbox">
-                                <span class="checkbox_icon"></span>
-                            </label>
-                        </a>
-                        <div class="mypage2_box2-1">
-                            <span class="mypage2_text4">기본 배송지</span>
-                            <span class="mypage2_text5">인천 남동구 남동대로 123번길 123동 123호</span>
-                        </div>
-                    </li>
-                </ul>
+
+            <div class="page-info-box">
+                <div th:each="avo : ${list}" id="addressContainer" th:data="${avo.isMain}">
+                    <div class="mypage3_text2" id="addName">
+                        <span class="mypage2_text4 hidden" th:text="${avo.isMain == 'Y' ? '기본배송지' : '추가배송지'}"></span>
+                        [[${avo.addrName}]]
+                    </div>
+                    <span class="mypage3_text3" id="address">
+                        [[${avo.address}]]
+                    </span>
+                </div>
             </div>
         </div>
+
         <div id="d8" style="display: none;">
             <div class="mypage2_box1">
                 <span class="mypage2_text1">개인정보 수정</span>
@@ -448,8 +461,8 @@
                             <img id="modal-image" src="" alt="" width="100%" height="100%" style="border-radius: 5px">
                         </div>
                         <div class="modal-info">
-                            <p id="modal-product-name" style="margin: 30px 0; font-size: 22px; font-weight: 570"></p>
-                            <p id="modal-product-description"></p>
+                            <p id="modal-product-name" style="margin: 24px 0; font-size: 15px; font-weight: 500;"></p>
+                            <p id="modal-product-description" style="font-size: 13px; font-weight: 400;"></p>
                         </div>
                     </div>
 
@@ -530,22 +543,32 @@
 
 <script th:inline="javascript">
     const customerId = [[${session.id}]];
+    const nickName = [[${session.name}]];
+    let point = parseInt([[${#authentication.principal.point}]]);
+    document.getElementById('point').innerText = point.toLocaleString();
+    let mStatus = [[${#authentication.principal.mStatus}]];
 </script>
 <script th:src="@{/js/myPage/slang.js}"></script>
 <script th:src="@{/js/myPage/purchasedProduct.js}"></script>
+<script th:src="@{/js/myPage/frequentPurchases.js}"></script>
 <script th:src="@{/js/myPage/review.js}"></script>
 <script>
 
-    document.addEventListener("DOMContentLoaded", function () {
-        // 마이페이지 진입시 주문내역 버튼 자동으로 클릭;
-        const select_button = document.querySelectorAll('.mypage_text8');
 
-        // 페이지 로드 시 첫 번째 버튼 클릭
-        if (select_button.length > 0) {
+    window.onload = function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const defaultTab = urlParams.get('defaultTab');
+        const reloadTab = urlParams.get('reload');
+        const select_button = document.querySelectorAll('.mypage_text8');
+        if (defaultTab) {
+            // 기본 탭 선택 로직
+            select_button[2].click();
+        } else if (reloadTab) {
+            select_button[5].click();
+        } else {
             select_button[0].click();
         }
-    });
-
+    }
 
     document.getElementById('mypage1').addEventListener('click', (e) => {
 
@@ -579,19 +602,227 @@
 
             //주문 내역
             if (target === 1) {
-                spreadMyPurchasedProductList(customerId);
+                spreadMyPurchasedProductList(customerId, 'purchasedPage');
+                return;
+            }
+            if (target === 2) {
+                spreadMyCouponList(customerId);
+                return;
             }
 
             //찜한상품
             if (target === 3) {
                 spreadMySlangProductList(customerId);
+                return;
+            }
+            //
+            if (target === 4) {
+                spreadMyFrequentPurchasesList(customerId);
+                return;
+            }
+
+            //상품후기
+            if (target === 5) {
+
+                const select_button = document.querySelectorAll('.review-select-button');
+                // 페이지 로드 시 첫 번째 버튼 클릭
+                if (select_button.length > 0) {
+                    select_button[0].click();
+                }
+            }
+            if (target === 7) {
+
             }
         }
+    });
 
+    document.getElementById('addCoupon').addEventListener('click', () => {
+        let couponContainer = document.getElementById('couponContainer');
+        if (couponContainer) {
+            couponContainer.style.display = '';
+        } else {
+            couponContainer = document.createElement('div');
+            couponContainer.setAttribute('id', 'couponContainer');
+            couponContainer.style.position = 'fixed';
+            couponContainer.style.top = '50%';
+            couponContainer.style.left = '50%';
+            couponContainer.style.transform = 'translate(-50%, -50%)';
+            couponContainer.style.backgroundColor = '#fff';
+            couponContainer.style.padding = '20px';
+            couponContainer.style.border = '1px solid #ccc';
+            couponContainer.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+            couponContainer.style.zIndex = '1000';
+
+            const text = document.createElement('p');
+            text.textContent = '쿠폰번호를 입력해주세요';
+            couponContainer.appendChild(text);
+
+            const closeBtn = document.createElement('button');
+            closeBtn.innerText = "X";
+            closeBtn.setAttribute('id', 'closeBtn');
+            closeBtn.style.position = 'absolute';
+            closeBtn.style.top = '15px';
+            closeBtn.style.right = '15px';
+            closeBtn.style.background = 'transparent';
+            closeBtn.style.border = 'none';
+            closeBtn.style.fontSize = '16px';
+            closeBtn.style.cursor = 'pointer';
+            couponContainer.appendChild(closeBtn);
+            closeBtn.addEventListener('click', () => {
+                couponContainer.style.display = 'none';
+            });
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.style.width = '100%';
+            input.style.padding = '8px';
+            input.style.marginTop = '8px';
+            couponContainer.appendChild(input);
+
+            const submitButton = document.createElement('button');
+            submitButton.textContent = '등록';
+            submitButton.style.marginTop = '8px';
+            submitButton.style.padding = '8px 16px';
+            submitButton.style.backgroundColor = 'orange';
+            submitButton.style.color = '#fff';
+            submitButton.style.border = 'none';
+            submitButton.style.cursor = 'pointer';
+            couponContainer.appendChild(submitButton);
+
+
+            submitButton.addEventListener('click', () => {
+                const couponCode = input.value;
+                if(couponCode == "멤버쉽1" || couponCode == "멤버쉽2" || couponCode == "멤버쉽3" ){
+                    alert("멤버쉽 전용 쿠폰입니다.\n등록하실 수 없습니다. ")
+                }else{
+                    searchCoupon(couponCode, customerId).then(result => {
+                        if (result > 0) {
+                            if (confirm("쿠폰을 등록하시겠습니까?")) {
+                                addCoupon(customerId, result).then(result => {
+                                    if (result == "1") {
+                                        alert("등록완료");
+                                        couponContainer.style.display = "none";
+                                        spreadMyCouponList(customerId)
+                                    } else {
+                                        alert("등록실패 관리자문의");
+                                    }
+                                });
+                            }
+                        } else if (result == -2) {
+                            alert("이미 등록된 쿠폰입니다. ");
+                        } else {
+                            alert("존재하지않는 쿠폰입니다. 다시입력해주세요.");
+                        }
+                    });
+                }
+            });
+            document.body.appendChild(couponContainer);
+            input.focus();
+        }
+    });
+
+
+    async function searchCoupon(couponCode, customerId) {
+        try {
+            const url = '/coupon/search/' + couponCode + "/" + customerId;
+            const config = {
+                method: 'GET'
+            };
+            const resp = await fetch(url, config);
+            const result = await resp.text();
+            return result;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async function addCoupon(id, couponId) {
+        try {
+            const url = '/coupon/add/' + id + "/" + couponId;
+            const config = {
+                method: 'GET'
+            };
+            const resp = await fetch(url, config);
+            const result = await resp.text();
+            return result;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    function spreadMyCouponList(customerId) {
+        couponListFromServer(customerId).then(result => {
+            if (result) {
+                let div = document.getElementById('coupon-list-box');
+                div.innerHTML = '';
+                let str = '';
+                console.log(result);
+                result.forEach(result => {
+                    const issueDate = result.cvo.issueDate.match(/\d{2}(\d{2})-(\d{2})-(\d{2})/).slice(1).join('');
+                    const endDate = result.cvo.endDate.match(/\d{2}(\d{2})-(\d{2})-(\d{2})/).slice(1).join('');
+                    const discountAmount = result.cvo.discountAmount.toString().split('');
+                    console.log(discountAmount);
+                    str += `<div class="ticket">`;
+                    str += `<span class="issueDate">발급일자</span>`;
+                    str += `<span class="endDate">사용기한</span>`;
+                    str += `<div class="ticket-edge-top-left"></div>`;
+                    str += `<div class="ticket-edge-top-right"></div>`;
+                    str += `<div class="ticket-edge-bottom-left"></div>`;
+                    str += `<div class="ticket-edge-bottom-right"></div>`;
+                    str += `<div class="ticket-punches"></div>`;
+                    str += `<div class="ticket-punches-right"></div>`;
+                    str += `<div class="ticket-inner">`;
+                    str += `<div class="ticket-headline">`;
+                    str += `<span>${result.cvo.name} 할인쿠폰</span>`;
+                    str += `</div>`;
+                    str += `<div class="ticket-star">`;
+                    str += `<i class="fa fa-star-o"></i>`;
+                    str += `</div>`;
+                    str += `<div class="ticket-admit">`;
+
+                    discountAmount.forEach((value)=>{
+                    str += `<span class="char">${value}</span>`;
+                    });
+
+                    str += `<span class="char">원</span>`;
+                    str += `</div>`;
+                    str += `<div class="ticket-numbers">${issueDate}</div>`;
+                    str += `<div class="ticket-numbers second">${endDate}</div>`;
+                    str += `</div>`;
+                    str += `</div>`;
+                    str += `</div>`;
+
+                });
+                div.innerHTML = str;
+            } else {
+                document.getElementById('couponList').innerHTML = '쿠폰 정보를 불러올 수 없습니다.';
+            }
+        })
+
+    }
+
+
+    async function couponListFromServer(customerId) {
+        try {
+            const url = '/coupon/' + customerId
+            const config = {
+                method: 'GET'
+            };
+            const resp = await fetch(url, config);
+            const result = await resp.json();
+            return result;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    let addressAddBtn = document.getElementById('addressAddBtn');
+    addressAddBtn.addEventListener('click', () => {
+        window.open('/payment/addrModifyPopup', '배송지 변경', 'width=800,height=600,left=340px,top=80px');
     });
 
 </script>
 
-<th:block th:replace="~{footer :: footer}"></th:block>
 </body>
+<th:block th:replace="~{footer :: footer}"></th:block>
 

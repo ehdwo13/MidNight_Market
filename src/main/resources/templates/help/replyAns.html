@@ -1,15 +1,150 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>reply</title>
+    <title>1:1문의</title>
+    <style>
+        body {
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .detailContainer {
+            width: 44%;
+            max-width: 940px;
+            margin: 50px auto 20px auto;
+            background-color: #ffffff;
+            padding: 33px 33px 33px 21px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            font-family: 'NanumSquareRoundL';
+        }
+
+        .detailContainer:focus {
+            border: none;
+        }
+
+        .detailContainer > div:first-child {
+            display: flex;
+            justify-content: center;
+        }
+
+        label {
+            display: inline-block;
+            width: 100px;
+            font-weight: bold !important; /*css 충돌나서 !important 사용으로 우선적용함*/
+            margin-bottom: 5px;
+            text-align: center;
+            letter-spacing: 5px;
+        }
+
+        .input {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        .detail {
+            margin-bottom: 7px;
+        }
+
+        .divBtn {
+            width: 50%;
+            margin: 37px 0 0 19px;
+        }
+
+        .divBtn > a > button,
+        .divBtn > button {
+            margin-right: 5px;
+        }
+
+        .labelContainer > textarea {
+            width: 80%;
+            height: 80px;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            margin: 5px 0 0 5px;
+            box-sizing: border-box;
+        }
+
+        .labelContainer {
+            display: flex;
+            justify-content: left;
+        }
+
+        .adminReply {
+            background-color: #f7f7f7;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 20px 0 0 19px;
+            border-radius: 5px;
+            width: 480px;
+        }
+
+        .adminReply p:first-child {
+            font-size: 17px;
+            font-weight: bold;
+            margin: 10px auto;
+        }
+
+    </style>
 </head>
 <th:block th:replace="~{header :: header}"></th:block>
 <body>
+<div class="detailContainer">
     <div>
-        <h3>질문 제목 : [[${hvo.title}]]</h3>
-        <span>관리자 답변 : [[${hvo.replyContent}]]</span>
+        <form action="@{/help/detail}">
+            <input type="hidden" name="hno" th:value="${hvo.hno}" class="input">
+            <div class="detail">
+                <label for="created">작성일</label>
+                <input type="text" id="created" th:value="${hvo.regAt}" readonly class="input">
+            </div>
+            <div class="detail">
+                <label for="mod">수정일</label>
+                <input type="text" id="mod" th:value="${hvo.modAt}" readonly class="input">
+            </div>
+            <div class="detail">
+                <label for="title">제　목</label>
+                <input type="text" id="title" name="title" th:value="${hvo.title}" readonly class="input">
+            </div>
+            <div class="detail">
+                <label for="id">작성자</label>
+                <input type="text" id="id" name="id" th:value="${hvo.id}" readonly class="input">
+            </div>
+            <div class="detail">
+                <div class="labelContainer">
+                    <label for="content" style="height: 80px; margin-top: 5px">내　용</label>
+                    <textarea name="content" id="content" cols="50" rows="5" readonly class="input">[[${hvo.content}]]</textarea>
+                </div>
+            </div>
+            <!--관리자 답변은 관리자만 달 수 있게-->
+            <!--답변이 있는 경우-->
+            <div th:if="${hvo.replyContent != null}" class="adminReply">
+                <p>관리자 답변</p>
+                <p>[[${hvo.replyContent}]]</p>
+            </div>
+            <div class="divBtn">
+                <a th:href="@{/help/list}"><button type="button" id="listBtn" class="btn btn-outline-primary">목록</button></a>
+            </div>
+        </form>
     </div>
-    <a th:href="@{/help/list}"><button type="button" class="btn btn-outline-primary">목록</button></a>
+
+</div>
+<script>
+    document.getElementById('delBtn').addEventListener('click',()=>{
+        if(confirm("질문을 삭제하시겠습니까?")){
+            document.getElementById('realDelBtn').click();
+            ("삭제되었습니다.");
+        }else{
+            alert("취소되었습니다.");
+        }
+    });
+</script>
 </body>
 <th:block th:replace="~{footer :: footer}"></th:block>

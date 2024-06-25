@@ -14,17 +14,17 @@ public class IndexServiceImple implements IndexService{
     private final ProductMapper productMapper;
 
     @Override
-    public List<ProductVO> getNewProductList() {
-        return productMapper.getNewProductList();
+    public List<ProductVO> getIndexNewProductList() {
+        return productMapper.getIndexNewProductList();
     }
 
     @Override
-    public List<ProductVO> getHeavySoldList() {
-        return productMapper.getHeavySoldList();
+    public List<ProductVO> getIndexHeavySoldList() {
+        return productMapper.getIndexHeavySoldList();
     }
 
     @Override
-    public List<ProductVO> getDiscountProductList() {
-        return productMapper.getDiscountProductList();
+    public List<ProductVO> getIndexDiscountProductList() {
+        return productMapper.getIndexDiscountProductList();
     }
 }

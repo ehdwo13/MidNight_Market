@@ -2,61 +2,50 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="~{header :: header}"></th:block>
 <head>
-    <title>Basket</title>
+    <title>장바구니</title>
     <link rel="stylesheet" th:href="@{/dist/css/myBasket.css}">
 </head>
 
-<body>
-<div class="basket1">
-    <div class="basket2">
-        <span class="title1">장바구니</span>
-    </div>
-    <div class="basket3">
+<body id="myBasketBody">
 
-        <div>
+<div class="basketTitle">
+    <span class="title1">장바구니</span>
+</div>
+
+<div class="basket1">
+    <div class="basket3" id="basket3">
+
+        <div id="select-all">
             <label class="checkbox_label">
-                <input type="checkbox" id="basketCheckboxAll">
-                <span class="checkbox_icon">전체 선택</span>
-                <a href="" id="select-delete"><span class="text2">선택 삭제</span></a>
+                <input type="checkbox" id="basketCheckboxAll" class="basketCheckbox" checked data-is-checked="no-all" value="0">
+                <span class="checkbox_icon" style="font-weight: 500">전체 선택</span>
+                <a href="" id="select-delete"><span class="text2" style="font-weight: 500">선택 삭제</span></a>
             </label>
         </div>
 
         <hr>
-        <div class="basket9">
             <ul id="basketList">
-
-                <li>등록되어있는 상품이 존재하지 않습니다.</li>
-
             </ul>
-        </div>
     </div>
+
     <div class="basket4">
         <div class="basket5">
             <div class="text3">
                 <span>상품금액</span>
-                <span id="product-price-text">원</span>
+                <span id="product-price-text">0원</span>
             </div>
             <div class="text4">
                 <span>상품 할인 금액</span>
-                <span id="product-discount-price-text">원</span>
+                <span id="product-discount-price-text">0원</span>
             </div>
-            <div class="text5">
-                <span>배송비</span>
-                <span>원</span>
-            </div>
-            <div class="text6">
-                <span>원 추가 주문시, 무료배송</span>
-            </div>
+
             <div class="text7">
                 <span>결제 예정 금액</span>
-                <span id="product-total-price-text">원</span>
+                <span id="product-total-price-text">0원</span>
             </div>
             <div class="text8">
                 <span><span class="accumulate">적립</span>로그인 후 회원 등급에 따라 적립</span>
             </div>
-        </div>
-        <div class="basket7">
-
         </div>
         <a href="#" id="orders-button">
             <div class="basket6">
@@ -64,11 +53,14 @@
             </div>
         </a>
         <div class="basket8">
-            <span class="text10">[주문완료] 상태일 경우에만 주문 취소가 가능합니다.</span>
-            <span class="text11">[마이페이지>주문내역 상세페이지]에서 직접 취소 하실수 있습니다.</span>
+            <p class="text10">[주문완료] 상태일 경우에만 주문 취소가 가능합니다.</p>
+            <p class="text11">[마이페이지>주문내역 상세페이지]에서 직접 취소 하실수 있습니다.</p>
         </div>
     </div>
+
+
 </div>
+
 
 <form action="/payment/orders" id="orderMoveForm" method="post">
     <input type="hidden" name="merchantUid" id="merchantUid">
@@ -76,11 +68,12 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 <script th:inline="javascript">const customerId = [[${session.id}]];
-console.log(customerId + '확인');</script>
+</script>
 <script th:src="@{/js/myBasket.js}"></script>
 <script th:inline="javascript" th:if="customerId != null">
     spreadMyBasketList(customerId);
 </script>
 </body>
+
 
 <th:block th:replace="~{footer :: footer}"></th:block>

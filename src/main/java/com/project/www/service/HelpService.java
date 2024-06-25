@@ -24,4 +24,6 @@ public interface HelpService {
     List<HelpVO> getMyList(String name);
 
     int getMyTotal(String name);
+
+    List<HelpVO> getListToAdmin();
 }

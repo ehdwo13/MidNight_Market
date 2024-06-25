@@ -1,0 +1,64 @@
+.frequent-box{
+    width: 100%;
+    height: 265px;
+    /*background-color: #0d6efd;*/
+    margin-bottom: 77px;
+}
+.frequent-top-box{
+    width: 90%;
+    height: 40px;
+    margin: 0 0 24px;
+    /*background-color: red;*/
+}
+.frequent-top-box span:first-child{
+    font-size: 35px;
+    font-weight: 700;
+}
+.frequent-top-box span:last-child{
+    font-size: 20px;
+    font-weight: 500;
+    margin-left: 54px;
+}
+.frequent-product-box{
+    width: 90%;
+    height: 197px;
+    /*background-color: yellow;*/
+    margin-left: 5%;
+    display: flex;
+}
+.frequent-product-box img{
+    width: 151px;
+    height: auto;
+    border-radius: 4px;
+}
+.frequent-product-description-box{
+    width: 77%;
+    margin-left: 3%;
+    height: 197px;
+    /*background-color: yellowgreen;*/
+    display: flex;
+    flex-direction: column;
+}
+.frequent-product-description-box span:first-child{
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 16px;
+}
+.frequent-product-description-box span:last-child{
+    font-size: 14px;
+    font-weight: 500;
+}
+.frequent-product-description-box a{
+    width: 252px;
+    height: 37px;
+    margin-top: 112px;
+    background-color: orangered;
+    color: white;
+    border: none;
+    text-align: center;
+    line-height: 37px;
+}
+.frequent-product-description-box a:hover{
+    filter: brightness(90%);
+}
+

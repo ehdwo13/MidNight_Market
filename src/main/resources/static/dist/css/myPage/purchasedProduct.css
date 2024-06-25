@@ -1,10 +1,78 @@
-.table{
-    width: 700px;
-    height: 700px;
-}
-.thead-border{
+.purchased-date-box{
     width: 100%;
-    height: 100px;
-    border: 1px solid black;
-    line-height: 100px;
+    height: 36px;
+    /*background-color: red;*/
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 18px;
+    border-bottom: 1px solid lightgray;
+}
+.purchased-box{
+    width: 100%;
+    height: 124px;
+    /*background-color: yellowgreen;*/
+    display: flex;
+    margin-bottom: 54px;
+}
+.purchased-image-box{
+    width: 96px;
+    height: auto;
+    margin-right: 17px;
+}
+.purchased-image-box img{
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+.purchased-product-info-box{
+    width : 50%;
+    height: 100%;
+    /*background-color: #6f42c1;*/
+}
+.purchased-product-info-box p{
+    margin: 37px 0 13px;
+    font-weight: 600;
+    font-size: 16px;
+}
+.purchased-price{
+    font-size: 15px;
+    font-weight: 600;
+    margin-right: 14px;
+}
+.purchased-quantity{
+    font-size: 14px;
+    font-weight: 400;
+}
+.purchased-status{
+    width: 100px;
+    height: 100%;
+    /*background-color: #3A1D1D;*/
+    font-weight: 500;
+    font-size: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 37px;
+    text-align: center;
+}
+.purchases-select-button-box{
+    width: 190px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    /*background-color: #055160;*/
+}
+.purchases-select-button-box button{
+    width: 78%;
+    height: 30%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    border: 1px solid lightgray;
+}
+.purchases-select-button-box button:hover{
+    filter: brightness(95%);
 }

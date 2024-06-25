@@ -8,5 +8,7 @@ import java.util.List;
 @Mapper
 public interface ReviewImageMapper {
 
-    void register(List<ReviewImageVO> reviewImageVOList);
+    int register(List<ReviewImageVO> reviewImageVOList);
+
+    List<ReviewImageVO> getReviewImgList(long id);
 }

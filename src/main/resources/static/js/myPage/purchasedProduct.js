@@ -1,4 +1,4 @@
-//상품 정보 저장
+//상품 정보 저장 하기
 let purchasedData;
 
 async function getMyPurchasedProductListFromServer(customerId) {
@@ -14,50 +14,172 @@ async function getMyPurchasedProductListFromServer(customerId) {
 
 function spreadMyPurchasedProductList(customerId) {
     getMyPurchasedProductListFromServer(customerId).then(result => {
-        console.log(result);
-        purchasedData = result;
         let div = document.getElementById('purchasedPage');
         div.innerHTML = '';
-        let str = `<!--<p style="font-weight: bold; margin-bottom: 10px">전체 ${result.length}개</p>--> `;
-        str += `<table class="table">`;
-        str += `<thead class="thead-border">`;
-        str += `<tr>`;
-        str += `<th scope="col">주문날짜</th>`;
-        str += `<th scope="col">상품</th>`;
-        str += `<th scope="col">가격</th>`;
-        str += `<th scope="col">수량</th>`;
-        str += `<th scope="col">주문상태</th>`;
-        str += `<th scope="col">리뷰작성</th>`;
-        str += `</tr>`;
-        str += `</thead>`;
-        str += `<tbody>`;
+        let str = '';
         if (result.length > 0) {
-            result.forEach((ordersVO, index) => {
+            result.forEach((value) => {
 
-                const price = ordersVO.payPrice.toLocaleString('ko-KR') + '원';
-                const date = ordersVO.ordersDate.split(' ')[0];
-                console.log(ordersVO.reviewComment);
+                const [year, month, day, hour, minute] = value.ordersDate.match(/\d+/g);
+                const [yearS, monthS, dayS, hourS, minuteS] = value.statusDate.match(/\d+/g);
 
-                str += `<tr>`;
-                str += `<td><p>${date}</p></td>`;
-                str += `<td>${ordersVO.productVO.name}</td>`;
-                str += `<td>${price}</td>`;
-                str += `<td>${ordersVO.qty}</td>`;
-                str += `<td> <p>${ordersVO.status}</p> <button>환불하기</button> </td>`;
-                if (ordersVO.reviewComment) {
-                    str += `<td><span style="color: #0f5132; font-weight: 650" >작성완료</span></td>`;
-                } else {
-                    str += `<td><button class="review-button" data-index="${index}" data-bs-toggle="modal" data-bs-target="#staticBackdrop">작성하기</button> </td>`;
+                str += `<div class="purchased-date-box">`;
+                str += `<span>${year}.${month}.${day} (${hour}시 ${minute}분)</span>`;
+                str += `</div>`;
+                str += `<div class="purchased-box">`;
+                str += `<div class="purchased-image-box">`;
+                str += `<img src="${value.productVO.mainImage}" alt="사진없음">`;
+                str += `</div>`;
+                str += `<div class="purchased-product-info-box">`;
+                str += `<p>${value.productVO.name}</p>`;
+                str += `<span class="purchased-price">${value.payPrice.toLocaleString()}원</span>`;
+                str += `<span class="purchased-quantity">${value.qty}개 구매</span>`;
+                str += `</div>`;
+                str += `<div class="purchased-status">`;
+                str += `<span style="color: ${displayColorByStatus(value.status)}; text-align: center">${value.status} ${value.confirmed ? '<br>(주문확정)<br>' : ''} <br><br> ${yearS}.${monthS}.${dayS} <br> (${hourS}시 ${minuteS}분)</span>`;
+                str += `</div>`;
+                str += `<div class="purchases-select-button-box">`;
+
+                if (value.status === '주문완료' && !value.confirmed) {
+                    str += `<button class="orderConfirmed-button" data-id="${value.id}" data-name="${value.productVO.name}" data-price="${value.payPrice}">주문확정</button>`;
+                    str += `<button class="refundButton" data-id="${value.id}" data-name="${value.productVO.name}" data-price="${value.payPrice}">환불하기</button>`;
                 }
-                str += `</tr>`;
-            });
-            str += `</tbody>`;
-            str += `</table>`;
-            div.innerHTML += str;
-        } else {
-            div.innerText = '주문하신 상품이 없습니다.';
-        }
 
-    })
+                if(value.status === '배송완료' && !value.confirmed){//배송완료되었지만 주문확정을 하지 않았을 경우
+                    str += `<button class="orderConfirmed-button" data-id="${value.id}" data-name="${value.productVO.name}" data-price="${value.payPrice}">주문확정</button>`;
+                    str += `<button class="refundButton" data-id="${value.id}" data-name="${value.productVO.name}" data-price="${value.payPrice}">환불하기</button>`;
+                }
+
+                if(value.status === '배송완료' && !value.reviewComment && value.confirmed){ //배송완료지만 주문확정을 했을 경우
+                    str += `<button class="review-gogo">리뷰작성</button>`;
+                }
+
+                str += `</div>`;
+                str += `</div>`;
+            });
+            div.innerHTML = str;
+
+            //환불버튼 클릭시
+            const refundButtons = document.querySelectorAll('.refundButton');
+            refundButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+
+                    const price = Number(e.target.dataset.price).toLocaleString();
+                    const name = e.target.dataset.name;
+                    const id = e.target.dataset.id;
+
+                    const notification = '상품명 : '+ name + '\n가격 : ' + price +'원\n\n정말로 환불을 진행하시겠습니까?';
+
+                    if (!confirm(notification)) {
+                        e.preventDefault();
+                        return;
+                    }
+
+                    // POST 요청 보내기
+                    fetch('/payment/refund', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({id: id})
+                    })
+                        .then(response => response.text())
+                        .then(data => {
+                            // 서버 응답 처리
+                            alert(data);
+                            let point = document.getElementById('point')
+                            const refundPoint = Number(data.match(/환급된 포인트\s*:\s*([\d,]+)원/)[1].replace(/,/g, ''));
+                            let withoutCommaPoint = parseInt(point.innerText.replace(/,/g, ''), 10);
+                            point.innerText = (withoutCommaPoint + refundPoint).toLocaleString();
+                            spreadMyPurchasedProductList(customerId);
+                        })
+                        .catch((error) => {
+                            console.error('Error:', error);
+                        });
+                });
+            });
+
+            //주문확정 클릭시
+            const orderConfirmedButton = document.querySelectorAll('.orderConfirmed-button');
+
+            orderConfirmedButton.forEach((button)=>{
+
+                button.addEventListener('click',(e)=>{
+
+                    const id = e.target.dataset.id;
+                    const price = Number(e.target.dataset.price).toLocaleString();
+                    const name = e.target.dataset.name;
+                    let point = document.getElementById('point')
+
+                    const notification = '상품명 : '+ name + '\n가격 : ' + price +'원\n\n주문확정을 하실 경우 환불이 불가능합니다.\n정말로 주문확정을 진행하시겠습니까?';
+                    if(!confirm(notification)){
+                        e.preventDefault();
+                        return;
+                    }
+
+                    confirmOrderUpdate(id).then(result=>{
+                        const parts = result.split('/');
+                        alert(parts[0]);
+                        let withoutCommaPoint = parseInt(point.innerText.replace(/,/g, ''), 10);
+                        point.innerText = (withoutCommaPoint + parseInt(parts[1])).toLocaleString();
+                        spreadMyPurchasedProductList(customerId);
+                    });
+                });
+            });
+            
+            //리뷰작성 클릭 시
+            const reviewGo = document.querySelectorAll('.review-gogo');
+            reviewGo.forEach((button)=>{
+                button.addEventListener('click',()=>{
+                    const myPageSelect = document.querySelectorAll('.mypage_text8');
+                    myPageSelect[4].click();
+                });
+            });
+
+        } else {
+            div.innerHTML = `<div class="nodata-zone"><span>주문 내역이 존재하지 않습니다.</span></div>`;
+        }
+    });
+}
+
+
+function displayColorByStatus(status) {
+
+    let color;
+
+    switch (status) {
+        case '배송완료' :
+            color = 'forestgreen';
+            break;
+
+        case '환불처리' :
+            color = 'red';
+            break;
+
+        default :
+            color = 'black';
+            break;
+    }
+    return color;
+}
+
+
+
+//주문확정시 업데이트
+async function confirmOrderUpdate(id) {
+    const url = '/orders/confirmOrderUpdate';
+    const config = {
+        method: 'PUT',
+        headers: {
+            'content-type': 'application/json; charset=utf-8'
+        },
+        body: JSON.stringify({
+            id: id
+        })
+    };
+
+    const response = await fetch(url, config);
+    const result = await response.text();
+    return result;
 }
 

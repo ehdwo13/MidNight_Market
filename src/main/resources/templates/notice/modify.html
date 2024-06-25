@@ -3,31 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <title>modify</title>
+
+    <style>
+        body {
+  width: 100%;
+  height: auto;
+  min-width: 1200px;
+}
+
+.notice_modify0 {
+    width: 940px;
+    margin: auto;
+}
+
+.notice_modify1 {
+  font-size: 25px;
+  font-weight: 550;
+  margin: 30px 0 30px 0px;
+}
+
+.hr1 {
+  border: 1px solid black;
+}
+
+.notice_modify2 {
+  margin: 30px 30px;
+}
+
+.notice_modify2_1 {
+  width: 200px;
+  float: left;
+}
+
+.notice_modify2_2_regdate,
+.notice_modify2_2_title {
+  width: 77%;
+  height: 30px;
+  border: 1px solid lightgray;
+  border-radius: 5px;
+  font-size: 15px;
+}
+
+.notice_modify2_2_content {
+  width: 77%;
+  height: 300px;
+  border: 1px solid lightgray;
+  border-radius: 5px;
+  font-size: 15px;
+}
+
+.notice_modify2_2_regdate:focus,
+.notice_modify2_2_title:focus,
+.notice_modify2_2_content:focus {
+  outline: none;
+}
+
+.notice_modify3 {
+    margin-top: 50px;
+    text-align: center;
+}
+
+.notice_modify3_1 {
+  width: 100px;
+  height: 50px;
+  background-color: orange;
+  line-height: 50px;
+  border-radius: 5px;
+  margin: auto;
+  border-style: none;
+  font-size: 17px;
+}
+
+    </style>
 </head>
 
 <th:block th:replace="~{header :: header}"></th:block>
 
 <body>
-<h1>notice modify</h1>
-<form th:action="@{/notice/modify}" method="post">
-    <input type="hidden" name="id" th:value="${nvo.id}">
-    <div class="my-3">
-        <label for="created">작성일 : </label>
-        <input type="text" class="form-control" id="created" th:value="${nvo.registerDate}" readonly>
+<div class="notice_modify0">
+    <div class="notice_modify1">
+        <span>수정하기</span>
     </div>
-    <div class="mb-3">
-        <label for="title">제목 : </label>
-        <input type="text" class="form-control" id="title" name="title" th:value="${nvo.title}">
-    </div>
-    <div class="mb-3">
-        <label for="content">내용 : </label>
-        <textarea name="content" id="content" cols="50" rows="5" class="form-control">[[${nvo.content}]]</textarea>
-    </div>
+    <hr class="hr1">
+    <form th:action="@{/notice/modify}" method="post">
+        <input type="hidden" name="id" th:value="${nvo.id}">
+        <div class="notice_modify2">
+            <div class="notice_modify2_1">
+                <label for="created">작성일</label>
+            </div>
+            <div class="notice_modify2_2">
+                <input type="text" class="notice_modify2_2_regdate" id="created" th:value="${nvo.registerDate}"
+                       readonly>
+            </div>
+        </div>
+        <div class="notice_modify2">
+            <div class="notice_modify2_1">
+                <label for="title">제목</label>
+            </div>
+            <div class="notice_modify2_2">
+                <input type="text" class="notice_modify2_2_title" id="title" name="title" th:value="${nvo.title}">
+            </div>
+        </div>
+        <div class="notice_modify2">
+            <div class="notice_modify2_1">
+                <label for="content">내용</label>
+            </div>
+            <div class="notice_modify2_2">
+                    <textarea name="content" id="content" cols="50" rows="5"
+                              class="notice_modify2_2_content">[[${nvo.content}]]</textarea>
+            </div>
+        </div>
 
-    <button type="submit" id="modBtn" class="btn btn-outline-warning">수정</button>
-    <a th:href="@{/notice/notice}"><button type="button" id="listBtn" class="btn btn-outline-primary">목록</button></a>
-
-</form>
+        <div class="notice_modify3">
+            <button type="submit" id="modBtn" class="notice_modify3_1">수정</button>
+            <a th:href="@{/notice/notice}"><button type="button" id="listBtn"
+                                                   class="notice_modify3_1">목록</button></a>
+        </div>
+    </form>
+</div>
 </body>
 
 <th:block th:replace="~{footer :: footer}"></th:block>
